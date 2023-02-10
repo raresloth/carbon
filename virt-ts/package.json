@@ -23,7 +23,7 @@
   },
   "scripts": {
     "build": "cp ../virt-anchor/target/types/virt.ts ./src/idl && rm -rf dist && tsc && tsc -p tsconfig.cjs.json",
-    "dev": "concurrently \"cpx ../virt-anchor/target/types/virt.ts ./src/idl\" \"tsc -p tsconfig.cjs.json --watch\" \"tsc --watch\""
+    "dev": "concurrently \"cpx ../virt-anchor/target/types/virt.ts ./src/idl --watch\" \"tsc -p tsconfig.cjs.json --watch\" \"tsc --watch\""
   },
   "dependencies": {
     "@coral-xyz/anchor": "^0.26.0",

@@ -9,7 +9,10 @@ pub struct Listing {
 	pub bump: [u8; 1],
 	pub version: u8,
 	pub authority: Pubkey,
-	pub mint: Pubkey,
+	// Set to mint of NFT if listing is for NFT, otherwise a unique ID for the virtual item
+	pub id: Pubkey,
+	// True if the listing is for a virtual item, false if it is for an NFT
+	pub is_virtual: bool,
 	pub currency_mint: Pubkey,
 	pub price: u64,
 	pub expiry: i64,
@@ -22,14 +25,14 @@ impl Listing {
 
 	// Additional padding for future proofing
 	pub const SPACE: usize =
-		8 + 1 + 1 + 32 + 32 + 32 + 8 + 8 + FeeSchedule::SPACE + 256;
+		8 + 1 + 1 + 32 + 32 + 1 + 32 + 8 + 8 + FeeSchedule::SPACE + 256;
 
 	pub const PREFIX: &'static str = "listing";
 
 	pub fn auth_seeds<'a>(&'a self) -> [&'a [u8]; 3] {
 		[
 			Listing::PREFIX.as_bytes(),
-			self.mint.as_ref(),
+			self.id.as_ref(),
 			self.bump.as_ref()
 		]
 	}
@@ -38,7 +41,8 @@ impl Listing {
 		&mut self,
 		bump: [u8; 1],
 		authority: Pubkey,
-		mint: Pubkey,
+		id: Pubkey,
+		is_virtual: bool,
 		currency_mint: Pubkey,
 		price: u64,
 		expiry: i64
@@ -50,7 +54,8 @@ impl Listing {
 		self.bump = bump;
 		self.version = Listing::VERSION;
 		self.authority = authority;
-		self.mint = mint;
+		self.id = id;
+		self.is_virtual = is_virtual;
 		self.currency_mint = currency_mint;
 		self.price = price;
 		self.expiry = expiry;

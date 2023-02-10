@@ -16,4 +16,8 @@ pub mod virt {
     pub fn list_nft(ctx: Context<ListNft>, price: u64, expiry: i64) -> Result<()> {
         instructions::list_nft_handler(ctx, price, expiry)
     }
+
+    pub fn list_virtual(ctx: Context<ListVirtual>, id: Pubkey, price: u64, expiry: i64) -> Result<()> {
+        instructions::list_virtual_handler(ctx, id, price, expiry)
+    }
 }

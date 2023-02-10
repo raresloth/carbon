@@ -81,6 +81,56 @@ export type Virt = {
           "type": "i64"
         }
       ]
+    },
+    {
+      "name": "listVirtual",
+      "accounts": [
+        {
+          "name": "authority",
+          "isMut": true,
+          "isSigner": true,
+          "docs": [
+            "Seller wallet."
+          ]
+        },
+        {
+          "name": "currencyMint",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "The currency to use or native mint if using SOL"
+          ]
+        },
+        {
+          "name": "listing",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "rent",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "id",
+          "type": "publicKey"
+        },
+        {
+          "name": "price",
+          "type": "u64"
+        },
+        {
+          "name": "expiry",
+          "type": "i64"
+        }
+      ]
     }
   ],
   "accounts": [
@@ -107,8 +157,12 @@ export type Virt = {
             "type": "publicKey"
           },
           {
-            "name": "mint",
+            "name": "id",
             "type": "publicKey"
+          },
+          {
+            "name": "isVirtual",
+            "type": "bool"
           },
           {
             "name": "currencyMint",
@@ -247,6 +301,56 @@ export const IDL: Virt = {
           "type": "i64"
         }
       ]
+    },
+    {
+      "name": "listVirtual",
+      "accounts": [
+        {
+          "name": "authority",
+          "isMut": true,
+          "isSigner": true,
+          "docs": [
+            "Seller wallet."
+          ]
+        },
+        {
+          "name": "currencyMint",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "The currency to use or native mint if using SOL"
+          ]
+        },
+        {
+          "name": "listing",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "rent",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "id",
+          "type": "publicKey"
+        },
+        {
+          "name": "price",
+          "type": "u64"
+        },
+        {
+          "name": "expiry",
+          "type": "i64"
+        }
+      ]
     }
   ],
   "accounts": [
@@ -273,8 +377,12 @@ export const IDL: Virt = {
             "type": "publicKey"
           },
           {
-            "name": "mint",
+            "name": "id",
             "type": "publicKey"
+          },
+          {
+            "name": "isVirtual",
+            "type": "bool"
           },
           {
             "name": "currencyMint",

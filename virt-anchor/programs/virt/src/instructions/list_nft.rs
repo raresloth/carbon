@@ -32,8 +32,7 @@ pub struct ListNft<'info> {
     pub edition: UncheckedAccount<'info>,
 
     /// The currency to use or native mint if using SOL
-    /// CHECK: Verified in handler if not native mint
-    pub currency_mint: UncheckedAccount<'info>,
+    pub currency_mint: Box<Account<'info, Mint>>,
 
     #[account(
         init,
@@ -66,6 +65,7 @@ pub fn list_nft_handler<'info>(
         [*ctx.bumps.get(Listing::PREFIX).ok_or(Error::BumpSeedNotInHashMap)?],
         ctx.accounts.authority.key(),
         ctx.accounts.mint.key(),
+        false,
         ctx.accounts.currency_mint.key(),
         price,
         expiry,
