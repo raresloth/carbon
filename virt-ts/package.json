@@ -22,8 +22,8 @@
     "node": ">=11"
   },
   "scripts": {
-    "build": "rm -rf dist && tsc && tsc -p tsconfig.cjs.json",
-    "watch": "concurrently \"tsc -p tsconfig.cjs.json --watch\" \"tsc --watch\""
+    "build": "cp ../virt-anchor/target/types/virt.ts ./src/idl && rm -rf dist && tsc && tsc -p tsconfig.cjs.json",
+    "dev": "concurrently \"cpx ../virt-anchor/target/types/virt.ts ./src/idl\" \"tsc -p tsconfig.cjs.json --watch\" \"tsc --watch\""
   },
   "dependencies": {
     "@coral-xyz/anchor": "^0.26.0",
@@ -39,6 +39,7 @@
     "@typescript-eslint/eslint-plugin": "^4.6.0",
     "@typescript-eslint/parser": "^4.6.0",
     "concurrently": "^7.6.0",
+    "cpx": "^1.5.0",
     "eslint": "^7.12.1",
     "eslint-config-prettier": "^6.15.0",
     "lint-staged": "^10.5.0",
