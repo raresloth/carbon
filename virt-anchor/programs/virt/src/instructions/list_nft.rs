@@ -1,14 +1,14 @@
 use anchor_lang::prelude::*;
 use anchor_spl::{
     token::{self, Mint, Token, TokenAccount, Approve},
+    metadata::Metadata
 };
-use anchor_spl::metadata::Metadata;
 use solana_program::program::invoke_signed;
 use crate::{
     state::{Listing, FeeSchedule},
+    util::{is_default, approve_and_freeze},
     error::Error
 };
-use crate::util::{is_default, approve_and_freeze};
 
 #[derive(Accounts)]
 pub struct ListNft<'info> {

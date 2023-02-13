@@ -1,5 +1,6 @@
 use anchor_lang::prelude::*;
 use instructions::*;
+use state::*;
 
 pub mod instructions;
 pub mod state;
@@ -13,11 +14,19 @@ declare_id!("VRTEittKzMw7RxcmwAvk9WEQwjrceHawEM3fpzg9LUc");
 pub mod virt {
     use super::*;
 
+    pub fn init_collection_config(ctx: Context<InitCollectionConfig>, args: CollectionConfigArgs) -> Result<()> {
+        instructions::init_collection_config_handler(ctx, args)
+    }
+
     pub fn list_nft(ctx: Context<ListNft>, price: u64, expiry: i64) -> Result<()> {
         instructions::list_nft_handler(ctx, price, expiry)
     }
 
     pub fn list_virtual(ctx: Context<ListVirtual>, id: Pubkey, price: u64, expiry: i64) -> Result<()> {
         instructions::list_virtual_handler(ctx, id, price, expiry)
+    }
+
+    pub fn buy_virtual(ctx: Context<BuyVirtual>, id: Pubkey, price: u64, metadata: Metadata) -> Result<()> {
+        instructions::buy_virtual_handler(ctx, id, price, metadata)
     }
 }

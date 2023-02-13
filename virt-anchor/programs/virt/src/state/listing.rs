@@ -8,14 +8,19 @@ use crate::{
 pub struct Listing {
 	pub bump: [u8; 1],
 	pub version: u8,
+	/// Pubkey of the seller's wallet
 	pub authority: Pubkey,
-	// Set to mint of NFT if listing is for NFT, otherwise a unique ID for the virtual item
+	/// Set to mint of NFT if listing is for NFT, otherwise a unique ID for the virtual item
 	pub id: Pubkey,
-	// True if the listing is for a virtual item, false if it is for an NFT
+	/// True if the listing is for a virtual item, false if it is for an NFT
 	pub is_virtual: bool,
+	/// Currency to accept for payment
 	pub currency_mint: Pubkey,
+	/// Price of the item
 	pub price: u64,
+	/// Unix timestamp of when the listing expires
 	pub expiry: i64,
+	/// Fee schedule for the listing
 	pub fee_schedule: FeeSchedule
 }
 
@@ -60,6 +65,18 @@ impl Listing {
 		self.price = price;
 		self.expiry = expiry;
 		self.fee_schedule = FeeSchedule::default();
+
+		return Ok(());
+	}
+
+	pub fn assert_can_buy(&self, price: u64) -> Result<()> {
+		if self.expiry <= Clock::get()?.unix_timestamp {
+			return err!(Error::ListingExpired);
+		}
+
+		if self.price != price {
+			return err!(Error::PriceMismatch);
+		}
 
 		return Ok(());
 	}

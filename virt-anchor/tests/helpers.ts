@@ -1,6 +1,6 @@
 import { Provider } from "@coral-xyz/anchor";
 import {keypairIdentity, Metaplex } from "@metaplex-foundation/js";
-import {Keypair, Transaction, SystemProgram} from "@solana/web3.js";
+import {Keypair, Transaction, SystemProgram, PublicKey} from "@solana/web3.js";
 
 export async function setBalance(provider: Provider, keypair: Keypair, amount: number) {
 	const balance = await provider.connection.getBalance(keypair.publicKey);
@@ -23,10 +23,34 @@ export async function setBalance(provider: Provider, keypair: Keypair, amount: n
 	}
 }
 
+export async function createCollectionNFT(
+	provider: Provider,
+	payer: Keypair,
+	updateAuthority: Keypair,
+	mintArgs?: any
+) {
+	const metaplex = new Metaplex(provider.connection).use(keypairIdentity(payer))
+	const result = await metaplex.nfts().create({
+		name: 'Collection NFT',
+		uri: 'https://arweave.net/Rb9SwSImzCInyGbaxbT1bpnjJGiTszkCTLWZiomnerw',
+		sellerFeeBasisPoints: 500,
+		isCollection: true,
+		updateAuthority,
+		...(mintArgs || {}),
+	})
+	const mint = result.mintAddress
+	const metadataAccount = metaplex.nfts().pdas().metadata({
+		mint
+	})
+	const edition = result.masterEditionAddress
+
+	return {mint, metadataAccount, edition}
+}
+
 export async function createNFT(provider: Provider, payer: Keypair, mintArgs?: any) {
 	const metaplex = new Metaplex(provider.connection).use(keypairIdentity(payer))
 	const result = await metaplex.nfts().create({
-		name: 'Meditating Sloth',
+		name: 'NFT Item',
 		uri: 'https://arweave.net/Rb9SwSImzCInyGbaxbT1bpnjJGiTszkCTLWZiomnerw',
 		sellerFeeBasisPoints: 500,
 		...(mintArgs || {}),
@@ -38,4 +62,11 @@ export async function createNFT(provider: Provider, payer: Keypair, mintArgs?: a
 	const edition = result.masterEditionAddress
 
 	return {mint, metadataAccount, edition}
+}
+
+export async function fetchNFT(provider: Provider, payer: Keypair, mint: PublicKey) {
+	const metaplex = new Metaplex(provider.connection).use(keypairIdentity(payer))
+	return await metaplex.nfts().findByMint({
+		mintAddress: mint
+	})
 }

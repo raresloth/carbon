@@ -6,10 +6,18 @@ export class Pdas {
 		public virt: Virt,
 	) {}
 
-	listing(mint: PublicKey): PublicKey {
+	collectionConfig(authority: PublicKey, collectionMint: PublicKey): PublicKey {
+		return PublicKey.findProgramAddressSync([
+			Buffer.from("collection_config"),
+			authority.toBuffer(),
+			collectionMint.toBuffer(),
+		], this.virt.programId)[0];
+	}
+
+	listing(id: PublicKey): PublicKey {
 		return PublicKey.findProgramAddressSync([
 			Buffer.from("listing"),
-			mint.toBuffer(),
+			id.toBuffer(),
 		], this.virt.programId)[0];
 	}
 }

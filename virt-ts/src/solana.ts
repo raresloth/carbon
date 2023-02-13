@@ -11,3 +11,11 @@ export function getEditionPDA(mint: PublicKey) {
 		Buffer.from('edition', 'utf8'),
 	], TOKEN_METADATA_PROGRAM_ID)[0]
 }
+
+export function getMetadataPDA(mint: PublicKey) {
+	return PublicKey.findProgramAddressSync([
+		Buffer.from('metadata', 'utf8'),
+		TOKEN_METADATA_PROGRAM_ID.toBuffer(),
+		mint.toBuffer(),
+	], TOKEN_METADATA_PROGRAM_ID)[0]
+}
