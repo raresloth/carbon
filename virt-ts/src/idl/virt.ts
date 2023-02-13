@@ -270,6 +270,14 @@ export type Virt = {
           "isSigner": false
         },
         {
+          "name": "feeAccount",
+          "isMut": true,
+          "isSigner": false,
+          "docs": [
+            "Account to send fees to."
+          ]
+        },
+        {
           "name": "tokenMetadataProgram",
           "isMut": false,
           "isSigner": false
@@ -428,12 +436,12 @@ export type Virt = {
             "type": "i64"
           },
           {
-            "name": "feeSchedule",
+            "name": "feeConfig",
             "docs": [
-              "Fee schedule for the listing"
+              "Fee config for the listing"
             ],
             "type": {
-              "defined": "FeeSchedule"
+              "defined": "FeeConfig"
             }
           }
         ]
@@ -466,12 +474,12 @@ export type Virt = {
       }
     },
     {
-      "name": "FeeSchedule",
+      "name": "FeeConfig",
       "type": {
         "kind": "struct",
         "fields": [
           {
-            "name": "beneficiary",
+            "name": "feeAccount",
             "type": "publicKey"
           },
           {
@@ -528,6 +536,16 @@ export type Virt = {
       "code": 6005,
       "name": "InvalidListingAuthority",
       "msg": "Invalid listing authority"
+    },
+    {
+      "code": 6006,
+      "name": "OverflowError",
+      "msg": "Overflow error"
+    },
+    {
+      "code": 6007,
+      "name": "InvalidFeeAccount",
+      "msg": "Invalid fee account"
     }
   ]
 };
@@ -804,6 +822,14 @@ export const IDL: Virt = {
           "isSigner": false
         },
         {
+          "name": "feeAccount",
+          "isMut": true,
+          "isSigner": false,
+          "docs": [
+            "Account to send fees to."
+          ]
+        },
+        {
           "name": "tokenMetadataProgram",
           "isMut": false,
           "isSigner": false
@@ -962,12 +988,12 @@ export const IDL: Virt = {
             "type": "i64"
           },
           {
-            "name": "feeSchedule",
+            "name": "feeConfig",
             "docs": [
-              "Fee schedule for the listing"
+              "Fee config for the listing"
             ],
             "type": {
-              "defined": "FeeSchedule"
+              "defined": "FeeConfig"
             }
           }
         ]
@@ -1000,12 +1026,12 @@ export const IDL: Virt = {
       }
     },
     {
-      "name": "FeeSchedule",
+      "name": "FeeConfig",
       "type": {
         "kind": "struct",
         "fields": [
           {
-            "name": "beneficiary",
+            "name": "feeAccount",
             "type": "publicKey"
           },
           {
@@ -1062,6 +1088,16 @@ export const IDL: Virt = {
       "code": 6005,
       "name": "InvalidListingAuthority",
       "msg": "Invalid listing authority"
+    },
+    {
+      "code": 6006,
+      "name": "OverflowError",
+      "msg": "Overflow error"
+    },
+    {
+      "code": 6007,
+      "name": "InvalidFeeAccount",
+      "msg": "Invalid fee account"
     }
   ]
 };

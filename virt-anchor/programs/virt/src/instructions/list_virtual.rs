@@ -1,14 +1,11 @@
 use anchor_lang::prelude::*;
 use anchor_spl::{
-    token::{self, Mint, Token, TokenAccount, Approve},
+    token::{Mint},
 };
-use anchor_spl::metadata::Metadata;
-use solana_program::program::invoke_signed;
 use crate::{
-    state::{Listing, FeeSchedule},
-    error::Error
+	state::{Listing},
+	error::Error
 };
-use crate::util::{is_default, approve_and_freeze};
 
 #[derive(Accounts)]
 #[instruction(id: Pubkey)]

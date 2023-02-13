@@ -1,13 +1,8 @@
 use anchor_lang::prelude::*;
-use anchor_spl::associated_token::get_associated_token_address;
 use anchor_spl::token;
-use anchor_spl::token::{Approve, Mint, Revoke, Transfer};
-use anchor_spl::metadata::{MetadataAccount};
-use solana_program::{pubkey::Pubkey, account_info::AccountInfo, system_instruction};
-use solana_program::program::{invoke, invoke_signed};
-use solana_program::program_pack::{IsInitialized, Pack};
-use spl_associated_token_account::instruction::create_associated_token_account;
-use spl_token::state::Account as SplAccount;
+use anchor_spl::token::{Approve, Revoke};
+use solana_program::{account_info::AccountInfo};
+use solana_program::program::{invoke_signed};
 
 pub fn approve_and_freeze<'a>(
 	token_account: &AccountInfo<'a>,

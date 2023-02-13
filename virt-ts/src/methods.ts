@@ -99,6 +99,7 @@ export class Methods {
 				collectionMetadataAccount: getMetadataPDA(collectionConfig.collectionMint),
 				collectionEdition: getEditionPDA(collectionConfig.collectionMint),
 				listing: this.virt.pdas.listing(listing.id),
+				feeAccount: listing.feeConfig.feeAccount,
 				tokenMetadataProgram: TOKEN_METADATA_PROGRAM_ID,
 				associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
 			})

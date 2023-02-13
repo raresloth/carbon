@@ -1,7 +1,6 @@
 use anchor_lang::prelude::*;
-use anchor_spl::token::accessor::mint;
 use mpl_token_metadata::state::{Collection, DataV2};
-use crate::{error::Error, Metadata};
+use crate::{Metadata};
 
 #[account]
 pub struct CollectionConfig {

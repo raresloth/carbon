@@ -1,13 +1,9 @@
 use anchor_lang::prelude::*;
-use anchor_spl::associated_token::get_associated_token_address;
 use anchor_spl::token;
-use anchor_spl::token::{Approve, Mint, Revoke, Transfer};
-use anchor_spl::metadata::{MetadataAccount};
-use solana_program::{pubkey::Pubkey, account_info::AccountInfo, system_instruction};
+use anchor_spl::token::{Transfer};
+use solana_program::{account_info::AccountInfo, system_instruction};
 use solana_program::program::{invoke, invoke_signed};
-use solana_program::program_pack::{IsInitialized, Pack};
 use spl_associated_token_account::instruction::create_associated_token_account;
-use spl_token::state::Account as SplAccount;
 use crate::util::{assert_is_ata, assert_is_mint, is_native_mint};
 
 /// Transfers SOL or SPL tokens between two accounts. The native mint can be used for the
@@ -116,6 +112,102 @@ pub fn transfer<'a>(
 				amount,
 			)?;
 		}
+	}
+
+	Ok(())
+}
+
+pub fn transfer_sol<'a>(
+	from: &AccountInfo<'a>,
+	to: &AccountInfo<'a>,
+	system_program: &AccountInfo<'a>,
+	signer_seeds: Option<&[&[u8]]>,
+	amount: u64,
+) -> Result<()> {
+	let transfer_ix = &system_instruction::transfer(
+		from.key,
+		to.key,
+		amount,
+	);
+
+	let transfer_accounts = &[
+		from.clone(),
+		to.clone(),
+		system_program.clone(),
+	];
+
+	if signer_seeds.is_some() {
+		invoke_signed(
+			transfer_ix,
+			transfer_accounts,
+			&[signer_seeds.unwrap()],
+		)?;
+	} else {
+		invoke(
+			transfer_ix,
+			transfer_accounts,
+		)?;
+	}
+
+	Ok(())
+}
+
+pub fn transfer_spl<'a>(
+	from: &AccountInfo<'a>,
+	to: &AccountInfo<'a>,
+	from_currency_account: &AccountInfo<'a>,
+	to_currency_account: &AccountInfo<'a>,
+	currency_mint: &AccountInfo<'a>,
+	fee_payer: &AccountInfo<'a>,
+	ata_program: &AccountInfo<'a>,
+	token_program: &AccountInfo<'a>,
+	system_program: &AccountInfo<'a>,
+	rent: &AccountInfo<'a>,
+	signer_seeds: &[&[u8]],
+	fee_payer_seeds: &[&[u8]],
+	amount: u64,
+) -> Result<()> {
+	assert_is_mint(currency_mint)?;
+
+	if to_currency_account.data_is_empty() {
+		make_ata(
+			to_currency_account.to_account_info(),
+			to.to_account_info(),
+			currency_mint.to_account_info(),
+			fee_payer.to_account_info(),
+			ata_program.to_account_info(),
+			token_program.to_account_info(),
+			system_program.to_account_info(),
+			rent.to_account_info(),
+			fee_payer_seeds,
+		)?;
+	} else {
+		assert_is_ata(
+			to_currency_account,
+			to.key,
+			&currency_mint.key(),
+		)?;
+	}
+
+	let transfer_cpi = CpiContext::new(
+		token_program.to_account_info(),
+		Transfer {
+			from: from_currency_account.to_account_info(),
+			to: to_currency_account.to_account_info(),
+			authority: from.to_account_info(),
+		},
+	);
+
+	if signer_seeds.is_empty() {
+		token::transfer(
+			transfer_cpi,
+			amount,
+		)?;
+	} else {
+		token::transfer(
+			transfer_cpi.with_signer(&[signer_seeds]),
+			amount,
+		)?;
 	}
 
 	Ok(())

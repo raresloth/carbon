@@ -1,6 +1,6 @@
 use anchor_lang::prelude::*;
 use crate::{
-	state::fee_schedule::{FeeSchedule},
+	state::fee_config::{FeeConfig},
 	error::Error
 };
 
@@ -20,8 +20,8 @@ pub struct Listing {
 	pub price: u64,
 	/// Unix timestamp of when the listing expires
 	pub expiry: i64,
-	/// Fee schedule for the listing
-	pub fee_schedule: FeeSchedule
+	/// Fee config for the listing
+	pub fee_config: FeeConfig
 }
 
 impl Listing {
@@ -30,7 +30,7 @@ impl Listing {
 
 	// Additional padding for future proofing
 	pub const SPACE: usize =
-		8 + 1 + 1 + 32 + 32 + 1 + 32 + 8 + 8 + FeeSchedule::SPACE + 256;
+		8 + 1 + 1 + 32 + 32 + 1 + 32 + 8 + 8 + FeeConfig::SPACE + 256;
 
 	pub const PREFIX: &'static str = "listing";
 
@@ -64,9 +64,17 @@ impl Listing {
 		self.currency_mint = currency_mint;
 		self.price = price;
 		self.expiry = expiry;
-		self.fee_schedule = FeeSchedule::default();
+		self.fee_config = FeeConfig::default();
 
 		return Ok(());
+	}
+
+	pub fn get_fee_amount(&self) -> Result<u64> {
+		return Ok((self.price as u128)
+			.checked_mul(self.fee_config.bps as u128)
+			.ok_or(Error::OverflowError)?
+			.checked_div(10_000)
+			.ok_or(Error::OverflowError)? as u64);
 	}
 
 	pub fn assert_can_buy(&self, price: u64) -> Result<()> {

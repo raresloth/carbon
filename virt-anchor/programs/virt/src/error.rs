@@ -17,4 +17,8 @@ pub enum Error {
 	/// 5
 	#[msg("Invalid listing authority")]
 	InvalidListingAuthority,
+	#[msg("Overflow error")]
+	OverflowError,
+	#[msg("Invalid fee account")]
+	InvalidFeeAccount,
 }

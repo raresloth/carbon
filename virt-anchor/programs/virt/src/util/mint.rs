@@ -12,11 +12,9 @@ use anchor_spl::{
 		mint_to,
 		InitializeMint2,
 		MintTo,
-		TokenAccount
 	}
 };
 use mpl_token_metadata::state::{DataV2};
-use solana_program::program::invoke_signed;
 use crate::util::make_ata;
 
 pub fn mint_nft<'a>(

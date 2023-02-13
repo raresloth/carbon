@@ -1,6 +1,6 @@
 use anchor_lang::prelude::*;
 use anchor_spl::{
-	token::{Mint, Token, TokenAccount},
+	token::{Token},
 	associated_token::AssociatedToken,
 	metadata::{
 		verify_sized_collection_item,
@@ -10,11 +10,9 @@ use anchor_spl::{
 	},
 	metadata
 };
-use mpl_token_metadata::state::DataV2;
-use solana_program::{program::{invoke_signed, invoke}};
 use crate::{CollectionConfig, Metadata, state::{Listing}};
 use crate::error::Error;
-use crate::util::{assert_keys_equal, is_default, mint_nft};
+use crate::util::{is_native_mint, mint_nft, transfer_sol};
 
 #[derive(Accounts)]
 #[instruction(id: Pubkey)]
@@ -98,8 +96,14 @@ pub struct BuyVirtual<'info> {
 		has_one = authority @ Error::InvalidListingAuthority,
 		has_one = id,
 		constraint = listing.is_virtual @ Error::NotVirtual,
+		constraint = listing.fee_config.fee_account == fee_account.key() @ Error::InvalidFeeAccount,
 	)]
 	pub listing: Box<Account<'info, Listing>>,
+
+	/// Account to send fees to.
+	/// CHECK: Safe because of listing constraint
+	#[account(mut)]
+	pub fee_account: UncheckedAccount<'info>,
 
 	pub token_metadata_program: Program<'info, metadata::Metadata>,
 	pub token_program: Program<'info, Token>,
@@ -161,6 +165,35 @@ pub fn buy_virtual_handler<'info>(
 			}
 		)
 	)?;
+
+	// Transfer fees to the fee account.
+	let fee_amount = ctx.accounts.listing.get_fee_amount()?;
+	// TODO: Creator royalties
+	let seller_amount = ctx.accounts.listing.price.checked_sub(fee_amount)
+		.ok_or(Error::OverflowError)?;
+
+	if is_native_mint(ctx.accounts.listing.currency_mint) {
+		if fee_amount > 0 {
+			transfer_sol(
+				&ctx.accounts.buyer.to_account_info(),
+				&ctx.accounts.fee_account.to_account_info(),
+				&ctx.accounts.system_program.to_account_info(),
+				None,
+				fee_amount
+			)?;
+		}
+		if seller_amount > 0 {
+			transfer_sol(
+				&ctx.accounts.buyer.to_account_info(),
+				&ctx.accounts.authority.to_account_info(),
+				&ctx.accounts.system_program.to_account_info(),
+				None,
+				seller_amount
+			)?;
+		}
+	} else {
+		// TODO: Transfer tokens
+	}
 
 	Ok(())
 }

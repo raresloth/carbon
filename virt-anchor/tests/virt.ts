@@ -119,8 +119,8 @@ describe("virt", () => {
 				assert.equal(listing.currencyMint.toString(), currencyMint.toString());
 				assert.equal(listing.price.toNumber(), price);
 				assert.equal(listing.expiry.toNumber(), expiry);
-				assert.equal(listing.feeSchedule.beneficiary.toString(), FEE_ACCOUNT_ADDRESS)
-				assert.equal(listing.feeSchedule.bps, 0)
+				assert.equal(listing.feeConfig.feeAccount.toString(), FEE_ACCOUNT_ADDRESS)
+				assert.equal(listing.feeConfig.bps, 0)
 
 				const sellerTokenAccountObj = await getAccount(provider.connection, sellerTokenAccount);
 				assert.equal(sellerTokenAccountObj.delegate.toString(), listingPDA.toString());
@@ -152,8 +152,8 @@ describe("virt", () => {
 				assert.equal(listing.currencyMint.toString(), currencyMint.toString());
 				assert.equal(listing.price.toNumber(), price);
 				assert.equal(listing.expiry.toNumber(), expiry);
-				assert.equal(listing.feeSchedule.beneficiary.toString(), FEE_ACCOUNT_ADDRESS)
-				assert.equal(listing.feeSchedule.bps, 0)
+				assert.equal(listing.feeConfig.feeAccount.toString(), FEE_ACCOUNT_ADDRESS)
+				assert.equal(listing.feeConfig.bps, 0)
 			});
 
 		});
@@ -199,6 +199,8 @@ describe("virt", () => {
 				const sellerTokenAccount = await createAssociatedTokenAccount(provider.connection, buyer, mint, seller.publicKey)
 				const buyerTokenAccount = getAssociatedTokenAddressSync(mint, buyer.publicKey)
 				await transferChecked(provider.connection, buyer, buyerTokenAccount, mint, sellerTokenAccount, buyer, 1, 0)
+				
+				// Make sure correct amounts were sent to seller and fee account
 			});
 
 		});
