@@ -30,7 +30,12 @@ pub mod carbon {
         instructions::list_virtual_handler(ctx, id, price, expiry)
     }
 
-    pub fn buy_virtual(ctx: Context<BuyVirtual>, id: Pubkey, price: u64, metadata: Metadata) -> Result<()> {
+    pub fn buy_virtual<'info>(
+        ctx: Context<'_, '_, '_, 'info, BuyVirtual<'info>>,
+        id: Pubkey,
+        price: u64,
+        metadata: Metadata
+    ) -> Result<()> {
         instructions::buy_virtual_handler(ctx, id, price, metadata)
     }
 }

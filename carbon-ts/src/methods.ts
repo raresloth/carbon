@@ -96,6 +96,13 @@ export class Methods {
 	): Promise<PublicKey> {
 		const mint = Keypair.generate();
 
+		// TODO: Prepend with currency mint account and buyer currency account if SPL
+		const remainingAccounts = [{
+			pubkey: marketplaceAuthority.publicKey,
+			isWritable: true,
+			isSigner: false,
+		}]
+
 		await this.carbon.program.methods
 			.buyVirtual(
 				listing.id,
@@ -118,6 +125,7 @@ export class Methods {
 				tokenMetadataProgram: TOKEN_METADATA_PROGRAM_ID,
 				associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
 			})
+			.remainingAccounts(remainingAccounts)
 			.signers([buyer, marketplaceAuthority, mint])
 			.rpc();
 

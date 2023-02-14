@@ -64,7 +64,7 @@ pub fn mint_nft<'a>(
 		token_program.to_account_info(),
 		system_program.to_account_info(),
 		rent.to_account_info(),
-		&[]
+		None
 	)?;
 
 	// Mint to the receiver

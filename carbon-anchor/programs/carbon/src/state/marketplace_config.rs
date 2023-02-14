@@ -1,6 +1,5 @@
 use anchor_lang::prelude::*;
-use mpl_token_metadata::state::{Collection, DataV2};
-use crate::{FeeConfig, Metadata};
+use crate::{FeeConfig};
 
 #[account]
 pub struct MarketplaceConfig {

@@ -12,7 +12,7 @@ use anchor_spl::{
 };
 use crate::{CollectionConfig, Metadata, state::{Listing}};
 use crate::error::Error;
-use crate::util::{is_native_mint, mint_nft, transfer_sol};
+use crate::util::{is_native_mint, mint_nft, pay_creator_fees, transfer_sol};
 
 #[derive(Accounts)]
 #[instruction(id: Pubkey)]
@@ -101,7 +101,7 @@ pub struct BuyVirtual<'info> {
 }
 
 pub fn buy_virtual_handler<'info>(
-	ctx: Context<BuyVirtual>,
+	ctx: Context<'_, '_, '_, 'info, BuyVirtual<'info>>,
 	_id: Pubkey,
 	price: u64,
 	metadata: Metadata
@@ -111,7 +111,7 @@ pub fn buy_virtual_handler<'info>(
 	let data = &ctx.accounts.collection_config.get_mpl_metadata(metadata)?;
 	// Mint the NFT to the buyer.
 	mint_nft(
-		&ctx.accounts.buyer.to_account_info(),
+		&ctx.accounts.marketplace_authority.to_account_info(),
 		&ctx.accounts.buyer.to_account_info(),
 		&ctx.accounts.buyer_token_account.to_account_info(),
 		&ctx.accounts.mint.to_account_info(),
@@ -155,30 +155,47 @@ pub fn buy_virtual_handler<'info>(
 	)?;
 
 	// Transfer fees to the fee account.
-	let fee_amount = ctx.accounts.listing.get_fee_amount()?;
-	// TODO: Creator royalties
-	let seller_amount = ctx.accounts.listing.price.checked_sub(fee_amount)
+	let marketplace_fees = ctx.accounts.listing.get_fee_amount()?;
+	// First 2 remaining accounts are for the currency mint and from_currency_account
+	let remaining_accounts = &mut ctx.remaining_accounts.iter();
+
+	let creator_fees = pay_creator_fees(
+		&ctx.accounts.buyer.to_account_info(),
+		ctx.accounts.listing.currency_mint,
+		Some(&ctx.accounts.buyer.to_account_info()),
+		&ctx.accounts.metadata_account.to_account_info(),
+		remaining_accounts,
+		&ctx.accounts.associated_token_program.to_account_info(),
+		&ctx.accounts.token_program.to_account_info(),
+		&ctx.accounts.system_program.to_account_info(),
+		&ctx.accounts.rent.to_account_info(),
+		None,
+		None,
+		ctx.accounts.listing.price
+	)?;
+
+	let seller_amount = ctx.accounts.listing.price
+		.checked_sub(marketplace_fees)
+		.ok_or(Error::OverflowError)?
+		.checked_sub(creator_fees)
 		.ok_or(Error::OverflowError)?;
 
 	if is_native_mint(ctx.accounts.listing.currency_mint) {
-		if fee_amount > 0 {
-			transfer_sol(
-				&ctx.accounts.buyer.to_account_info(),
-				&ctx.accounts.fee_account.to_account_info(),
-				&ctx.accounts.system_program.to_account_info(),
-				None,
-				fee_amount
-			)?;
-		}
-		if seller_amount > 0 {
-			transfer_sol(
-				&ctx.accounts.buyer.to_account_info(),
-				&ctx.accounts.marketplace_authority.to_account_info(),
-				&ctx.accounts.system_program.to_account_info(),
-				None,
-				seller_amount
-			)?;
-		}
+		transfer_sol(
+			&ctx.accounts.buyer.to_account_info(),
+			&ctx.accounts.fee_account.to_account_info(),
+			&ctx.accounts.system_program.to_account_info(),
+			None,
+			marketplace_fees
+		)?;
+
+		transfer_sol(
+			&ctx.accounts.buyer.to_account_info(),
+			&ctx.accounts.marketplace_authority.to_account_info(),
+			&ctx.accounts.system_program.to_account_info(),
+			None,
+			seller_amount
+		)?;
 	} else {
 		// TODO: Transfer tokens
 	}

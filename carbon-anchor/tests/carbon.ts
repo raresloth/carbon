@@ -23,7 +23,7 @@ describe("carbon", () => {
 	const program = anchor.workspace.Carbon as Program<CarbonIDL.Carbon>;
 	const defaultFeeConfig = {
 		feeAccount: FEE_ACCOUNT_KEY,
-		bps: 500
+		bps: 200
 	}
 	const defaultSellerFeeBps = 500;
 	const defaultSymbol = 'KR';
@@ -199,10 +199,13 @@ describe("carbon", () => {
 		describe("buy_virtual", function () {
 
 			it("should buy the virtual item correctly", async function () {
+				const marketplaceAuthPreBalance = await provider.connection.getBalance(marketplaceAuthority.publicKey)
 				await carbon.methods.listVirtual(marketplaceAuthority, id, collectionMint, price, expiry)
 				const listing = await program.account.listing.fetch(listingPDA);
 				const collectionConfig = await program.account.collectionConfig.fetch(collectionConfigPDA);
 
+				const buyerPreBalance = await provider.connection.getBalance(buyer.publicKey)
+				const feeAccountPreBalance = await provider.connection.getBalance(FEE_ACCOUNT_KEY)
 				const mint = await carbon.methods.buyVirtual(
 					buyer,
 					marketplaceAuthority,
@@ -212,6 +215,9 @@ describe("carbon", () => {
 						name: "Ghost #1",
 						uri: "https://example.com",
 					})
+				const marketplaceAuthPostBalance = await provider.connection.getBalance(marketplaceAuthority.publicKey)
+				const buyerPostBalance = await provider.connection.getBalance(buyer.publicKey)
+				const feeAccountPostBalance = await provider.connection.getBalance(FEE_ACCOUNT_KEY)
 
 				// An NFT should now exist with the correct metadata
 				const nft = await fetchNFT(provider, marketplaceAuthority, mint)
@@ -235,6 +241,14 @@ describe("carbon", () => {
 				await transferChecked(provider.connection, buyer, buyerTokenAccount, mint, sellerTokenAccount, buyer, 1, 0)
 				
 				// Make sure correct amounts were sent to seller and fee account
+				assert.equal(buyerPreBalance - buyerPostBalance, price)
+
+				const mintingFee = (0.02 * LAMPORTS_PER_SOL)
+				const marketplaceFee = (price * defaultFeeConfig.bps / 10000)
+				assert.isAtLeast(marketplaceAuthPostBalance - marketplaceAuthPreBalance,
+					price - marketplaceFee - mintingFee)
+
+				assert.equal(feeAccountPostBalance - feeAccountPreBalance, marketplaceFee)
 			});
 
 		});
