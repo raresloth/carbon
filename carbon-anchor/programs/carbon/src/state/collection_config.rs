@@ -6,14 +6,13 @@ use crate::{Metadata};
 pub struct CollectionConfig {
 	pub bump: [u8; 1],
 	pub version: u8,
-	/// Pubkey of the marketplace authority's wallet
-	pub authority: Pubkey,
-	/// The verified collection key
+	/// The verified collection to add newly minted items to.
 	pub collection_mint: Pubkey,
-	/// Pubkey of the mint authority to be used for newly minted items for this collection
-	pub mint_authority: Pubkey,
+	/// Pubkey of the marketplace authority's wallet.
+	pub marketplace_authority: Pubkey,
+	/// Royalty bps. Inserted into newly minted metadata.
 	pub seller_fee_basis_points: u16,
-	/// Max 16 chars for symbol
+	/// Max 16 chars for symbol. Inserted into newly minted metadata.
 	pub symbol: String,
 }
 
@@ -29,10 +28,9 @@ impl CollectionConfig {
 
 	pub const PREFIX: &'static str = "collection_config";
 
-	pub fn auth_seeds<'a>(&'a self) -> [&'a [u8]; 3] {
+	pub fn auth_seeds<'a>(&'a self) -> [&'a [u8]; 2] {
 		[
 			CollectionConfig::PREFIX.as_bytes(),
-			self.authority.as_ref(),
 			self.collection_mint.as_ref()
 		]
 	}
@@ -40,17 +38,15 @@ impl CollectionConfig {
 	pub fn init(
 		&mut self,
 		bump: [u8; 1],
-		authority: Pubkey,
+		marketplace_authority: Pubkey,
 		collection_mint: Pubkey,
-		mint_authority: Pubkey,
 		seller_fee_basis_points: u16,
 		symbol: String
 	) -> Result<()> {
 		self.bump = bump;
 		self.version = CollectionConfig::VERSION;
-		self.authority = authority;
+		self.marketplace_authority = marketplace_authority;
 		self.collection_mint = collection_mint;
-		self.mint_authority = mint_authority;
 		self.seller_fee_basis_points = seller_fee_basis_points;
 		self.symbol = symbol;
 
@@ -63,7 +59,13 @@ impl CollectionConfig {
 			uri: metadata.uri.to_string(),
 			symbol: self.symbol.to_string(),
 			seller_fee_basis_points: self.seller_fee_basis_points,
-			creators: None,
+			creators: Some(vec![
+				mpl_token_metadata::state::Creator {
+					address: self.marketplace_authority,
+					verified: true,
+					share: 100
+				}
+			]),
 			collection: Some(Collection {
 				verified: false,
 				key: self.collection_mint

@@ -24,34 +24,22 @@ pub struct BuyVirtual<'info> {
 	/// Marketplace authority wallet.
 	/// CHECK: Safe because of collection_config constraint
 	#[account(mut)]
-	pub authority: Signer<'info>,
-
-	/// Collection authority for the NFT.
-	/// CHECK: Safe because of collection_config constraint
-	#[account(mut)]
-	pub collection_authority: Signer<'info>,
+	pub marketplace_authority: Signer<'info>,
 
 	/// The new mint to be used for the NFT.
 	/// CHECK: Verified in mint CPI
 	#[account(mut)]
 	pub mint: Signer<'info>,
 
-	/// Mint authority for the NFT.
-	/// CHECK: Safe because of collection_config constraint
-	#[account(mut)]
-	pub mint_authority: Signer<'info>,
-
 	#[account(
 		mut,
 		seeds = [
 			CollectionConfig::PREFIX.as_bytes(),
-			authority.key().as_ref(),
 			collection_mint.key().as_ref()
 		],
 		bump = collection_config.bump[0],
-		has_one = authority,
+		has_one = marketplace_authority,
 		has_one = collection_mint,
-		has_one = mint_authority,
 	)]
 	pub collection_config: Box<Account<'info, CollectionConfig>>,
 
@@ -87,15 +75,15 @@ pub struct BuyVirtual<'info> {
 
 	#[account(
 		mut,
-		close = authority,
+		close = marketplace_authority,
 		seeds = [
 			Listing::PREFIX.as_bytes(),
 			id.key().as_ref()
 		],
 		bump = listing.bump[0],
-		has_one = authority @ Error::InvalidListingAuthority,
 		has_one = id,
 		constraint = listing.is_virtual @ Error::NotVirtual,
+		constraint = listing.authority == marketplace_authority.key() @ Error::InvalidListingAuthority,
 		constraint = listing.fee_config.fee_account == fee_account.key() @ Error::InvalidFeeAccount,
 	)]
 	pub listing: Box<Account<'info, Listing>>,
@@ -127,7 +115,7 @@ pub fn buy_virtual_handler<'info>(
 		&ctx.accounts.buyer.to_account_info(),
 		&ctx.accounts.buyer_token_account.to_account_info(),
 		&ctx.accounts.mint.to_account_info(),
-		&ctx.accounts.mint_authority.to_account_info(),
+		&ctx.accounts.marketplace_authority.to_account_info(),
 		&ctx.accounts.metadata_account.to_account_info(),
 		data.clone(),
 		&ctx.accounts.edition.to_account_info(),
@@ -145,7 +133,7 @@ pub fn buy_virtual_handler<'info>(
 			VerifySizedCollectionItem {
 				payer: ctx.accounts.buyer.to_account_info(),
 				metadata: ctx.accounts.metadata_account.to_account_info(),
-				collection_authority: ctx.accounts.collection_authority.to_account_info(),
+				collection_authority: ctx.accounts.marketplace_authority.to_account_info(),
 				collection_mint: ctx.accounts.collection_mint.to_account_info(),
 				collection_metadata: ctx.accounts.collection_metadata_account.to_account_info(),
 				collection_master_edition: ctx.accounts.collection_edition.to_account_info()
@@ -185,7 +173,7 @@ pub fn buy_virtual_handler<'info>(
 		if seller_amount > 0 {
 			transfer_sol(
 				&ctx.accounts.buyer.to_account_info(),
-				&ctx.accounts.authority.to_account_info(),
+				&ctx.accounts.marketplace_authority.to_account_info(),
 				&ctx.accounts.system_program.to_account_info(),
 				None,
 				seller_amount

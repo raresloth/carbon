@@ -6,10 +6,9 @@ export class Pdas {
 		public carbon: Carbon,
 	) {}
 
-	collectionConfig(authority: PublicKey, collectionMint: PublicKey): PublicKey {
+	collectionConfig(collectionMint: PublicKey): PublicKey {
 		return PublicKey.findProgramAddressSync([
 			Buffer.from("collection_config"),
-			authority.toBuffer(),
 			collectionMint.toBuffer(),
 		], this.carbon.programId)[0];
 	}

@@ -6,7 +6,7 @@ export type Carbon = {
       "name": "initCollectionConfig",
       "accounts": [
         {
-          "name": "authority",
+          "name": "marketplaceAuthority",
           "isMut": true,
           "isSigner": true,
           "docs": [
@@ -180,19 +180,11 @@ export type Carbon = {
           ]
         },
         {
-          "name": "authority",
+          "name": "marketplaceAuthority",
           "isMut": true,
           "isSigner": true,
           "docs": [
             "Marketplace authority wallet."
-          ]
-        },
-        {
-          "name": "collectionAuthority",
-          "isMut": true,
-          "isSigner": true,
-          "docs": [
-            "Collection authority for the NFT."
           ]
         },
         {
@@ -201,14 +193,6 @@ export type Carbon = {
           "isSigner": true,
           "docs": [
             "The new mint to be used for the NFT."
-          ]
-        },
-        {
-          "name": "mintAuthority",
-          "isMut": true,
-          "isSigner": true,
-          "docs": [
-            "Mint authority for the NFT."
           ]
         },
         {
@@ -341,34 +325,30 @@ export type Carbon = {
             "type": "u8"
           },
           {
-            "name": "authority",
-            "docs": [
-              "Pubkey of the marketplace authority's wallet"
-            ],
-            "type": "publicKey"
-          },
-          {
             "name": "collectionMint",
             "docs": [
-              "The verified collection key"
+              "The verified collection to add newly minted items to."
             ],
             "type": "publicKey"
           },
           {
-            "name": "mintAuthority",
+            "name": "marketplaceAuthority",
             "docs": [
-              "Pubkey of the mint authority to be used for newly minted items for this collection"
+              "Pubkey of the marketplace authority's wallet."
             ],
             "type": "publicKey"
           },
           {
             "name": "sellerFeeBasisPoints",
+            "docs": [
+              "Royalty bps. Inserted into newly minted metadata."
+            ],
             "type": "u16"
           },
           {
             "name": "symbol",
             "docs": [
-              "Max 16 chars for symbol"
+              "Max 16 chars for symbol. Inserted into newly minted metadata."
             ],
             "type": "string"
           }
@@ -456,10 +436,6 @@ export type Carbon = {
         "fields": [
           {
             "name": "collectionMint",
-            "type": "publicKey"
-          },
-          {
-            "name": "mintAuthority",
             "type": "publicKey"
           },
           {
@@ -558,7 +534,7 @@ export const IDL: Carbon = {
       "name": "initCollectionConfig",
       "accounts": [
         {
-          "name": "authority",
+          "name": "marketplaceAuthority",
           "isMut": true,
           "isSigner": true,
           "docs": [
@@ -732,19 +708,11 @@ export const IDL: Carbon = {
           ]
         },
         {
-          "name": "authority",
+          "name": "marketplaceAuthority",
           "isMut": true,
           "isSigner": true,
           "docs": [
             "Marketplace authority wallet."
-          ]
-        },
-        {
-          "name": "collectionAuthority",
-          "isMut": true,
-          "isSigner": true,
-          "docs": [
-            "Collection authority for the NFT."
           ]
         },
         {
@@ -753,14 +721,6 @@ export const IDL: Carbon = {
           "isSigner": true,
           "docs": [
             "The new mint to be used for the NFT."
-          ]
-        },
-        {
-          "name": "mintAuthority",
-          "isMut": true,
-          "isSigner": true,
-          "docs": [
-            "Mint authority for the NFT."
           ]
         },
         {
@@ -893,34 +853,30 @@ export const IDL: Carbon = {
             "type": "u8"
           },
           {
-            "name": "authority",
-            "docs": [
-              "Pubkey of the marketplace authority's wallet"
-            ],
-            "type": "publicKey"
-          },
-          {
             "name": "collectionMint",
             "docs": [
-              "The verified collection key"
+              "The verified collection to add newly minted items to."
             ],
             "type": "publicKey"
           },
           {
-            "name": "mintAuthority",
+            "name": "marketplaceAuthority",
             "docs": [
-              "Pubkey of the mint authority to be used for newly minted items for this collection"
+              "Pubkey of the marketplace authority's wallet."
             ],
             "type": "publicKey"
           },
           {
             "name": "sellerFeeBasisPoints",
+            "docs": [
+              "Royalty bps. Inserted into newly minted metadata."
+            ],
             "type": "u16"
           },
           {
             "name": "symbol",
             "docs": [
-              "Max 16 chars for symbol"
+              "Max 16 chars for symbol. Inserted into newly minted metadata."
             ],
             "type": "string"
           }
@@ -1008,10 +964,6 @@ export const IDL: Carbon = {
         "fields": [
           {
             "name": "collectionMint",
-            "type": "publicKey"
-          },
-          {
-            "name": "mintAuthority",
             "type": "publicKey"
           },
           {

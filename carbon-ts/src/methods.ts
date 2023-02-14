@@ -11,14 +11,14 @@ export class Methods {
 	) {}
 
 	async initCollectionConfig(
-		authority: Keypair,
+		marketplaceAuthority: Keypair,
 		args: IdlTypes<CarbonIDL.Carbon>["CollectionConfigArgs"]
 	) {
 		await this.carbon.program.methods.initCollectionConfig(args)
 			.accounts({
-				authority: authority.publicKey,
-				collectionConfig: this.carbon.pdas.collectionConfig(authority.publicKey, args.collectionMint),
-			}).signers([authority]).rpc();
+				marketplaceAuthority: marketplaceAuthority.publicKey,
+				collectionConfig: this.carbon.pdas.collectionConfig(args.collectionMint),
+			}).signers([marketplaceAuthority]).rpc();
 	}
 
 	async listNft(
@@ -70,9 +70,7 @@ export class Methods {
 
 	async buyVirtual(
 		buyer: Keypair,
-		authority: Keypair,
-		collectionAuthority: Keypair,
-		mintAuthority: Keypair,
+		marketplaceAuthority: Keypair,
 		collectionConfig: IdlAccounts<CarbonIDL.Carbon>["collectionConfig"],
 		listing: IdlAccounts<CarbonIDL.Carbon>["listing"],
 		metadata: IdlTypes<CarbonIDL.Carbon>["Metadata"]
@@ -87,11 +85,9 @@ export class Methods {
 			)
 			.accounts({
 				buyer: buyer.publicKey,
-				authority: authority.publicKey,
-				collectionAuthority: collectionAuthority.publicKey,
+				marketplaceAuthority: marketplaceAuthority.publicKey,
 				mint: mint.publicKey,
-				mintAuthority: mintAuthority.publicKey,
-				collectionConfig: this.carbon.pdas.collectionConfig(authority.publicKey, collectionConfig.collectionMint),
+				collectionConfig: this.carbon.pdas.collectionConfig(collectionConfig.collectionMint),
 				buyerTokenAccount: getAssociatedTokenAddressSync(mint.publicKey, buyer.publicKey),
 				metadataAccount: getMetadataPDA(mint.publicKey),
 				edition: getEditionPDA(mint.publicKey),
@@ -103,7 +99,7 @@ export class Methods {
 				tokenMetadataProgram: TOKEN_METADATA_PROGRAM_ID,
 				associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
 			})
-			.signers([buyer, authority, collectionAuthority, mint, mintAuthority])
+			.signers([buyer, marketplaceAuthority, mint])
 			.rpc();
 
 		return mint.publicKey;
