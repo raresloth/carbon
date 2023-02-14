@@ -1,11 +1,11 @@
 import {PublicKey} from "@solana/web3.js";
 import {Program, Provider} from "@coral-xyz/anchor";
-import * as VirtIDL from "./idl/virt"
+import * as CarbonIDL from "./idl/carbon"
 import Pdas from "./pdas";
 import Methods from "./methods"
 
-export class Virt {
-	public program: Program<VirtIDL.Virt>;
+export class Carbon {
+	public program: Program<CarbonIDL.Carbon>;
 	public pdas: Pdas;
 	public methods: Methods;
 
@@ -13,10 +13,10 @@ export class Virt {
 		public programId: PublicKey,
 		public provider: Provider
 	) {
-		this.program = new Program<VirtIDL.Virt>(VirtIDL.IDL, programId, provider);
+		this.program = new Program<CarbonIDL.Carbon>(CarbonIDL.IDL, programId, provider);
 		this.pdas = new Pdas(this);
 		this.methods = new Methods(this);
 	}
 }
 
-export default Virt;
+export default Carbon;

@@ -5,11 +5,11 @@ importers:
   .:
     specifiers: {}
 
-  virt-anchor:
+  carbon-anchor:
     specifiers:
       '@coral-xyz/anchor': ^0.26.0
       '@metaplex-foundation/js': ^0.17.12
-      '@raresloth/virt-ts': workspace:^0.1.0
+      '@raresloth/carbon-ts': workspace:^0.1.0
       '@solana/spl-token': ^0.3.6
       '@solana/web3.js': ^1.47.4
       '@types/bn.js': ^5.1.0
@@ -25,7 +25,7 @@ importers:
       '@coral-xyz/anchor': 0.26.0
     devDependencies:
       '@metaplex-foundation/js': 0.17.12
-      '@raresloth/virt-ts': link:../virt-ts
+      '@raresloth/carbon-ts': link:../carbon-ts
       '@solana/spl-token': 0.3.7_@solana+web3.js@1.73.2
       '@solana/web3.js': 1.73.2
       '@types/bn.js': 5.1.1
@@ -38,7 +38,7 @@ importers:
       ts-mocha: 10.0.0_mocha@9.2.2
       typescript: 4.9.5
 
-  virt-ts:
+  carbon-ts:
     specifiers:
       '@coral-xyz/anchor': ^0.26.0
       '@solana/spl-token': ^0.3.6

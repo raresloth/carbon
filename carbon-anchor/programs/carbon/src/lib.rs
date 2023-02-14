@@ -8,10 +8,10 @@ pub mod error;
 mod util;
 mod constants;
 
-declare_id!("VRTEittKzMw7RxcmwAvk9WEQwjrceHawEM3fpzg9LUc");
+declare_id!("CRBNZ9mWZXkgX7Um6FsdFMGFHfeNgfwbyPYtuzHxbPWB");
 
 #[program]
-pub mod virt {
+pub mod carbon {
     use super::*;
 
     pub fn init_collection_config(ctx: Context<InitCollectionConfig>, args: CollectionConfigArgs) -> Result<()> {

@@ -1,12 +1,12 @@
 [package]
-name = "virt"
+name = "carbon"
 version = "0.1.0"
-description = "Created with Anchor"
+description = "Marketplace for listing virtual items to be lazy minted on purchase."
 edition = "2021"
 
 [lib]
 crate-type = ["cdylib", "lib"]
-name = "virt"
+name = "carbon"
 
 [features]
 no-entrypoint = []

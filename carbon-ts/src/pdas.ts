@@ -1,9 +1,9 @@
 import {PublicKey} from "@solana/web3.js";
-import Virt from "./virt";
+import Carbon from "./carbon";
 
 export class Pdas {
 	constructor(
-		public virt: Virt,
+		public carbon: Carbon,
 	) {}
 
 	collectionConfig(authority: PublicKey, collectionMint: PublicKey): PublicKey {
@@ -11,14 +11,14 @@ export class Pdas {
 			Buffer.from("collection_config"),
 			authority.toBuffer(),
 			collectionMint.toBuffer(),
-		], this.virt.programId)[0];
+		], this.carbon.programId)[0];
 	}
 
 	listing(id: PublicKey): PublicKey {
 		return PublicKey.findProgramAddressSync([
 			Buffer.from("listing"),
 			id.toBuffer(),
-		], this.virt.programId)[0];
+		], this.carbon.programId)[0];
 	}
 }
 

@@ -1,23 +1,23 @@
 import {Keypair, PublicKey} from "@solana/web3.js";
-import Virt from "./virt";
+import Carbon from "./carbon";
 import {ASSOCIATED_TOKEN_PROGRAM_ID, getAssociatedTokenAddressSync, NATIVE_MINT} from "@solana/spl-token";
 import {BN, IdlAccounts, IdlTypes} from "@coral-xyz/anchor";
 import {getEditionPDA, getMetadataPDA, TOKEN_METADATA_PROGRAM_ID} from "./solana";
-import * as VirtIDL from "./idl/virt";
+import * as CarbonIDL from "./idl/carbon";
 
 export class Methods {
 	constructor(
-		public virt: Virt,
+		public carbon: Carbon,
 	) {}
 
 	async initCollectionConfig(
 		authority: Keypair,
-		args: IdlTypes<VirtIDL.Virt>["CollectionConfigArgs"]
+		args: IdlTypes<CarbonIDL.Carbon>["CollectionConfigArgs"]
 	) {
-		await this.virt.program.methods.initCollectionConfig(args)
+		await this.carbon.program.methods.initCollectionConfig(args)
 			.accounts({
 				authority: authority.publicKey,
-				collectionConfig: this.virt.pdas.collectionConfig(authority.publicKey, args.collectionMint),
+				collectionConfig: this.carbon.pdas.collectionConfig(authority.publicKey, args.collectionMint),
 			}).signers([authority]).rpc();
 	}
 
@@ -28,7 +28,7 @@ export class Methods {
 		expiry: number,
 		currencyMint: PublicKey = NATIVE_MINT,
 	) {
-		await this.virt.program.methods
+		await this.carbon.program.methods
 			.listNft(
 				new BN(price),
 				new BN(expiry),
@@ -39,7 +39,7 @@ export class Methods {
 				mint,
 				edition: getEditionPDA(mint),
 				currencyMint,
-				listing: this.virt.pdas.listing(mint),
+				listing: this.carbon.pdas.listing(mint),
 				tokenMetadataProgram: TOKEN_METADATA_PROGRAM_ID,
 			})
 			.signers([authority])
@@ -53,7 +53,7 @@ export class Methods {
 		expiry: number,
 		currencyMint: PublicKey = NATIVE_MINT,
 	) {
-		await this.virt.program.methods
+		await this.carbon.program.methods
 			.listVirtual(
 				id,
 				new BN(price),
@@ -62,7 +62,7 @@ export class Methods {
 			.accounts({
 				authority: authority.publicKey,
 				currencyMint,
-				listing: this.virt.pdas.listing(id),
+				listing: this.carbon.pdas.listing(id),
 			})
 			.signers([authority])
 			.rpc();
@@ -73,13 +73,13 @@ export class Methods {
 		authority: Keypair,
 		collectionAuthority: Keypair,
 		mintAuthority: Keypair,
-		collectionConfig: IdlAccounts<VirtIDL.Virt>["collectionConfig"],
-		listing: IdlAccounts<VirtIDL.Virt>["listing"],
-		metadata: IdlTypes<VirtIDL.Virt>["Metadata"]
+		collectionConfig: IdlAccounts<CarbonIDL.Carbon>["collectionConfig"],
+		listing: IdlAccounts<CarbonIDL.Carbon>["listing"],
+		metadata: IdlTypes<CarbonIDL.Carbon>["Metadata"]
 	): Promise<PublicKey> {
 		const mint = Keypair.generate();
 
-		await this.virt.program.methods
+		await this.carbon.program.methods
 			.buyVirtual(
 				listing.id,
 				listing.price,
@@ -91,14 +91,14 @@ export class Methods {
 				collectionAuthority: collectionAuthority.publicKey,
 				mint: mint.publicKey,
 				mintAuthority: mintAuthority.publicKey,
-				collectionConfig: this.virt.pdas.collectionConfig(authority.publicKey, collectionConfig.collectionMint),
+				collectionConfig: this.carbon.pdas.collectionConfig(authority.publicKey, collectionConfig.collectionMint),
 				buyerTokenAccount: getAssociatedTokenAddressSync(mint.publicKey, buyer.publicKey),
 				metadataAccount: getMetadataPDA(mint.publicKey),
 				edition: getEditionPDA(mint.publicKey),
 				collectionMint: collectionConfig.collectionMint,
 				collectionMetadataAccount: getMetadataPDA(collectionConfig.collectionMint),
 				collectionEdition: getEditionPDA(collectionConfig.collectionMint),
-				listing: this.virt.pdas.listing(listing.id),
+				listing: this.carbon.pdas.listing(listing.id),
 				feeAccount: listing.feeConfig.feeAccount,
 				tokenMetadataProgram: TOKEN_METADATA_PROGRAM_ID,
 				associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID,

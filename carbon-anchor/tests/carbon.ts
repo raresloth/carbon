@@ -1,11 +1,11 @@
 import * as anchor from "@coral-xyz/anchor";
 import {IdlAccounts, Program} from "@coral-xyz/anchor";
 import { Keypair, PublicKey, LAMPORTS_PER_SOL } from "@solana/web3.js";
-import * as VirtIDL from "../target/types/virt";
+import * as CarbonIDL from "../target/types/carbon";
 import {createCollectionNFT, createNFT, fetchNFT, setBalance} from "./helpers";
 import moment from "moment";
-import { Virt } from "@raresloth/virt-ts"
-import {FEE_ACCOUNT_ADDRESS} from "@raresloth/virt-ts";
+import { Carbon } from "@raresloth/carbon-ts"
+import {FEE_ACCOUNT_ADDRESS} from "@raresloth/carbon-ts";
 import {
 	createAssociatedTokenAccount,
 	getAccount,
@@ -15,13 +15,13 @@ import {
 } from "@solana/spl-token";
 import { assert } from "chai";
 
-describe("virt", () => {
+describe("carbon", () => {
 	const provider = anchor.AnchorProvider.env();
 	provider.opts.skipPreflight = true;
 	anchor.setProvider(provider);
 
-	const program = anchor.workspace.Virt as Program<VirtIDL.Virt>;
-	const virt = new Virt(program.programId, provider);
+	const program = anchor.workspace.Carbon as Program<CarbonIDL.Carbon>;
+	const carbon = new Carbon(program.programId, provider);
 	const defaultSellerFeeBps = 500;
 	const defaultSymbol = 'KR';
 
@@ -65,7 +65,7 @@ describe("virt", () => {
 		collectionMint = collectionNft.mint
 		collectionMetadataAccount = collectionNft.metadataAccount
 		collectionEdition = collectionNft.edition
-		collectionConfigPDA = virt.pdas.collectionConfig(marketplaceAuthority.publicKey, collectionMint)
+		collectionConfigPDA = carbon.pdas.collectionConfig(marketplaceAuthority.publicKey, collectionMint)
 		currencyMint = NATIVE_MINT;
 		price = LAMPORTS_PER_SOL
 		expiry = moment().add(1, 'day').unix()
@@ -74,7 +74,7 @@ describe("virt", () => {
 	describe("init_collection_config", function () {
 
 		it("should initialize the collection config correctly", async function () {
-			await virt.methods.initCollectionConfig(marketplaceAuthority, {
+			await carbon.methods.initCollectionConfig(marketplaceAuthority, {
 				collectionMint,
 				mintAuthority: mintAuthority.publicKey,
 				sellerFeeBasisPoints: defaultSellerFeeBps,
@@ -103,13 +103,13 @@ describe("virt", () => {
 			metadataAccount = nft.metadataAccount
 			edition = nft.edition
 			sellerTokenAccount = getAssociatedTokenAddressSync(id, seller.publicKey)
-			listingPDA = virt.pdas.listing(id)
+			listingPDA = carbon.pdas.listing(id)
 		}
 
 		describe("list_nft", function () {
 
 			it("should list the nft correctly", async function () {
-				await virt.methods.listNft(seller, id, price, expiry)
+				await carbon.methods.listNft(seller, id, price, expiry)
 
 				const listing = await program.account.listing.fetch(listingPDA);
 				assert.equal(listing.version, 1);
@@ -136,13 +136,13 @@ describe("virt", () => {
 		beforeEach(setUpData)
 		async function setUpData() {
 			id = Keypair.generate().publicKey
-			listingPDA = virt.pdas.listing(id)
+			listingPDA = carbon.pdas.listing(id)
 		}
 
 		describe("list_virtual", function () {
 
 			it("should list the virtual item correctly", async function () {
-				await virt.methods.listVirtual(seller, id, price, expiry)
+				await carbon.methods.listVirtual(seller, id, price, expiry)
 
 				const listing = await program.account.listing.fetch(listingPDA);
 				assert.equal(listing.version, 1);
@@ -161,24 +161,24 @@ describe("virt", () => {
 		describe("buy_virtual", function () {
 
 			it("should buy the virtual item correctly", async function () {
-				await virt.methods.initCollectionConfig(marketplaceAuthority, {
+				await carbon.methods.initCollectionConfig(marketplaceAuthority, {
 					collectionMint,
 					mintAuthority: mintAuthority.publicKey,
 					sellerFeeBasisPoints: defaultSellerFeeBps,
 					symbol: defaultSymbol
 				})
 
-				await virt.methods.listVirtual(marketplaceAuthority, id, price, expiry)
+				await carbon.methods.listVirtual(marketplaceAuthority, id, price, expiry)
 				const listing = await program.account.listing.fetch(listingPDA);
 				const collectionConfig = await program.account.collectionConfig.fetch(collectionConfigPDA);
 
-				const mint = await virt.methods.buyVirtual(
+				const mint = await carbon.methods.buyVirtual(
 					buyer,
 					marketplaceAuthority,
 					collectionAuthority,
 					mintAuthority,
-					collectionConfig as IdlAccounts<VirtIDL.Virt>["collectionConfig"],
-					listing as IdlAccounts<VirtIDL.Virt>["listing"],
+					collectionConfig as IdlAccounts<CarbonIDL.Carbon>["collectionConfig"],
+					listing as IdlAccounts<CarbonIDL.Carbon>["listing"],
 					{
 						name: "Ghost #1",
 						uri: "https://example.com",

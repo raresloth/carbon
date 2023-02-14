@@ -1,4 +1,4 @@
 # pnpm-workspace.yaml
 packages:
-  - 'virt-anchor'
-  - 'virt-ts'
+  - 'carbon-anchor'
+  - 'carbon-ts'

@@ -2,7 +2,7 @@
 seeds = false
 skip-lint = false
 [programs.localnet]
-virt = "VRTEittKzMw7RxcmwAvk9WEQwjrceHawEM3fpzg9LUc"
+carbon = "CRBNZ9mWZXkgX7Um6FsdFMGFHfeNgfwbyPYtuzHxbPWB"
 
 [registry]
 url = "https://api.apr.dev"

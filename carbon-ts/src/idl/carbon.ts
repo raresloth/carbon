@@ -1,6 +1,6 @@
-export type Virt = {
+export type Carbon = {
   "version": "0.1.0",
-  "name": "virt",
+  "name": "carbon",
   "instructions": [
     {
       "name": "initCollectionConfig",
@@ -550,9 +550,9 @@ export type Virt = {
   ]
 };
 
-export const IDL: Virt = {
+export const IDL: Carbon = {
   "version": "0.1.0",
-  "name": "virt",
+  "name": "carbon",
   "instructions": [
     {
       "name": "initCollectionConfig",
