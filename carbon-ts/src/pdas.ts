@@ -6,6 +6,13 @@ export class Pdas {
 		public carbon: Carbon,
 	) {}
 
+	marketplaceConfig(marketplaceAuthority: PublicKey): PublicKey {
+		return PublicKey.findProgramAddressSync([
+			Buffer.from("marketplace_config"),
+			marketplaceAuthority.toBuffer(),
+		], this.carbon.programId)[0];
+	}
+
 	collectionConfig(collectionMint: PublicKey): PublicKey {
 		return PublicKey.findProgramAddressSync([
 			Buffer.from("collection_config"),

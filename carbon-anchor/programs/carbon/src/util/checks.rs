@@ -47,7 +47,8 @@ pub fn assert_is_nft_in_collection<'info>(
 	assert_owned_by(&nft_metadata.to_account_info(), &mpl_token_metadata::id())?;
 	assert_keys_equal(nft_metadata.mint, nft_mint.key())?;
 
-	let collection_data = nft_metadata.collection.as_ref().unwrap();
+	let collection_data = nft_metadata.collection.as_ref()
+		.ok_or(Error::CollectionNotSet)?;
 	assert!(collection_data.verified);
 	assert_keys_equal(collection_data.key, collection)?;
 

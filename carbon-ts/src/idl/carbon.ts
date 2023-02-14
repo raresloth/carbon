@@ -3,6 +3,42 @@ export type Carbon = {
   "name": "carbon",
   "instructions": [
     {
+      "name": "initMarketplaceConfig",
+      "accounts": [
+        {
+          "name": "marketplaceAuthority",
+          "isMut": true,
+          "isSigner": true,
+          "docs": [
+            "Marketplace authority wallet."
+          ]
+        },
+        {
+          "name": "marketplaceConfig",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "rent",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "args",
+          "type": {
+            "defined": "MarketplaceConfigArgs"
+          }
+        }
+      ]
+    },
+    {
       "name": "initCollectionConfig",
       "accounts": [
         {
@@ -42,7 +78,7 @@ export type Carbon = {
       "name": "listNft",
       "accounts": [
         {
-          "name": "authority",
+          "name": "seller",
           "isMut": true,
           "isSigner": true,
           "docs": [
@@ -66,6 +102,22 @@ export type Carbon = {
           ]
         },
         {
+          "name": "collectionMint",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "The verified collection mint of the NFT to sell."
+          ]
+        },
+        {
+          "name": "metadataAccount",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "Metadata of the NFT to sell."
+          ]
+        },
+        {
           "name": "edition",
           "isMut": false,
           "isSigner": false,
@@ -84,6 +136,16 @@ export type Carbon = {
         {
           "name": "listing",
           "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "collectionConfig",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "marketplaceConfig",
+          "isMut": false,
           "isSigner": false
         },
         {
@@ -122,11 +184,11 @@ export type Carbon = {
       "name": "listVirtual",
       "accounts": [
         {
-          "name": "authority",
+          "name": "marketplaceAuthority",
           "isMut": true,
           "isSigner": true,
           "docs": [
-            "Seller wallet."
+            "Marketplace authority wallet."
           ]
         },
         {
@@ -140,6 +202,16 @@ export type Carbon = {
         {
           "name": "listing",
           "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "collectionConfig",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "marketplaceConfig",
+          "isMut": false,
           "isSigner": false
         },
         {
@@ -196,11 +268,6 @@ export type Carbon = {
           ]
         },
         {
-          "name": "collectionConfig",
-          "isMut": true,
-          "isSigner": false
-        },
-        {
           "name": "buyerTokenAccount",
           "isMut": true,
           "isSigner": false,
@@ -251,6 +318,11 @@ export type Carbon = {
         {
           "name": "listing",
           "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "collectionConfig",
+          "isMut": false,
           "isSigner": false
         },
         {
@@ -374,7 +446,7 @@ export type Carbon = {
             "type": "u8"
           },
           {
-            "name": "authority",
+            "name": "seller",
             "docs": [
               "Pubkey of the seller's wallet"
             ],
@@ -398,6 +470,13 @@ export type Carbon = {
             "name": "currencyMint",
             "docs": [
               "Currency to accept for payment"
+            ],
+            "type": "publicKey"
+          },
+          {
+            "name": "collectionConfig",
+            "docs": [
+              "Collection config for the item"
             ],
             "type": "publicKey"
           },
@@ -426,6 +505,43 @@ export type Carbon = {
           }
         ]
       }
+    },
+    {
+      "name": "marketplaceConfig",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "bump",
+            "type": {
+              "array": [
+                "u8",
+                1
+              ]
+            }
+          },
+          {
+            "name": "version",
+            "type": "u8"
+          },
+          {
+            "name": "marketplaceAuthority",
+            "docs": [
+              "Pubkey of the marketplace authority's wallet."
+            ],
+            "type": "publicKey"
+          },
+          {
+            "name": "feeConfig",
+            "docs": [
+              "Royalty bps. Inserted into newly minted metadata."
+            ],
+            "type": {
+              "defined": "FeeConfig"
+            }
+          }
+        ]
+      }
     }
   ],
   "types": [
@@ -445,6 +561,20 @@ export type Carbon = {
           {
             "name": "symbol",
             "type": "string"
+          }
+        ]
+      }
+    },
+    {
+      "name": "MarketplaceConfigArgs",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "feeConfig",
+            "type": {
+              "defined": "FeeConfig"
+            }
           }
         ]
       }
@@ -531,6 +661,42 @@ export const IDL: Carbon = {
   "name": "carbon",
   "instructions": [
     {
+      "name": "initMarketplaceConfig",
+      "accounts": [
+        {
+          "name": "marketplaceAuthority",
+          "isMut": true,
+          "isSigner": true,
+          "docs": [
+            "Marketplace authority wallet."
+          ]
+        },
+        {
+          "name": "marketplaceConfig",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "rent",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "args",
+          "type": {
+            "defined": "MarketplaceConfigArgs"
+          }
+        }
+      ]
+    },
+    {
       "name": "initCollectionConfig",
       "accounts": [
         {
@@ -570,7 +736,7 @@ export const IDL: Carbon = {
       "name": "listNft",
       "accounts": [
         {
-          "name": "authority",
+          "name": "seller",
           "isMut": true,
           "isSigner": true,
           "docs": [
@@ -594,6 +760,22 @@ export const IDL: Carbon = {
           ]
         },
         {
+          "name": "collectionMint",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "The verified collection mint of the NFT to sell."
+          ]
+        },
+        {
+          "name": "metadataAccount",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "Metadata of the NFT to sell."
+          ]
+        },
+        {
           "name": "edition",
           "isMut": false,
           "isSigner": false,
@@ -612,6 +794,16 @@ export const IDL: Carbon = {
         {
           "name": "listing",
           "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "collectionConfig",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "marketplaceConfig",
+          "isMut": false,
           "isSigner": false
         },
         {
@@ -650,11 +842,11 @@ export const IDL: Carbon = {
       "name": "listVirtual",
       "accounts": [
         {
-          "name": "authority",
+          "name": "marketplaceAuthority",
           "isMut": true,
           "isSigner": true,
           "docs": [
-            "Seller wallet."
+            "Marketplace authority wallet."
           ]
         },
         {
@@ -668,6 +860,16 @@ export const IDL: Carbon = {
         {
           "name": "listing",
           "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "collectionConfig",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "marketplaceConfig",
+          "isMut": false,
           "isSigner": false
         },
         {
@@ -724,11 +926,6 @@ export const IDL: Carbon = {
           ]
         },
         {
-          "name": "collectionConfig",
-          "isMut": true,
-          "isSigner": false
-        },
-        {
           "name": "buyerTokenAccount",
           "isMut": true,
           "isSigner": false,
@@ -779,6 +976,11 @@ export const IDL: Carbon = {
         {
           "name": "listing",
           "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "collectionConfig",
+          "isMut": false,
           "isSigner": false
         },
         {
@@ -902,7 +1104,7 @@ export const IDL: Carbon = {
             "type": "u8"
           },
           {
-            "name": "authority",
+            "name": "seller",
             "docs": [
               "Pubkey of the seller's wallet"
             ],
@@ -926,6 +1128,13 @@ export const IDL: Carbon = {
             "name": "currencyMint",
             "docs": [
               "Currency to accept for payment"
+            ],
+            "type": "publicKey"
+          },
+          {
+            "name": "collectionConfig",
+            "docs": [
+              "Collection config for the item"
             ],
             "type": "publicKey"
           },
@@ -954,6 +1163,43 @@ export const IDL: Carbon = {
           }
         ]
       }
+    },
+    {
+      "name": "marketplaceConfig",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "bump",
+            "type": {
+              "array": [
+                "u8",
+                1
+              ]
+            }
+          },
+          {
+            "name": "version",
+            "type": "u8"
+          },
+          {
+            "name": "marketplaceAuthority",
+            "docs": [
+              "Pubkey of the marketplace authority's wallet."
+            ],
+            "type": "publicKey"
+          },
+          {
+            "name": "feeConfig",
+            "docs": [
+              "Royalty bps. Inserted into newly minted metadata."
+            ],
+            "type": {
+              "defined": "FeeConfig"
+            }
+          }
+        ]
+      }
     }
   ],
   "types": [
@@ -973,6 +1219,20 @@ export const IDL: Carbon = {
           {
             "name": "symbol",
             "type": "string"
+          }
+        ]
+      }
+    },
+    {
+      "name": "MarketplaceConfigArgs",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "feeConfig",
+            "type": {
+              "defined": "FeeConfig"
+            }
           }
         ]
       }

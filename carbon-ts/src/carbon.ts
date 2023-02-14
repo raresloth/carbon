@@ -11,7 +11,8 @@ export class Carbon {
 
 	constructor(
 		public programId: PublicKey,
-		public provider: Provider
+		public provider: Provider,
+		public marketplaceAuthority: PublicKey
 	) {
 		this.program = new Program<CarbonIDL.Carbon>(CarbonIDL.IDL, programId, provider);
 		this.pdas = new Pdas(this);

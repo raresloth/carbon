@@ -14,6 +14,10 @@ declare_id!("CRBNZ9mWZXkgX7Um6FsdFMGFHfeNgfwbyPYtuzHxbPWB");
 pub mod carbon {
     use super::*;
 
+    pub fn init_marketplace_config(ctx: Context<InitMarketplaceConfig>, args: MarketplaceConfigArgs) -> Result<()> {
+        instructions::init_marketplace_config_handler(ctx, args)
+    }
+
     pub fn init_collection_config(ctx: Context<InitCollectionConfig>, args: CollectionConfigArgs) -> Result<()> {
         instructions::init_collection_config_handler(ctx, args)
     }

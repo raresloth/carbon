@@ -11,4 +11,6 @@ pub enum Error {
 	UninitializedAccount,
 	#[msg("Overflow error")]
 	OverflowError,
+	#[msg("Collection not set")]
+	CollectionNotSet
 }

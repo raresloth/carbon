@@ -5,7 +5,7 @@ import * as CarbonIDL from "../target/types/carbon";
 import {createCollectionNFT, createNFT, fetchNFT, setBalance} from "./helpers";
 import moment from "moment";
 import { Carbon } from "@raresloth/carbon-ts"
-import {FEE_ACCOUNT_ADDRESS} from "@raresloth/carbon-ts";
+import {FEE_ACCOUNT_KEY} from "@raresloth/carbon-ts";
 import {
 	createAssociatedTokenAccount,
 	getAccount,
@@ -21,11 +21,15 @@ describe("carbon", () => {
 	anchor.setProvider(provider);
 
 	const program = anchor.workspace.Carbon as Program<CarbonIDL.Carbon>;
-	const carbon = new Carbon(program.programId, provider);
+	const defaultFeeConfig = {
+		feeAccount: FEE_ACCOUNT_KEY,
+		bps: 500
+	}
 	const defaultSellerFeeBps = 500;
 	const defaultSymbol = 'KR';
 
 	let marketplaceAuthority: Keypair;
+	let carbon: Carbon;
 	let seller: Keypair;
 	let sellerTokenAccount: PublicKey;
 	let buyer: Keypair;
@@ -39,6 +43,7 @@ describe("carbon", () => {
 	let currencyMint: PublicKey;
 	let price: number;
 	let expiry: number;
+	let marketplaceConfigPDA: PublicKey;
 	let collectionConfigPDA: PublicKey;
 	let listingPDA: PublicKey;
 
@@ -47,6 +52,8 @@ describe("carbon", () => {
 		let promises = []
 
 		marketplaceAuthority = Keypair.generate()
+		carbon = new Carbon(program.programId, provider, marketplaceAuthority.publicKey);
+		marketplaceConfigPDA = carbon.pdas.marketplaceConfig(marketplaceAuthority.publicKey)
 		promises.push(setBalance(provider, marketplaceAuthority, 100 * LAMPORTS_PER_SOL))
 
 		seller = Keypair.generate()
@@ -66,6 +73,21 @@ describe("carbon", () => {
 		price = LAMPORTS_PER_SOL
 		expiry = moment().add(1, 'day').unix()
 	}
+
+	describe("init_marketplace_config", function () {
+
+		it("should initialize the marketplace config correctly", async function () {
+			await carbon.methods.initMarketplaceConfig(marketplaceAuthority, {
+				feeConfig: defaultFeeConfig
+			})
+
+			const marketplaceConfig = await program.account.marketplaceConfig.fetch(marketplaceConfigPDA);
+			assert.equal(marketplaceConfig.version, 1);
+			assert.equal(marketplaceConfig.marketplaceAuthority.toString(), marketplaceAuthority.publicKey.toString());
+			assert.deepEqual(marketplaceConfig.feeConfig, defaultFeeConfig);
+		});
+
+	});
 
 	describe("init_collection_config", function () {
 
@@ -90,9 +112,21 @@ describe("carbon", () => {
 
 		beforeEach(setUpData)
 		async function setUpData() {
-			const nft = await createNFT(provider, marketplaceAuthority, {
-				tokenOwner: seller.publicKey
-			});
+			const results = await Promise.all([
+				carbon.methods.initMarketplaceConfig(marketplaceAuthority, {
+					feeConfig: defaultFeeConfig
+				}),
+				carbon.methods.initCollectionConfig(marketplaceAuthority, {
+					collectionMint,
+					sellerFeeBasisPoints: defaultSellerFeeBps,
+					symbol: defaultSymbol
+				}),
+				createNFT(provider, marketplaceAuthority, collectionMint, {
+					tokenOwner: seller.publicKey
+				})
+			])
+
+			const nft = results[2]
 			id = nft.mint
 			metadataAccount = nft.metadataAccount
 			edition = nft.edition
@@ -103,18 +137,17 @@ describe("carbon", () => {
 		describe("list_nft", function () {
 
 			it("should list the nft correctly", async function () {
-				await carbon.methods.listNft(seller, id, price, expiry)
+				await carbon.methods.listNft(seller, id, collectionMint, price, expiry)
 
 				const listing = await program.account.listing.fetch(listingPDA);
 				assert.equal(listing.version, 1);
-				assert.equal(listing.authority.toString(), seller.publicKey.toString());
+				assert.equal(listing.seller.toString(), seller.publicKey.toString());
 				assert.equal(listing.id.toString(), id.toString());
 				assert.equal(listing.isVirtual, false);
 				assert.equal(listing.currencyMint.toString(), currencyMint.toString());
 				assert.equal(listing.price.toNumber(), price);
 				assert.equal(listing.expiry.toNumber(), expiry);
-				assert.equal(listing.feeConfig.feeAccount.toString(), FEE_ACCOUNT_ADDRESS)
-				assert.equal(listing.feeConfig.bps, 0)
+				assert.deepEqual(listing.feeConfig, defaultFeeConfig)
 
 				const sellerTokenAccountObj = await getAccount(provider.connection, sellerTokenAccount);
 				assert.equal(sellerTokenAccountObj.delegate.toString(), listingPDA.toString());
@@ -129,6 +162,17 @@ describe("carbon", () => {
 
 		beforeEach(setUpData)
 		async function setUpData() {
+			await Promise.all([
+				carbon.methods.initMarketplaceConfig(marketplaceAuthority, {
+					feeConfig: defaultFeeConfig
+				}),
+				carbon.methods.initCollectionConfig(marketplaceAuthority, {
+					collectionMint,
+					sellerFeeBasisPoints: defaultSellerFeeBps,
+					symbol: defaultSymbol
+				})
+			])
+
 			id = Keypair.generate().publicKey
 			listingPDA = carbon.pdas.listing(id)
 		}
@@ -136,18 +180,18 @@ describe("carbon", () => {
 		describe("list_virtual", function () {
 
 			it("should list the virtual item correctly", async function () {
-				await carbon.methods.listVirtual(seller, id, price, expiry)
+				await carbon.methods.listVirtual(marketplaceAuthority, id, collectionMint, price, expiry)
 
 				const listing = await program.account.listing.fetch(listingPDA);
 				assert.equal(listing.version, 1);
-				assert.equal(listing.authority.toString(), seller.publicKey.toString());
+				assert.equal(listing.seller.toString(), marketplaceAuthority.publicKey.toString());
 				assert.equal(listing.id.toString(), id.toString());
 				assert.equal(listing.isVirtual, true);
 				assert.equal(listing.currencyMint.toString(), currencyMint.toString());
 				assert.equal(listing.price.toNumber(), price);
 				assert.equal(listing.expiry.toNumber(), expiry);
-				assert.equal(listing.feeConfig.feeAccount.toString(), FEE_ACCOUNT_ADDRESS)
-				assert.equal(listing.feeConfig.bps, 0)
+				assert.equal(listing.feeConfig.feeAccount.toString(), FEE_ACCOUNT_KEY.toString())
+				assert.equal(listing.feeConfig.bps, defaultFeeConfig.bps)
 			});
 
 		});
@@ -155,13 +199,7 @@ describe("carbon", () => {
 		describe("buy_virtual", function () {
 
 			it("should buy the virtual item correctly", async function () {
-				await carbon.methods.initCollectionConfig(marketplaceAuthority, {
-					collectionMint,
-					sellerFeeBasisPoints: defaultSellerFeeBps,
-					symbol: defaultSymbol
-				})
-
-				await carbon.methods.listVirtual(marketplaceAuthority, id, price, expiry)
+				await carbon.methods.listVirtual(marketplaceAuthority, id, collectionMint, price, expiry)
 				const listing = await program.account.listing.fetch(listingPDA);
 				const collectionConfig = await program.account.collectionConfig.fetch(collectionConfigPDA);
 
@@ -177,7 +215,6 @@ describe("carbon", () => {
 
 				// An NFT should now exist with the correct metadata
 				const nft = await fetchNFT(provider, marketplaceAuthority, mint)
-				console.log(nft)
 				assert.equal(nft.updateAuthorityAddress.toString(), marketplaceAuthority.publicKey.toString())
 				assert.equal(nft.name, "Ghost #1")
 				assert.equal(nft.uri, "https://example.com")

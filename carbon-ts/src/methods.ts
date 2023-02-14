@@ -10,6 +10,17 @@ export class Methods {
 		public carbon: Carbon,
 	) {}
 
+	async initMarketplaceConfig(
+		marketplaceAuthority: Keypair,
+		args: IdlTypes<CarbonIDL.Carbon>["MarketplaceConfigArgs"]
+	) {
+		await this.carbon.program.methods.initMarketplaceConfig(args)
+			.accounts({
+				marketplaceAuthority: marketplaceAuthority.publicKey,
+				marketplaceConfig: this.carbon.pdas.marketplaceConfig(marketplaceAuthority.publicKey),
+			}).signers([marketplaceAuthority]).rpc();
+	}
+
 	async initCollectionConfig(
 		marketplaceAuthority: Keypair,
 		args: IdlTypes<CarbonIDL.Carbon>["CollectionConfigArgs"]
@@ -22,8 +33,9 @@ export class Methods {
 	}
 
 	async listNft(
-		authority: Keypair,
+		seller: Keypair,
 		mint: PublicKey,
+		collectionMint: PublicKey,
 		price: number,
 		expiry: number,
 		currencyMint: PublicKey = NATIVE_MINT,
@@ -34,21 +46,26 @@ export class Methods {
 				new BN(expiry),
 			)
 			.accounts({
-				authority: authority.publicKey,
-				tokenAccount: getAssociatedTokenAddressSync(mint, authority.publicKey),
+				seller: seller.publicKey,
+				tokenAccount: getAssociatedTokenAddressSync(mint, seller.publicKey),
 				mint,
+				collectionMint,
+				metadataAccount: getMetadataPDA(mint),
 				edition: getEditionPDA(mint),
 				currencyMint,
 				listing: this.carbon.pdas.listing(mint),
+				collectionConfig: this.carbon.pdas.collectionConfig(collectionMint),
+				marketplaceConfig: this.carbon.pdas.marketplaceConfig(this.carbon.marketplaceAuthority),
 				tokenMetadataProgram: TOKEN_METADATA_PROGRAM_ID,
 			})
-			.signers([authority])
+			.signers([seller])
 			.rpc();
 	}
 
 	async listVirtual(
-		authority: Keypair,
+		marketplaceAuthority: Keypair,
 		id: PublicKey,
+		collectionMint: PublicKey,
 		price: number,
 		expiry: number,
 		currencyMint: PublicKey = NATIVE_MINT,
@@ -60,11 +77,13 @@ export class Methods {
 				new BN(expiry),
 			)
 			.accounts({
-				authority: authority.publicKey,
+				marketplaceAuthority: marketplaceAuthority.publicKey,
 				currencyMint,
 				listing: this.carbon.pdas.listing(id),
+				collectionConfig: this.carbon.pdas.collectionConfig(collectionMint),
+				marketplaceConfig: this.carbon.pdas.marketplaceConfig(this.carbon.marketplaceAuthority),
 			})
-			.signers([authority])
+			.signers([marketplaceAuthority])
 			.rpc();
 	}
 

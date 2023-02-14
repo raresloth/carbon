@@ -47,12 +47,14 @@ export async function createCollectionNFT(
 	return {mint, metadataAccount, edition}
 }
 
-export async function createNFT(provider: Provider, payer: Keypair, mintArgs?: any) {
+export async function createNFT(provider: Provider, payer: Keypair, collectionMint: PublicKey, mintArgs?: any) {
 	const metaplex = new Metaplex(provider.connection).use(keypairIdentity(payer))
 	const result = await metaplex.nfts().create({
 		name: 'NFT Item',
 		uri: 'https://arweave.net/Rb9SwSImzCInyGbaxbT1bpnjJGiTszkCTLWZiomnerw',
 		sellerFeeBasisPoints: 500,
+		collection: collectionMint,
+		collectionAuthority: payer,
 		...(mintArgs || {}),
 	})
 	const mint = result.mintAddress

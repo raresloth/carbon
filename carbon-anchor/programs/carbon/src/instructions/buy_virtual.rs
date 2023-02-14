@@ -31,18 +31,6 @@ pub struct BuyVirtual<'info> {
 	#[account(mut)]
 	pub mint: Signer<'info>,
 
-	#[account(
-		mut,
-		seeds = [
-			CollectionConfig::PREFIX.as_bytes(),
-			collection_mint.key().as_ref()
-		],
-		bump = collection_config.bump[0],
-		has_one = marketplace_authority,
-		has_one = collection_mint,
-	)]
-	pub collection_config: Box<Account<'info, CollectionConfig>>,
-
 	/// Buyer NFT token account.
 	/// CHECK: Created for mint CPI
 	#[account(mut)]
@@ -82,11 +70,23 @@ pub struct BuyVirtual<'info> {
 		],
 		bump = listing.bump[0],
 		has_one = id,
+		has_one = collection_config,
 		constraint = listing.is_virtual @ Error::NotVirtual,
-		constraint = listing.authority == marketplace_authority.key() @ Error::InvalidListingAuthority,
+		constraint = listing.seller == marketplace_authority.key() @ Error::InvalidListingAuthority,
 		constraint = listing.fee_config.fee_account == fee_account.key() @ Error::InvalidFeeAccount,
 	)]
 	pub listing: Box<Account<'info, Listing>>,
+
+	#[account(
+		seeds = [
+			CollectionConfig::PREFIX.as_bytes(),
+			collection_mint.key().as_ref()
+		],
+		bump = collection_config.bump[0],
+		has_one = marketplace_authority,
+		has_one = collection_mint,
+	)]
+	pub collection_config: Box<Account<'info, CollectionConfig>>,
 
 	/// Account to send fees to.
 	/// CHECK: Safe because of listing constraint

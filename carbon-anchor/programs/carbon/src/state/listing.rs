@@ -1,21 +1,20 @@
 use anchor_lang::prelude::*;
-use crate::{
-	state::fee_config::{FeeConfig},
-	error::Error
-};
+use crate::{state::fee_config::{FeeConfig}, error::Error};
 
 #[account]
 pub struct Listing {
 	pub bump: [u8; 1],
 	pub version: u8,
 	/// Pubkey of the seller's wallet
-	pub authority: Pubkey,
+	pub seller: Pubkey,
 	/// Set to mint of NFT if listing is for NFT, otherwise a unique ID for the virtual item
 	pub id: Pubkey,
 	/// True if the listing is for a virtual item, false if it is for an NFT
 	pub is_virtual: bool,
 	/// Currency to accept for payment
 	pub currency_mint: Pubkey,
+	/// Collection config for the item
+	pub collection_config: Pubkey,
 	/// Price of the item
 	pub price: u64,
 	/// Unix timestamp of when the listing expires
@@ -45,10 +44,12 @@ impl Listing {
 	pub fn init(
 		&mut self,
 		bump: [u8; 1],
-		authority: Pubkey,
+		seller: Pubkey,
 		id: Pubkey,
 		is_virtual: bool,
 		currency_mint: Pubkey,
+		collection_config: Pubkey,
+		fee_config: FeeConfig,
 		price: u64,
 		expiry: i64
 	) -> Result<()> {
@@ -58,13 +59,14 @@ impl Listing {
 
 		self.bump = bump;
 		self.version = Listing::VERSION;
-		self.authority = authority;
+		self.seller = seller;
 		self.id = id;
 		self.is_virtual = is_virtual;
 		self.currency_mint = currency_mint;
+		self.collection_config = collection_config;
 		self.price = price;
 		self.expiry = expiry;
-		self.fee_config = FeeConfig::default();
+		self.fee_config = fee_config;
 
 		return Ok(());
 	}
