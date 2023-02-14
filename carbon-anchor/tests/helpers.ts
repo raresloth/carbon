@@ -1,6 +1,7 @@
 import { Provider } from "@coral-xyz/anchor";
 import {keypairIdentity, Metaplex } from "@metaplex-foundation/js";
 import {Keypair, Transaction, SystemProgram, PublicKey} from "@solana/web3.js";
+import {createMint, getOrCreateAssociatedTokenAccount, mintTo} from "@solana/spl-token";
 
 export async function setBalance(provider: Provider, keypair: Keypair, amount: number) {
 	const balance = await provider.connection.getBalance(keypair.publicKey);
@@ -71,4 +72,26 @@ export async function fetchNFT(provider: Provider, payer: Keypair, mint: PublicK
 	return await metaplex.nfts().findByMint({
 		mintAddress: mint
 	})
+}
+
+export async function createSplToken(provider: Provider, payer: Keypair, mintToWallet: PublicKey, amount: number) {
+	const mint = await createMint(provider.connection, payer, payer.publicKey, payer.publicKey, 0)
+
+	const toWalletCurrencyAccount = await getOrCreateAssociatedTokenAccount(
+		provider.connection,
+		payer,
+		mint,
+		mintToWallet
+	)
+
+	await mintTo(
+		provider.connection,
+		payer,
+		mint,
+		toWalletCurrencyAccount.address,
+		payer.publicKey,
+		amount
+	)
+
+	return { mint }
 }

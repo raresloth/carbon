@@ -1,4 +1,4 @@
-import {Keypair, PublicKey} from "@solana/web3.js";
+import {ComputeBudgetProgram, Keypair, PublicKey, SystemProgram} from "@solana/web3.js";
 import Carbon from "./carbon";
 import {ASSOCIATED_TOKEN_PROGRAM_ID, getAssociatedTokenAddressSync, NATIVE_MINT} from "@solana/spl-token";
 import {BN, IdlAccounts, IdlTypes} from "@coral-xyz/anchor";
@@ -96,14 +96,7 @@ export class Methods {
 	): Promise<PublicKey> {
 		const mint = Keypair.generate();
 
-		// TODO: Prepend with currency mint account and buyer currency account if SPL
-		const remainingAccounts = [{
-			pubkey: marketplaceAuthority.publicKey,
-			isWritable: true,
-			isSigner: false,
-		}]
-
-		await this.carbon.program.methods
+		const builder = this.carbon.program.methods
 			.buyVirtual(
 				listing.id,
 				listing.price,
@@ -125,9 +118,42 @@ export class Methods {
 				tokenMetadataProgram: TOKEN_METADATA_PROGRAM_ID,
 				associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
 			})
-			.remainingAccounts(remainingAccounts)
-			.signers([buyer, marketplaceAuthority, mint])
-			.rpc();
+
+		if (listing.currencyMint.equals(NATIVE_MINT)) {
+			builder.remainingAccounts([{
+				pubkey: marketplaceAuthority.publicKey,
+				isWritable: true,
+				isSigner: false,
+			}])
+		} else {
+			builder.remainingAccounts([{
+				pubkey: listing.currencyMint,
+				isWritable: false,
+				isSigner: false,
+			}, {
+				pubkey: getAssociatedTokenAddressSync(listing.currencyMint, buyer.publicKey),
+				isWritable: true,
+				isSigner: false,
+			}, {
+				pubkey: marketplaceAuthority.publicKey,
+				isWritable: false,
+				isSigner: false,
+			}, {
+				pubkey: getAssociatedTokenAddressSync(listing.currencyMint, marketplaceAuthority.publicKey),
+				isWritable: true,
+				isSigner: false,
+			}, {
+				pubkey: getAssociatedTokenAddressSync(listing.currencyMint, listing.feeConfig.feeAccount),
+				isWritable: true,
+				isSigner: false,
+			}]).preInstructions([
+				ComputeBudgetProgram.setComputeUnitLimit({
+					units: 400_000
+				})
+			])
+		}
+
+		await builder.signers([buyer, marketplaceAuthority, mint]).rpc();
 
 		return mint.publicKey;
 	}

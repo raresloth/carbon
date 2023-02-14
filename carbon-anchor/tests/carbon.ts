@@ -2,7 +2,7 @@ import * as anchor from "@coral-xyz/anchor";
 import {IdlAccounts, Program} from "@coral-xyz/anchor";
 import { Keypair, PublicKey, LAMPORTS_PER_SOL } from "@solana/web3.js";
 import * as CarbonIDL from "../target/types/carbon";
-import {createCollectionNFT, createNFT, fetchNFT, setBalance} from "./helpers";
+import {createCollectionNFT, createNFT, createSplToken, fetchNFT, setBalance} from "./helpers";
 import moment from "moment";
 import { Carbon } from "@raresloth/carbon-ts"
 import {FEE_ACCOUNT_KEY} from "@raresloth/carbon-ts";
@@ -249,6 +249,41 @@ describe("carbon", () => {
 					price - marketplaceFee - mintingFee)
 
 				assert.equal(feeAccountPostBalance - feeAccountPreBalance, marketplaceFee)
+			});
+
+			it("should buy the virtual item with SPL correctly", async function () {
+				price = 1000
+				const { mint: splTokenMint } =
+					await createSplToken(provider, marketplaceAuthority, buyer.publicKey, price)
+
+				await carbon.methods.listVirtual(marketplaceAuthority, id, collectionMint, price, expiry, splTokenMint)
+				const listing = await program.account.listing.fetch(listingPDA);
+				const collectionConfig = await program.account.collectionConfig.fetch(collectionConfigPDA);
+
+				await carbon.methods.buyVirtual(
+					buyer,
+					marketplaceAuthority,
+					collectionConfig as IdlAccounts<CarbonIDL.Carbon>["collectionConfig"],
+					listing as IdlAccounts<CarbonIDL.Carbon>["listing"],
+					{
+						name: "Ghost #1",
+						uri: "https://example.com",
+					})
+
+				const marketplaceAuthTokenAddress = await getAssociatedTokenAddressSync(splTokenMint, marketplaceAuthority.publicKey)
+				const marketplaceAuthPostBalance = await provider.connection.getTokenAccountBalance(marketplaceAuthTokenAddress)
+				const buyerTokenAddress = await getAssociatedTokenAddressSync(splTokenMint, buyer.publicKey)
+				const buyerPostBalance = await provider.connection.getTokenAccountBalance(buyerTokenAddress)
+				const feeAccountTokenAddress = await getAssociatedTokenAddressSync(splTokenMint, FEE_ACCOUNT_KEY)
+				const feeAccountPostBalance = await provider.connection.getTokenAccountBalance(feeAccountTokenAddress)
+
+				// Make sure correct amounts were sent to seller and fee account
+				assert.equal(buyerPostBalance.value.uiAmount, 0)
+
+				const marketplaceFee = (price * defaultFeeConfig.bps / 10000)
+				assert.isAtLeast(marketplaceAuthPostBalance.value.uiAmount, price - marketplaceFee)
+
+				assert.equal(feeAccountPostBalance.value.uiAmount, marketplaceFee)
 			});
 
 		});
