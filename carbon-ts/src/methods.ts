@@ -62,6 +62,24 @@ export class Methods {
 			.rpc();
 	}
 
+	async delistNft(
+		seller: Keypair,
+		mint: PublicKey,
+	) {
+		await this.carbon.program.methods
+			.delistNft()
+			.accounts({
+				seller: seller.publicKey,
+				tokenAccount: getAssociatedTokenAddressSync(mint, seller.publicKey),
+				mint,
+				edition: getEditionPDA(mint),
+				listing: this.carbon.pdas.listing(mint),
+				tokenMetadataProgram: TOKEN_METADATA_PROGRAM_ID,
+			})
+			.signers([seller])
+			.rpc();
+	}
+
 	async buyNft(
 		buyer: Keypair,
 		listing: IdlAccounts<CarbonIDL.Carbon>["listing"],
@@ -117,7 +135,7 @@ export class Methods {
 				isSigner: false,
 			}]).preInstructions([
 				ComputeBudgetProgram.setComputeUnitLimit({
-					units: 400_000
+					units: 300_000
 				})
 			])
 		}

@@ -2,7 +2,7 @@ import * as anchor from "@coral-xyz/anchor";
 import {IdlAccounts, Program} from "@coral-xyz/anchor";
 import { Keypair, PublicKey, LAMPORTS_PER_SOL } from "@solana/web3.js";
 import * as CarbonIDL from "../target/types/carbon";
-import {createCollectionNFT, createNFT, createSplToken, fetchNFT, setBalance} from "./helpers";
+import {assertThrows, createCollectionNFT, createNFT, createSplToken, fetchNFT, setBalance} from "./helpers";
 import moment from "moment";
 import { Carbon } from "@raresloth/carbon-ts"
 import {FEE_ACCOUNT_KEY} from "@raresloth/carbon-ts";
@@ -152,6 +152,22 @@ describe("carbon", () => {
 				const sellerTokenAccountObj = await getAccount(provider.connection, sellerTokenAccount);
 				assert.equal(sellerTokenAccountObj.delegate.toString(), listingPDA.toString());
 				assert.isTrue(sellerTokenAccountObj.isFrozen);
+			});
+
+		});
+
+		describe("delist_nft", function () {
+
+			it("should delist the nft correctly", async function () {
+				await carbon.methods.listNft(seller, id, collectionMint, price, expiry)
+				await carbon.methods.delistNft(seller, id)
+
+				// Listing should no longer exist
+				await assertThrows(async () => await program.account.listing.fetch(listingPDA));
+
+				const sellerTokenAccountObj = await getAccount(provider.connection, sellerTokenAccount);
+				assert.isNull(sellerTokenAccountObj.delegate);
+				assert.isFalse(sellerTokenAccountObj.isFrozen);
 			});
 
 		});

@@ -2,6 +2,7 @@ import { Provider } from "@coral-xyz/anchor";
 import {keypairIdentity, Metaplex } from "@metaplex-foundation/js";
 import {Keypair, Transaction, SystemProgram, PublicKey} from "@solana/web3.js";
 import {createMint, getOrCreateAssociatedTokenAccount, mintTo} from "@solana/spl-token";
+import {assert} from "chai";
 
 export async function setBalance(provider: Provider, keypair: Keypair, amount: number) {
 	const balance = await provider.connection.getBalance(keypair.publicKey);
@@ -94,4 +95,21 @@ export async function createSplToken(provider: Provider, payer: Keypair, mintToW
 	)
 
 	return { mint }
+}
+
+export async function assertThrows(fn: () => Promise<any | void>, code?: number, message?: string) {
+	let throws = false
+	try {
+		await fn()
+	} catch (e) {
+		console.log(`[${e.code ?? ''}] ${e.message}`)
+		throws = true
+		if (code) {
+			throws = e.code === code
+		}
+		if (message) {
+			throws = e.message.includes(message)
+		}
+	}
+	assert.isTrue(throws, 'Expected error to be thrown')
 }

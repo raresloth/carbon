@@ -241,6 +241,64 @@ export type Carbon = {
       ]
     },
     {
+      "name": "delistNft",
+      "accounts": [
+        {
+          "name": "seller",
+          "isMut": true,
+          "isSigner": true,
+          "docs": [
+            "Seller wallet."
+          ]
+        },
+        {
+          "name": "tokenAccount",
+          "isMut": true,
+          "isSigner": false,
+          "docs": [
+            "Seller's token account of the mint to delist."
+          ]
+        },
+        {
+          "name": "mint",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "Mint of the NFT to sell."
+          ]
+        },
+        {
+          "name": "edition",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "Edition of the NFT to sell."
+          ]
+        },
+        {
+          "name": "listing",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "tokenMetadataProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "tokenProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": []
+    },
+    {
       "name": "buyNft",
       "accounts": [
         {
@@ -1012,6 +1070,64 @@ export const IDL: Carbon = {
           "type": "i64"
         }
       ]
+    },
+    {
+      "name": "delistNft",
+      "accounts": [
+        {
+          "name": "seller",
+          "isMut": true,
+          "isSigner": true,
+          "docs": [
+            "Seller wallet."
+          ]
+        },
+        {
+          "name": "tokenAccount",
+          "isMut": true,
+          "isSigner": false,
+          "docs": [
+            "Seller's token account of the mint to delist."
+          ]
+        },
+        {
+          "name": "mint",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "Mint of the NFT to sell."
+          ]
+        },
+        {
+          "name": "edition",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "Edition of the NFT to sell."
+          ]
+        },
+        {
+          "name": "listing",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "tokenMetadataProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "tokenProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": []
     },
     {
       "name": "buyNft",
