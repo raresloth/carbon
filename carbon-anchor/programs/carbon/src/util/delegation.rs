@@ -53,6 +53,35 @@ pub fn thaw_and_revoke<'a>(
 	token_metadata_program: &AccountInfo<'a>,
 	signer_seeds: Option<&[&[u8]]>,
 ) -> Result<()> {
+	thaw(
+		token_account,
+		mint,
+		edition,
+		delegate,
+		token_program,
+		token_metadata_program,
+		signer_seeds,
+	)?;
+
+	token::revoke(
+		CpiContext::new(token_program.clone(), Revoke {
+			source: token_account.clone(),
+			authority: token_owner.clone(),
+		}),
+	)?;
+
+	return Ok(())
+}
+
+pub fn thaw<'a>(
+	token_account: &AccountInfo<'a>,
+	mint: &AccountInfo<'a>,
+	edition: &AccountInfo<'a>,
+	delegate: &AccountInfo<'a>,
+	token_program: &AccountInfo<'a>,
+	token_metadata_program: &AccountInfo<'a>,
+	signer_seeds: Option<&[&[u8]]>,
+) -> Result<()> {
 	let auth_seeds = signer_seeds.unwrap_or(&[]);
 
 	let thaw_ix = mpl_token_metadata::instruction::thaw_delegated_account(
@@ -72,10 +101,5 @@ pub fn thaw_and_revoke<'a>(
 		mint.clone(),
 	], &[&auth_seeds])?;
 
-	return Ok(token::revoke(
-		CpiContext::new(token_program.clone(), Revoke {
-			source: token_account.clone(),
-			authority: token_owner.clone(),
-		}),
-	)?)
+	return Ok(())
 }

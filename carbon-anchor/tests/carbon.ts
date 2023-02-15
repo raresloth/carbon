@@ -156,6 +156,76 @@ describe("carbon", () => {
 
 		});
 
+		describe("buy_nft", function () {
+
+			it("should buy the nft correctly", async function () {
+				const sellerPreBalance = await provider.connection.getBalance(seller.publicKey)
+				await carbon.methods.listNft(seller, id, collectionMint, price, expiry)
+				const listing = await program.account.listing.fetch(listingPDA);
+
+				const buyerPreBalance = await provider.connection.getBalance(buyer.publicKey)
+				const marketplacePreBalance = await provider.connection.getBalance(marketplaceAuthority.publicKey)
+				const feeAccountPreBalance = await provider.connection.getBalance(FEE_ACCOUNT_KEY)
+				await carbon.methods.buyNft(
+					buyer,
+					listing as IdlAccounts<CarbonIDL.Carbon>["listing"]
+				)
+				const sellerPostBalance = await provider.connection.getBalance(seller.publicKey)
+				const buyerPostBalance = await provider.connection.getBalance(buyer.publicKey)
+				const marketplacePostBalance = await provider.connection.getBalance(marketplaceAuthority.publicKey)
+				const feeAccountPostBalance = await provider.connection.getBalance(FEE_ACCOUNT_KEY)
+
+				// Make sure buyer is the owner and can transfer the NFT
+				const buyerTokenAccount = getAssociatedTokenAddressSync(id, buyer.publicKey)
+				await transferChecked(provider.connection, buyer, buyerTokenAccount, id, sellerTokenAccount, buyer, 1, 0)
+
+				// Make sure correct amounts were sent to seller and fee account
+				// Rent fee for creating NFT account is a bit over 0.002 SOL
+				const ataRent = 0.002 * LAMPORTS_PER_SOL
+				assert.isAtLeast(buyerPreBalance - buyerPostBalance, price + ataRent)
+
+				const marketplaceFee = (price * defaultFeeConfig.bps / 10000)
+				const royalty = (price * defaultSellerFeeBps / 10000)
+				assert.equal(sellerPostBalance - sellerPreBalance,
+					price - marketplaceFee - royalty)
+				assert.equal(marketplacePostBalance - marketplacePreBalance, royalty)
+				assert.equal(feeAccountPostBalance - feeAccountPreBalance, marketplaceFee)
+			});
+
+			it("should buy the nft with SPL correctly", async function () {
+				price = 1000
+				const { mint: splTokenMint } =
+					await createSplToken(provider, marketplaceAuthority, buyer.publicKey, price)
+
+				await carbon.methods.listNft(seller, id, collectionMint, price, expiry, splTokenMint)
+				const listing = await program.account.listing.fetch(listingPDA);
+
+				await carbon.methods.buyNft(
+					buyer,
+					listing as IdlAccounts<CarbonIDL.Carbon>["listing"]
+				)
+
+				const sellerCurrencyTokenAddress = await getAssociatedTokenAddressSync(splTokenMint, seller.publicKey)
+				const sellerPostBalance = await provider.connection.getTokenAccountBalance(sellerCurrencyTokenAddress)
+				const buyerTokenAddress = await getAssociatedTokenAddressSync(splTokenMint, buyer.publicKey)
+				const buyerPostBalance = await provider.connection.getTokenAccountBalance(buyerTokenAddress)
+				const marketplaceAuthTokenAddress = await getAssociatedTokenAddressSync(splTokenMint, marketplaceAuthority.publicKey)
+				const marketplaceAuthPostBalance = await provider.connection.getTokenAccountBalance(marketplaceAuthTokenAddress)
+				const feeAccountTokenAddress = await getAssociatedTokenAddressSync(splTokenMint, FEE_ACCOUNT_KEY)
+				const feeAccountPostBalance = await provider.connection.getTokenAccountBalance(feeAccountTokenAddress)
+
+				// Make sure correct amounts were sent to seller and fee account
+				assert.equal(buyerPostBalance.value.uiAmount, 0)
+
+				const marketplaceFee = (price * defaultFeeConfig.bps / 10000)
+				const royalty = (price * defaultSellerFeeBps / 10000)
+				assert.equal(sellerPostBalance.value.uiAmount, price - marketplaceFee - royalty)
+				assert.equal(marketplaceAuthPostBalance.value.uiAmount, royalty)
+				assert.equal(feeAccountPostBalance.value.uiAmount, marketplaceFee)
+			});
+
+		});
+
 	});
 
 	describe("virtual flows", function () {

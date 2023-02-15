@@ -62,6 +62,69 @@ export class Methods {
 			.rpc();
 	}
 
+	async buyNft(
+		buyer: Keypair,
+		listing: IdlAccounts<CarbonIDL.Carbon>["listing"],
+	): Promise<void> {
+		const builder = this.carbon.program.methods
+			.buyNft(
+				listing.price,
+			)
+			.accounts({
+				buyer: buyer.publicKey,
+				seller: listing.seller,
+				mint: listing.id,
+				sellerTokenAccount: getAssociatedTokenAddressSync(listing.id, listing.seller),
+				buyerTokenAccount: getAssociatedTokenAddressSync(listing.id, buyer.publicKey),
+				metadataAccount: getMetadataPDA(listing.id),
+				edition: getEditionPDA(listing.id),
+				listing: this.carbon.pdas.listing(listing.id),
+				feeAccount: listing.feeConfig.feeAccount,
+				tokenMetadataProgram: TOKEN_METADATA_PROGRAM_ID,
+				associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
+			})
+
+		if (listing.currencyMint.equals(NATIVE_MINT)) {
+			builder.remainingAccounts([{
+				pubkey: this.carbon.marketplaceAuthority,
+				isWritable: true,
+				isSigner: false,
+			}])
+		} else {
+			builder.remainingAccounts([{
+				pubkey: listing.currencyMint,
+				isWritable: false,
+				isSigner: false,
+			}, {
+				pubkey: getAssociatedTokenAddressSync(listing.currencyMint, buyer.publicKey),
+				isWritable: true,
+				isSigner: false,
+			}, {
+				pubkey: this.carbon.marketplaceAuthority,
+				isWritable: false,
+				isSigner: false,
+			}, {
+				pubkey: getAssociatedTokenAddressSync(listing.currencyMint, this.carbon.marketplaceAuthority),
+				isWritable: true,
+				isSigner: false,
+			}, {
+				pubkey: getAssociatedTokenAddressSync(listing.currencyMint, listing.feeConfig.feeAccount),
+				isWritable: true,
+				isSigner: false,
+			}, {
+				pubkey: getAssociatedTokenAddressSync(listing.currencyMint, listing.seller),
+				isWritable: true,
+				isSigner: false,
+			}]).preInstructions([
+				ComputeBudgetProgram.setComputeUnitLimit({
+					units: 400_000
+				})
+			])
+		}
+
+		await builder.signers([buyer]).rpc();
+	}
+
 	async listVirtual(
 		marketplaceAuthority: Keypair,
 		id: PublicKey,

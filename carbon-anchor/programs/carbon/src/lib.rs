@@ -30,6 +30,13 @@ pub mod carbon {
         instructions::list_virtual_handler(ctx, id, price, expiry)
     }
 
+    pub fn buy_nft<'info>(
+        ctx: Context<'_, '_, '_, 'info, BuyNft<'info>>,
+        price: u64,
+    ) -> Result<()> {
+        instructions::buy_nft_handler(ctx, price)
+    }
+
     pub fn buy_virtual<'info>(
         ctx: Context<'_, '_, '_, 'info, BuyVirtual<'info>>,
         id: Pubkey,

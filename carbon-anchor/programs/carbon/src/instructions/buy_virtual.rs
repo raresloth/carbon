@@ -12,7 +12,7 @@ use anchor_spl::{
 };
 use crate::{CollectionConfig, Metadata, state::{Listing}};
 use crate::error::Error;
-use crate::util::{is_native_mint, mint_nft, pay_creator_fees, transfer_sol, transfer_spl};
+use crate::util::{mint_nft, transfer_payment};
 
 #[derive(Accounts)]
 #[instruction(id: Pubkey)]
@@ -161,93 +161,21 @@ pub fn buy_virtual_handler<'info>(
 		)
 	)?;
 
-	// Transfer fees to the fee account.
-	let marketplace_fees = ctx.accounts.listing.get_fee_amount()?;
-	// First 2 remaining accounts are for the currency mint and from_currency_account
-	let remaining_accounts = &mut ctx.remaining_accounts.iter().clone();
-
-	let creator_fees = pay_creator_fees(
+	transfer_payment(
 		&ctx.accounts.buyer.to_account_info(),
-		ctx.accounts.listing.currency_mint,
-		Some(&ctx.accounts.buyer.to_account_info()),
+		&ctx.accounts.marketplace_authority.to_account_info(),
+		&ctx.accounts.fee_account.to_account_info(),
+		&ctx.accounts.mint.to_account_info(),
 		&ctx.accounts.metadata_account.to_account_info(),
-		remaining_accounts,
+		ctx.accounts.listing.currency_mint,
 		&ctx.accounts.associated_token_program.to_account_info(),
 		&ctx.accounts.token_program.to_account_info(),
 		&ctx.accounts.system_program.to_account_info(),
 		&ctx.accounts.rent.to_account_info(),
-		None,
-		None,
-		ctx.accounts.listing.price
+		&ctx.remaining_accounts,
+		ctx.accounts.listing.price,
+		ctx.accounts.listing.get_fee_amount()?
 	)?;
-
-	let seller_amount = ctx.accounts.listing.price
-		.checked_sub(marketplace_fees)
-		.ok_or(Error::OverflowError)?
-		.checked_sub(creator_fees)
-		.ok_or(Error::OverflowError)?;
-
-	if is_native_mint(ctx.accounts.listing.currency_mint) {
-		transfer_sol(
-			&ctx.accounts.buyer.to_account_info(),
-			&ctx.accounts.fee_account.to_account_info(),
-			&ctx.accounts.system_program.to_account_info(),
-			None,
-			marketplace_fees
-		)?;
-
-		transfer_sol(
-			&ctx.accounts.buyer.to_account_info(),
-			&ctx.accounts.marketplace_authority.to_account_info(),
-			&ctx.accounts.system_program.to_account_info(),
-			None,
-			seller_amount
-		)?;
-	} else {
-		let remaining_accounts = &mut ctx.remaining_accounts.iter().clone();
-		let currency_mint = next_account_info(remaining_accounts)?;
-		msg!("currency_mint {}", currency_mint.key());
-		let buyer_currency_account = next_account_info(remaining_accounts)?;
-		msg!("buyer_currency_account {}", buyer_currency_account.key());
-		let next = next_account_info(remaining_accounts)?;
-		msg!("_ {}", next.key());
-		let marketplace_currency_account = next_account_info(remaining_accounts)?;
-		msg!("marketplace_currency_account {}", marketplace_currency_account.key());
-		let fee_currency_account = next_account_info(remaining_accounts)?;
-		msg!("fee_currency_account {}", fee_currency_account.key());
-
-		transfer_spl(
-			&ctx.accounts.buyer.to_account_info(),
-			&ctx.accounts.fee_account.to_account_info(),
-			buyer_currency_account,
-			fee_currency_account,
-			currency_mint,
-			&ctx.accounts.buyer.to_account_info(),
-			&ctx.accounts.associated_token_program.to_account_info(),
-			&ctx.accounts.token_program.to_account_info(),
-			&ctx.accounts.system_program.to_account_info(),
-			&ctx.accounts.rent.to_account_info(),
-			None,
-			None,
-			marketplace_fees
-		)?;
-
-		transfer_spl(
-			&ctx.accounts.buyer.to_account_info(),
-			&ctx.accounts.marketplace_authority.to_account_info(),
-			buyer_currency_account,
-			marketplace_currency_account,
-			currency_mint,
-			&ctx.accounts.buyer.to_account_info(),
-			&ctx.accounts.associated_token_program.to_account_info(),
-			&ctx.accounts.token_program.to_account_info(),
-			&ctx.accounts.system_program.to_account_info(),
-			&ctx.accounts.rent.to_account_info(),
-			None,
-			None,
-			seller_amount
-		)?;
-	}
 
 	Ok(())
 }

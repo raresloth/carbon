@@ -241,6 +241,111 @@ export type Carbon = {
       ]
     },
     {
+      "name": "buyNft",
+      "accounts": [
+        {
+          "name": "buyer",
+          "isMut": true,
+          "isSigner": true,
+          "docs": [
+            "Buyer wallet."
+          ]
+        },
+        {
+          "name": "seller",
+          "isMut": true,
+          "isSigner": false,
+          "docs": [
+            "Seller wallet."
+          ]
+        },
+        {
+          "name": "mint",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "The new mint to be used for the NFT."
+          ]
+        },
+        {
+          "name": "sellerTokenAccount",
+          "isMut": true,
+          "isSigner": false,
+          "docs": [
+            "Seller NFT token account."
+          ]
+        },
+        {
+          "name": "buyerTokenAccount",
+          "isMut": true,
+          "isSigner": false,
+          "docs": [
+            "Buyer NFT token account."
+          ]
+        },
+        {
+          "name": "metadataAccount",
+          "isMut": true,
+          "isSigner": false,
+          "docs": [
+            "Metadata account for the NFT."
+          ]
+        },
+        {
+          "name": "edition",
+          "isMut": true,
+          "isSigner": false,
+          "docs": [
+            "Edition account for the NFT."
+          ]
+        },
+        {
+          "name": "listing",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "feeAccount",
+          "isMut": true,
+          "isSigner": false,
+          "docs": [
+            "Account to send fees to."
+          ]
+        },
+        {
+          "name": "tokenMetadataProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "tokenProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "associatedTokenProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "rent",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "price",
+          "type": "u64"
+        }
+      ]
+    },
+    {
       "name": "buyVirtual",
       "accounts": [
         {
@@ -652,6 +757,16 @@ export type Carbon = {
       "code": 6007,
       "name": "InvalidFeeAccount",
       "msg": "Invalid fee account"
+    },
+    {
+      "code": 6008,
+      "name": "IsVirtual",
+      "msg": "Item is virtual"
+    },
+    {
+      "code": 6009,
+      "name": "InvalidMint",
+      "msg": "Invalid mint"
     }
   ]
 };
@@ -899,6 +1014,111 @@ export const IDL: Carbon = {
       ]
     },
     {
+      "name": "buyNft",
+      "accounts": [
+        {
+          "name": "buyer",
+          "isMut": true,
+          "isSigner": true,
+          "docs": [
+            "Buyer wallet."
+          ]
+        },
+        {
+          "name": "seller",
+          "isMut": true,
+          "isSigner": false,
+          "docs": [
+            "Seller wallet."
+          ]
+        },
+        {
+          "name": "mint",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "The new mint to be used for the NFT."
+          ]
+        },
+        {
+          "name": "sellerTokenAccount",
+          "isMut": true,
+          "isSigner": false,
+          "docs": [
+            "Seller NFT token account."
+          ]
+        },
+        {
+          "name": "buyerTokenAccount",
+          "isMut": true,
+          "isSigner": false,
+          "docs": [
+            "Buyer NFT token account."
+          ]
+        },
+        {
+          "name": "metadataAccount",
+          "isMut": true,
+          "isSigner": false,
+          "docs": [
+            "Metadata account for the NFT."
+          ]
+        },
+        {
+          "name": "edition",
+          "isMut": true,
+          "isSigner": false,
+          "docs": [
+            "Edition account for the NFT."
+          ]
+        },
+        {
+          "name": "listing",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "feeAccount",
+          "isMut": true,
+          "isSigner": false,
+          "docs": [
+            "Account to send fees to."
+          ]
+        },
+        {
+          "name": "tokenMetadataProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "tokenProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "associatedTokenProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "rent",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "price",
+          "type": "u64"
+        }
+      ]
+    },
+    {
       "name": "buyVirtual",
       "accounts": [
         {
@@ -1310,6 +1530,16 @@ export const IDL: Carbon = {
       "code": 6007,
       "name": "InvalidFeeAccount",
       "msg": "Invalid fee account"
+    },
+    {
+      "code": 6008,
+      "name": "IsVirtual",
+      "msg": "Item is virtual"
+    },
+    {
+      "code": 6009,
+      "name": "InvalidMint",
+      "msg": "Invalid mint"
     }
   ]
 };

@@ -21,4 +21,8 @@ pub enum Error {
 	OverflowError,
 	#[msg("Invalid fee account")]
 	InvalidFeeAccount,
+	#[msg("Item is virtual")]
+	IsVirtual,
+	#[msg("Invalid mint")]
+	InvalidMint,
 }

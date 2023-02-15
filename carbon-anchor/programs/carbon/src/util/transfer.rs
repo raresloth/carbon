@@ -6,7 +6,7 @@ use anchor_spl::token::{Transfer};
 use solana_program::{account_info::AccountInfo, system_instruction};
 use solana_program::program::{invoke, invoke_signed};
 use spl_associated_token_account::instruction::create_associated_token_account;
-use crate::util::{assert_is_ata, assert_is_mint, is_native_mint, error::Error, assert_keys_equal};
+use crate::util::{assert_is_ata, assert_is_mint, is_native_mint, error::Error, assert_keys_equal, assert_is_metadata_account};
 
 /// Transfers SOL or SPL tokens between two accounts. The native mint can be used for the
 /// currency mint to specifically transfer SOL.
@@ -156,14 +156,15 @@ pub fn transfer_sol<'a>(
 pub fn transfer_spl<'a>(
 	from: &AccountInfo<'a>,
 	to: &AccountInfo<'a>,
-	from_currency_account: &AccountInfo<'a>,
-	to_currency_account: &AccountInfo<'a>,
-	currency_mint: &AccountInfo<'a>,
+	from_token_account: &AccountInfo<'a>,
+	to_token_account: &AccountInfo<'a>,
+	mint: &AccountInfo<'a>,
 	fee_payer: &AccountInfo<'a>,
 	ata_program: &AccountInfo<'a>,
 	token_program: &AccountInfo<'a>,
 	system_program: &AccountInfo<'a>,
 	rent: &AccountInfo<'a>,
+	from_authority: Option<&AccountInfo<'a>>,
 	signer_seeds: Option<&[&[u8]]>,
 	fee_payer_seeds: Option<&[&[u8]]>,
 	amount: u64,
@@ -172,13 +173,13 @@ pub fn transfer_spl<'a>(
 		return Ok(());
 	}
 
-	assert_is_mint(currency_mint)?;
+	assert_is_mint(mint)?;
 
-	if to_currency_account.data_is_empty() {
+	if to_token_account.data_is_empty() {
 		make_ata(
-			to_currency_account.to_account_info(),
+			to_token_account.to_account_info(),
 			to.to_account_info(),
-			currency_mint.to_account_info(),
+			mint.to_account_info(),
 			fee_payer.to_account_info(),
 			ata_program.to_account_info(),
 			token_program.to_account_info(),
@@ -188,18 +189,18 @@ pub fn transfer_spl<'a>(
 		)?;
 	} else {
 		assert_is_ata(
-			to_currency_account,
+			to_token_account,
 			to.key,
-			&currency_mint.key(),
+			&mint.key(),
 		)?;
 	}
 
 	let transfer_cpi = CpiContext::new(
 		token_program.to_account_info(),
 		Transfer {
-			from: from_currency_account.to_account_info(),
-			to: to_currency_account.to_account_info(),
-			authority: from.to_account_info(),
+			from: from_token_account.to_account_info(),
+			to: to_token_account.to_account_info(),
+			authority: if from_authority.is_some() { from_authority.unwrap().to_account_info() } else { from.to_account_info() },
 		},
 	);
 
@@ -262,6 +263,7 @@ pub fn pay_creator_fees<'a>(
 	from: &AccountInfo<'a>,
 	currency_mint: Pubkey,
 	fee_payer: Option<&AccountInfo<'a>>,
+	mint: &AccountInfo<'a>,
 	metadata_account: &AccountInfo<'a>,
 	remaining_accounts: &mut Iter<AccountInfo<'a>>,
 	ata_program: &AccountInfo<'a>,
@@ -280,6 +282,8 @@ pub fn pay_creator_fees<'a>(
 	if metadata.data.creators.is_none() {
 		return Ok(0);
 	}
+
+	assert_is_metadata_account(metadata_account.key(), mint.key())?;
 
 	let creators = metadata.data.creators.as_ref().unwrap();
 	if creators.is_empty() {
@@ -316,7 +320,7 @@ pub fn pay_creator_fees<'a>(
 		}
 
 		let current_creator_info = next_account_info(remaining_accounts)?;
-		assert_keys_equal(creator.address, current_creator_info.key())?;
+		assert_keys_equal(creator.address, current_creator_info.key(), "Invalid creator key")?;
 
 		msg!("Disbursing royalty of {} to {}", creator_fee, creator.address);
 
@@ -341,6 +345,7 @@ pub fn pay_creator_fees<'a>(
 				token_program,
 				system_program,
 				rent,
+				None,
 				signer_seeds,
 				fee_payer_seeds,
 				creator_fee,
@@ -351,4 +356,112 @@ pub fn pay_creator_fees<'a>(
 	}
 
 	Ok(total_paid)
+}
+
+pub fn transfer_payment<'a, 'b>(
+	buyer: &AccountInfo<'a>,
+	seller: &AccountInfo<'a>,
+	fee_account: &AccountInfo<'a>,
+	mint: &AccountInfo<'a>,
+	metadata_account: &AccountInfo<'a>,
+	currency_mint_key: Pubkey,
+	associated_token_program: &AccountInfo<'a>,
+	token_program: &AccountInfo<'a>,
+	system_program: &AccountInfo<'a>,
+	rent: &AccountInfo<'a>,
+	remaining_accounts: &'b [AccountInfo<'a>],
+	price: u64,
+	marketplace_fees: u64
+) -> Result<()> {
+	let remaining_accounts_clone = &mut remaining_accounts.iter().clone();
+
+	let creator_fees = pay_creator_fees(
+		&buyer.to_account_info(),
+		currency_mint_key,
+		Some(&buyer.to_account_info()),
+		&mint.to_account_info(),
+		&metadata_account.to_account_info(),
+		remaining_accounts_clone,
+		&associated_token_program.to_account_info(),
+		&token_program.to_account_info(),
+		&system_program.to_account_info(),
+		&rent.to_account_info(),
+		None,
+		None,
+		price
+	)?;
+
+	let seller_amount = price
+		.checked_sub(marketplace_fees)
+		.ok_or(Error::OverflowError)?
+		.checked_sub(creator_fees)
+		.ok_or(Error::OverflowError)?;
+
+	if is_native_mint(currency_mint_key) {
+		transfer_sol(
+			&buyer.to_account_info(),
+			&fee_account.to_account_info(),
+			&system_program.to_account_info(),
+			None,
+			marketplace_fees
+		)?;
+
+		transfer_sol(
+			&buyer.to_account_info(),
+			&seller.to_account_info(),
+			&system_program.to_account_info(),
+			None,
+			seller_amount
+		)?;
+	} else {
+		let remaining_accounts_clone = &mut remaining_accounts.iter().clone();
+		let currency_mint = next_account_info(remaining_accounts_clone)?;
+		assert_keys_equal(currency_mint_key, currency_mint.key(), "Invalid currency mint")?;
+		let buyer_currency_account = next_account_info(remaining_accounts_clone)?;
+		let marketplace_authority = next_account_info(remaining_accounts_clone)?;
+		let marketplace_currency_account = next_account_info(remaining_accounts_clone)?;
+		let fee_currency_account = next_account_info(remaining_accounts_clone)?;
+
+		let seller_currency_account = if seller.key() == marketplace_authority.key()  {
+			marketplace_currency_account
+		} else {
+			next_account_info(remaining_accounts_clone)?
+		};
+
+		transfer_spl(
+			&buyer.to_account_info(),
+			&fee_account.to_account_info(),
+			buyer_currency_account,
+			fee_currency_account,
+			currency_mint,
+			&buyer.to_account_info(),
+			&associated_token_program.to_account_info(),
+			&token_program.to_account_info(),
+			&system_program.to_account_info(),
+			&rent.to_account_info(),
+			None,
+			None,
+			None,
+			marketplace_fees
+		)?;
+
+		transfer_spl(
+			&buyer.to_account_info(),
+			&seller.to_account_info(),
+			buyer_currency_account,
+			seller_currency_account,
+			currency_mint,
+			&buyer.to_account_info(),
+			&associated_token_program.to_account_info(),
+			&token_program.to_account_info(),
+			&system_program.to_account_info(),
+			&rent.to_account_info(),
+			None,
+			None,
+			None,
+			seller_amount
+		)?;
+	}
+	
+	Ok(())
 }
