@@ -255,6 +255,44 @@ export class Methods {
 		return mint.publicKey;
 	}
 
+	async custody(
+		authority: Keypair,
+		mint: PublicKey,
+	) {
+		await this.carbon.program.methods
+			.custody()
+			.accounts({
+				authority: authority.publicKey,
+				marketplaceAuthority: this.carbon.marketplaceAuthority,
+				tokenAccount: getAssociatedTokenAddressSync(mint, authority.publicKey),
+				mint,
+				edition: getEditionPDA(mint),
+				custodyAccount: this.carbon.pdas.custodyAccount(mint),
+				tokenMetadataProgram: TOKEN_METADATA_PROGRAM_ID,
+			})
+			.signers([authority])
+			.rpc();
+	}
+
+	async uncustody(
+		authority: Keypair,
+		mint: PublicKey,
+	) {
+		await this.carbon.program.methods
+			.uncustody()
+			.accounts({
+				authority: authority.publicKey,
+				marketplaceAuthority: this.carbon.marketplaceAuthority,
+				tokenAccount: getAssociatedTokenAddressSync(mint, authority.publicKey),
+				mint,
+				edition: getEditionPDA(mint),
+				custodyAccount: this.carbon.pdas.custodyAccount(mint),
+				tokenMetadataProgram: TOKEN_METADATA_PROGRAM_ID,
+			})
+			.signers([authority])
+			.rpc();
+	}
+
 }
 
 export default Methods;

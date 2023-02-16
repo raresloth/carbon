@@ -53,4 +53,12 @@ pub mod carbon {
     ) -> Result<()> {
         instructions::buy_virtual_handler(ctx, id, price, metadata)
     }
+
+    pub fn custody<'info>(ctx: Context<Custody>, ) -> Result<()> {
+        instructions::custody_handler(ctx)
+    }
+
+    pub fn uncustody<'info>(ctx: Context<Uncustody>, ) -> Result<()> {
+        instructions::uncustody_handler(ctx)
+    }
 }

@@ -567,6 +567,143 @@ export type Carbon = {
           }
         }
       ]
+    },
+    {
+      "name": "custody",
+      "accounts": [
+        {
+          "name": "authority",
+          "isMut": true,
+          "isSigner": true,
+          "docs": [
+            "User wallet."
+          ]
+        },
+        {
+          "name": "marketplaceAuthority",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "Marketplace authority wallet."
+          ]
+        },
+        {
+          "name": "tokenAccount",
+          "isMut": true,
+          "isSigner": false,
+          "docs": [
+            "User's token account of the mint to custody."
+          ]
+        },
+        {
+          "name": "mint",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "Mint to be custodied"
+          ]
+        },
+        {
+          "name": "edition",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "Edition of the NFT to custody."
+          ]
+        },
+        {
+          "name": "custodyAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "tokenMetadataProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "tokenProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "rent",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "uncustody",
+      "accounts": [
+        {
+          "name": "authority",
+          "isMut": true,
+          "isSigner": true,
+          "docs": [
+            "User wallet."
+          ]
+        },
+        {
+          "name": "marketplaceAuthority",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "Marketplace authority wallet."
+          ]
+        },
+        {
+          "name": "tokenAccount",
+          "isMut": true,
+          "isSigner": false,
+          "docs": [
+            "User's token account of the mint to custody."
+          ]
+        },
+        {
+          "name": "mint",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "Mint to be custodied"
+          ]
+        },
+        {
+          "name": "edition",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "Edition of the NFT to custody."
+          ]
+        },
+        {
+          "name": "custodyAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "tokenMetadataProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "tokenProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": []
     }
   ],
   "accounts": [
@@ -589,16 +726,16 @@ export type Carbon = {
             "type": "u8"
           },
           {
-            "name": "collectionMint",
+            "name": "marketplaceAuthority",
             "docs": [
-              "The verified collection to add newly minted items to."
+              "Pubkey of the marketplace authority's wallet."
             ],
             "type": "publicKey"
           },
           {
-            "name": "marketplaceAuthority",
+            "name": "collectionMint",
             "docs": [
-              "Pubkey of the marketplace authority's wallet."
+              "The verified collection to add newly minted items to."
             ],
             "type": "publicKey"
           },
@@ -620,6 +757,48 @@ export type Carbon = {
       }
     },
     {
+      "name": "custodyAccount",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "bump",
+            "type": {
+              "array": [
+                "u8",
+                1
+              ]
+            }
+          },
+          {
+            "name": "version",
+            "type": "u8"
+          },
+          {
+            "name": "marketplaceAuthority",
+            "docs": [
+              "Pubkey of the marketplace authority's wallet"
+            ],
+            "type": "publicKey"
+          },
+          {
+            "name": "authority",
+            "docs": [
+              "Pubkey of the user's wallet"
+            ],
+            "type": "publicKey"
+          },
+          {
+            "name": "mint",
+            "docs": [
+              "Pubkey of the mint being custodied"
+            ],
+            "type": "publicKey"
+          }
+        ]
+      }
+    },
+    {
       "name": "listing",
       "type": {
         "kind": "struct",
@@ -636,6 +815,13 @@ export type Carbon = {
           {
             "name": "version",
             "type": "u8"
+          },
+          {
+            "name": "marketplaceAuthority",
+            "docs": [
+              "Pubkey of the marketplace authority's wallet"
+            ],
+            "type": "publicKey"
           },
           {
             "name": "seller",
@@ -1427,6 +1613,143 @@ export const IDL: Carbon = {
           }
         }
       ]
+    },
+    {
+      "name": "custody",
+      "accounts": [
+        {
+          "name": "authority",
+          "isMut": true,
+          "isSigner": true,
+          "docs": [
+            "User wallet."
+          ]
+        },
+        {
+          "name": "marketplaceAuthority",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "Marketplace authority wallet."
+          ]
+        },
+        {
+          "name": "tokenAccount",
+          "isMut": true,
+          "isSigner": false,
+          "docs": [
+            "User's token account of the mint to custody."
+          ]
+        },
+        {
+          "name": "mint",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "Mint to be custodied"
+          ]
+        },
+        {
+          "name": "edition",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "Edition of the NFT to custody."
+          ]
+        },
+        {
+          "name": "custodyAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "tokenMetadataProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "tokenProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "rent",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "uncustody",
+      "accounts": [
+        {
+          "name": "authority",
+          "isMut": true,
+          "isSigner": true,
+          "docs": [
+            "User wallet."
+          ]
+        },
+        {
+          "name": "marketplaceAuthority",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "Marketplace authority wallet."
+          ]
+        },
+        {
+          "name": "tokenAccount",
+          "isMut": true,
+          "isSigner": false,
+          "docs": [
+            "User's token account of the mint to custody."
+          ]
+        },
+        {
+          "name": "mint",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "Mint to be custodied"
+          ]
+        },
+        {
+          "name": "edition",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "Edition of the NFT to custody."
+          ]
+        },
+        {
+          "name": "custodyAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "tokenMetadataProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "tokenProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": []
     }
   ],
   "accounts": [
@@ -1449,16 +1772,16 @@ export const IDL: Carbon = {
             "type": "u8"
           },
           {
-            "name": "collectionMint",
+            "name": "marketplaceAuthority",
             "docs": [
-              "The verified collection to add newly minted items to."
+              "Pubkey of the marketplace authority's wallet."
             ],
             "type": "publicKey"
           },
           {
-            "name": "marketplaceAuthority",
+            "name": "collectionMint",
             "docs": [
-              "Pubkey of the marketplace authority's wallet."
+              "The verified collection to add newly minted items to."
             ],
             "type": "publicKey"
           },
@@ -1480,6 +1803,48 @@ export const IDL: Carbon = {
       }
     },
     {
+      "name": "custodyAccount",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "bump",
+            "type": {
+              "array": [
+                "u8",
+                1
+              ]
+            }
+          },
+          {
+            "name": "version",
+            "type": "u8"
+          },
+          {
+            "name": "marketplaceAuthority",
+            "docs": [
+              "Pubkey of the marketplace authority's wallet"
+            ],
+            "type": "publicKey"
+          },
+          {
+            "name": "authority",
+            "docs": [
+              "Pubkey of the user's wallet"
+            ],
+            "type": "publicKey"
+          },
+          {
+            "name": "mint",
+            "docs": [
+              "Pubkey of the mint being custodied"
+            ],
+            "type": "publicKey"
+          }
+        ]
+      }
+    },
+    {
       "name": "listing",
       "type": {
         "kind": "struct",
@@ -1496,6 +1861,13 @@ export const IDL: Carbon = {
           {
             "name": "version",
             "type": "u8"
+          },
+          {
+            "name": "marketplaceAuthority",
+            "docs": [
+              "Pubkey of the marketplace authority's wallet"
+            ],
+            "type": "publicKey"
           },
           {
             "name": "seller",

@@ -26,6 +26,13 @@ export class Pdas {
 			id.toBuffer(),
 		], this.carbon.programId)[0];
 	}
+
+	custodyAccount(mint: PublicKey): PublicKey {
+		return PublicKey.findProgramAddressSync([
+			Buffer.from("custody_account"),
+			mint.toBuffer(),
+		], this.carbon.programId)[0];
+	}
 }
 
 export default Pdas;

@@ -94,6 +94,7 @@ pub fn list_nft_handler<'info>(
     let listing = &mut ctx.accounts.listing;
     listing.init(
         [*ctx.bumps.get(Listing::PREFIX).ok_or(Error::BumpSeedNotInHashMap)?],
+        ctx.accounts.marketplace_config.marketplace_authority,
         ctx.accounts.seller.key(),
         ctx.accounts.mint.key(),
         false,

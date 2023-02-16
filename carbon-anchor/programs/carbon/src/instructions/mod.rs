@@ -6,6 +6,8 @@ mod buy_virtual;
 mod buy_nft;
 mod delist_virtual;
 mod delist_nft;
+mod custody;
+mod uncustody;
 
 pub use init_marketplace_config::*;
 pub use init_collection_config::*;
@@ -15,3 +17,5 @@ pub use buy_virtual::*;
 pub use buy_nft::*;
 pub use delist_virtual::*;
 pub use delist_nft::*;
+pub use custody::*;
+pub use uncustody::*;

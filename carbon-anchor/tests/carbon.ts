@@ -4,8 +4,7 @@ import { Keypair, PublicKey, LAMPORTS_PER_SOL } from "@solana/web3.js";
 import * as CarbonIDL from "../target/types/carbon";
 import {assertThrows, createCollectionNFT, createNFT, createSplToken, fetchNFT, setBalance} from "./helpers";
 import moment from "moment";
-import { Carbon } from "@raresloth/carbon-ts"
-import {FEE_ACCOUNT_KEY} from "@raresloth/carbon-ts";
+import { Carbon, FEE_ACCOUNT_KEY } from "@raresloth/carbon-ts"
 import {
 	createAssociatedTokenAccount,
 	getAccount,
@@ -46,6 +45,7 @@ describe("carbon", () => {
 	let marketplaceConfigPDA: PublicKey;
 	let collectionConfigPDA: PublicKey;
 	let listingPDA: PublicKey;
+	let custodyAccountPDA: PublicKey;
 
 	beforeEach(setUpData)
 	async function setUpData() {
@@ -132,6 +132,7 @@ describe("carbon", () => {
 			edition = nft.edition
 			sellerTokenAccount = getAssociatedTokenAddressSync(id, seller.publicKey)
 			listingPDA = carbon.pdas.listing(id)
+			custodyAccountPDA = carbon.pdas.custodyAccount(id)
 		}
 
 		describe("list_nft", function () {
@@ -238,6 +239,40 @@ describe("carbon", () => {
 				assert.equal(sellerPostBalance.value.uiAmount, price - marketplaceFee - royalty)
 				assert.equal(marketplaceAuthPostBalance.value.uiAmount, royalty)
 				assert.equal(feeAccountPostBalance.value.uiAmount, marketplaceFee)
+			});
+
+		});
+
+		describe("custody", function () {
+
+			it("should custody the nft correctly", async function () {
+				await carbon.methods.custody(seller, id)
+
+				const custodyAccount = await program.account.custodyAccount.fetch(custodyAccountPDA);
+				assert.equal(custodyAccount.version, 1);
+				assert.equal(custodyAccount.marketplaceAuthority.toString(), marketplaceAuthority.publicKey.toString());
+				assert.equal(custodyAccount.authority.toString(), seller.publicKey.toString());
+				assert.equal(custodyAccount.mint.toString(), id.toString());
+
+				const sellerTokenAccountObj = await getAccount(provider.connection, sellerTokenAccount);
+				assert.equal(sellerTokenAccountObj.delegate.toString(), custodyAccountPDA.toString());
+				assert.isTrue(sellerTokenAccountObj.isFrozen);
+			});
+
+		});
+
+		describe("uncustody", function () {
+
+			it("ab should uncustody the nft correctly", async function () {
+				await carbon.methods.custody(seller, id)
+				await carbon.methods.uncustody(seller, id)
+
+				// Custody account should no longer exist
+				await assertThrows(async () => await program.account.custodyAccount.fetch(custodyAccountPDA));
+
+				const sellerTokenAccountObj = await getAccount(provider.connection, sellerTokenAccount);
+				assert.isNull(sellerTokenAccountObj.delegate);
+				assert.isFalse(sellerTokenAccountObj.isFrozen);
 			});
 
 		});

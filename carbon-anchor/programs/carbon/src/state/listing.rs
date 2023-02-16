@@ -5,6 +5,8 @@ use crate::{state::fee_config::{FeeConfig}, error::Error};
 pub struct Listing {
 	pub bump: [u8; 1],
 	pub version: u8,
+	/// Pubkey of the marketplace authority's wallet
+	pub marketplace_authority: Pubkey,
 	/// Pubkey of the seller's wallet
 	pub seller: Pubkey,
 	/// Set to mint of NFT if listing is for NFT, otherwise a unique ID for the virtual item
@@ -44,6 +46,7 @@ impl Listing {
 	pub fn init(
 		&mut self,
 		bump: [u8; 1],
+		marketplace_authority: Pubkey,
 		seller: Pubkey,
 		id: Pubkey,
 		is_virtual: bool,
@@ -59,6 +62,7 @@ impl Listing {
 
 		self.bump = bump;
 		self.version = Listing::VERSION;
+		self.marketplace_authority = marketplace_authority;
 		self.seller = seller;
 		self.id = id;
 		self.is_virtual = is_virtual;

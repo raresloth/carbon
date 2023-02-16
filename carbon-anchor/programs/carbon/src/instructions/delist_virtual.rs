@@ -16,6 +16,7 @@ pub struct DelistVirtual<'info> {
             id.as_ref()
         ],
         bump = listing.bump[0],
+        has_one = marketplace_authority,
     )]
     pub listing: Box<Account<'info, Listing>>,
 

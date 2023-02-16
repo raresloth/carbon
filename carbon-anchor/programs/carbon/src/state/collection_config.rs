@@ -6,10 +6,10 @@ use crate::{Metadata};
 pub struct CollectionConfig {
 	pub bump: [u8; 1],
 	pub version: u8,
-	/// The verified collection to add newly minted items to.
-	pub collection_mint: Pubkey,
 	/// Pubkey of the marketplace authority's wallet.
 	pub marketplace_authority: Pubkey,
+	/// The verified collection to add newly minted items to.
+	pub collection_mint: Pubkey,
 	/// Royalty bps. Inserted into newly minted metadata.
 	pub seller_fee_basis_points: u16,
 	/// Max 16 chars for symbol. Inserted into newly minted metadata.

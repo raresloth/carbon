@@ -60,6 +60,7 @@ pub fn list_virtual_handler<'info>(
     listing.init(
         [*ctx.bumps.get(Listing::PREFIX).ok_or(Error::BumpSeedNotInHashMap)?],
         ctx.accounts.marketplace_authority.key(),
+        ctx.accounts.marketplace_authority.key(),
         id,
         true,
         ctx.accounts.currency_mint.key(),
