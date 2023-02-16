@@ -34,6 +34,10 @@ pub mod carbon {
         instructions::delist_nft_handler(ctx)
     }
 
+    pub fn delist_virtual(ctx: Context<DelistVirtual>, id: Pubkey) -> Result<()> {
+        instructions::delist_virtual_handler(ctx, id)
+    }
+
     pub fn buy_nft<'info>(
         ctx: Context<'_, '_, '_, 'info, BuyNft<'info>>,
         price: u64,

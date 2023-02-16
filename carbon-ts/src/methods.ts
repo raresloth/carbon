@@ -168,6 +168,22 @@ export class Methods {
 			.rpc();
 	}
 
+	async delistVirtual(
+		marketplaceAuthority: Keypair,
+		id: PublicKey,
+	) {
+		await this.carbon.program.methods
+			.delistVirtual(
+				id
+			)
+			.accounts({
+				marketplaceAuthority: marketplaceAuthority.publicKey,
+				listing: this.carbon.pdas.listing(id),
+			})
+			.signers([marketplaceAuthority])
+			.rpc();
+	}
+
 	async buyVirtual(
 		buyer: Keypair,
 		marketplaceAuthority: Keypair,

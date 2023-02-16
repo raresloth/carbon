@@ -299,6 +299,35 @@ export type Carbon = {
       "args": []
     },
     {
+      "name": "delistVirtual",
+      "accounts": [
+        {
+          "name": "marketplaceAuthority",
+          "isMut": true,
+          "isSigner": true,
+          "docs": [
+            "Marketplace authority wallet."
+          ]
+        },
+        {
+          "name": "listing",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "id",
+          "type": "publicKey"
+        }
+      ]
+    },
+    {
       "name": "buyNft",
       "accounts": [
         {
@@ -1128,6 +1157,35 @@ export const IDL: Carbon = {
         }
       ],
       "args": []
+    },
+    {
+      "name": "delistVirtual",
+      "accounts": [
+        {
+          "name": "marketplaceAuthority",
+          "isMut": true,
+          "isSigner": true,
+          "docs": [
+            "Marketplace authority wallet."
+          ]
+        },
+        {
+          "name": "listing",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "id",
+          "type": "publicKey"
+        }
+      ]
     },
     {
       "name": "buyNft",

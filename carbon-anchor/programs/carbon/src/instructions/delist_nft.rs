@@ -3,9 +3,8 @@ use anchor_spl::{
     token::{Mint, Token, TokenAccount},
     metadata::Metadata
 };
-use anchor_spl::metadata::MetadataAccount;
-use crate::{state::{Listing}, util::{approve_and_freeze}, error::Error, MarketplaceConfig, CollectionConfig};
-use crate::util::{assert_is_nft_in_collection, thaw_and_revoke};
+use crate::{state::{Listing}};
+use crate::util::{thaw_and_revoke};
 
 #[derive(Accounts)]
 pub struct DelistNft<'info> {

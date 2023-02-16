@@ -282,6 +282,18 @@ describe("carbon", () => {
 
 		});
 
+		describe("delist_virtual", function () {
+
+			it("should delist the virtual item correctly", async function () {
+				await carbon.methods.listVirtual(marketplaceAuthority, id, collectionMint, price, expiry)
+				await carbon.methods.delistVirtual(marketplaceAuthority, id)
+
+				// Listing should no longer exist
+				await assertThrows(async () => await program.account.listing.fetch(listingPDA));
+			});
+
+		});
+
 		describe("buy_virtual", function () {
 
 			it("should buy the virtual item correctly", async function () {
