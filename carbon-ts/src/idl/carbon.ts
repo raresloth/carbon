@@ -663,7 +663,7 @@ export type Carbon = {
           "isMut": true,
           "isSigner": false,
           "docs": [
-            "User's token account of the mint to custody."
+            "User's token account of the mint to uncustody."
           ]
         },
         {
@@ -671,7 +671,7 @@ export type Carbon = {
           "isMut": false,
           "isSigner": false,
           "docs": [
-            "Mint to be custodied"
+            "Mint to be uncustodied"
           ]
         },
         {
@@ -679,7 +679,7 @@ export type Carbon = {
           "isMut": false,
           "isSigner": false,
           "docs": [
-            "Edition of the NFT to custody."
+            "Edition of the NFT to uncustody."
           ]
         },
         {
@@ -699,6 +699,90 @@ export type Carbon = {
         },
         {
           "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "takeOwnership",
+      "accounts": [
+        {
+          "name": "marketplaceAuthority",
+          "isMut": true,
+          "isSigner": true,
+          "docs": [
+            "Marketplace authority wallet."
+          ]
+        },
+        {
+          "name": "authority",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "User wallet with authority over the custodied mint."
+          ]
+        },
+        {
+          "name": "tokenAccount",
+          "isMut": true,
+          "isSigner": false,
+          "docs": [
+            "User's token account of the custodied mint."
+          ]
+        },
+        {
+          "name": "marketplaceAuthorityTokenAccount",
+          "isMut": true,
+          "isSigner": false,
+          "docs": [
+            "Marketplace authority's token account of the custodied mint."
+          ]
+        },
+        {
+          "name": "mint",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "Mint custodied"
+          ]
+        },
+        {
+          "name": "edition",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "Edition of the custodied mint."
+          ]
+        },
+        {
+          "name": "custodyAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "tokenMetadataProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "tokenProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "associatedTokenProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "rent",
           "isMut": false,
           "isSigner": false
         }
@@ -1709,7 +1793,7 @@ export const IDL: Carbon = {
           "isMut": true,
           "isSigner": false,
           "docs": [
-            "User's token account of the mint to custody."
+            "User's token account of the mint to uncustody."
           ]
         },
         {
@@ -1717,7 +1801,7 @@ export const IDL: Carbon = {
           "isMut": false,
           "isSigner": false,
           "docs": [
-            "Mint to be custodied"
+            "Mint to be uncustodied"
           ]
         },
         {
@@ -1725,7 +1809,7 @@ export const IDL: Carbon = {
           "isMut": false,
           "isSigner": false,
           "docs": [
-            "Edition of the NFT to custody."
+            "Edition of the NFT to uncustody."
           ]
         },
         {
@@ -1745,6 +1829,90 @@ export const IDL: Carbon = {
         },
         {
           "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "takeOwnership",
+      "accounts": [
+        {
+          "name": "marketplaceAuthority",
+          "isMut": true,
+          "isSigner": true,
+          "docs": [
+            "Marketplace authority wallet."
+          ]
+        },
+        {
+          "name": "authority",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "User wallet with authority over the custodied mint."
+          ]
+        },
+        {
+          "name": "tokenAccount",
+          "isMut": true,
+          "isSigner": false,
+          "docs": [
+            "User's token account of the custodied mint."
+          ]
+        },
+        {
+          "name": "marketplaceAuthorityTokenAccount",
+          "isMut": true,
+          "isSigner": false,
+          "docs": [
+            "Marketplace authority's token account of the custodied mint."
+          ]
+        },
+        {
+          "name": "mint",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "Mint custodied"
+          ]
+        },
+        {
+          "name": "edition",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "Edition of the custodied mint."
+          ]
+        },
+        {
+          "name": "custodyAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "tokenMetadataProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "tokenProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "associatedTokenProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "rent",
           "isMut": false,
           "isSigner": false
         }

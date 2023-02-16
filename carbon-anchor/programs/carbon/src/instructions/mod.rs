@@ -8,6 +8,7 @@ mod delist_virtual;
 mod delist_nft;
 mod custody;
 mod uncustody;
+mod take_ownership;
 
 pub use init_marketplace_config::*;
 pub use init_collection_config::*;
@@ -19,3 +20,4 @@ pub use delist_virtual::*;
 pub use delist_nft::*;
 pub use custody::*;
 pub use uncustody::*;
+pub use take_ownership::*;

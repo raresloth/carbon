@@ -276,20 +276,41 @@ export class Methods {
 
 	async uncustody(
 		authority: Keypair,
-		mint: PublicKey,
+		custodyAccount: IdlAccounts<CarbonIDL.Carbon>["custodyAccount"],
 	) {
 		await this.carbon.program.methods
 			.uncustody()
 			.accounts({
 				authority: authority.publicKey,
 				marketplaceAuthority: this.carbon.marketplaceAuthority,
-				tokenAccount: getAssociatedTokenAddressSync(mint, authority.publicKey),
-				mint,
-				edition: getEditionPDA(mint),
-				custodyAccount: this.carbon.pdas.custodyAccount(mint),
+				tokenAccount: getAssociatedTokenAddressSync(custodyAccount.mint, authority.publicKey),
+				mint: custodyAccount.mint,
+				edition: getEditionPDA(custodyAccount.mint),
+				custodyAccount: this.carbon.pdas.custodyAccount(custodyAccount.mint),
 				tokenMetadataProgram: TOKEN_METADATA_PROGRAM_ID,
 			})
 			.signers([authority])
+			.rpc();
+	}
+
+	async takeOwnership(
+		marketplaceAuthority: Keypair,
+		custodyAccount: IdlAccounts<CarbonIDL.Carbon>["custodyAccount"],
+	) {
+		await this.carbon.program.methods
+			.takeOwnership()
+			.accounts({
+				marketplaceAuthority: this.carbon.marketplaceAuthority,
+				authority: custodyAccount.authority,
+				tokenAccount: getAssociatedTokenAddressSync(custodyAccount.mint, custodyAccount.authority),
+				marketplaceAuthorityTokenAccount: getAssociatedTokenAddressSync(custodyAccount.mint, marketplaceAuthority.publicKey),
+				mint: custodyAccount.mint,
+				edition: getEditionPDA(custodyAccount.mint),
+				custodyAccount: this.carbon.pdas.custodyAccount(custodyAccount.mint),
+				tokenMetadataProgram: TOKEN_METADATA_PROGRAM_ID,
+				associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
+			})
+			.signers([marketplaceAuthority])
 			.rpc();
 	}
 

@@ -14,7 +14,7 @@ pub struct Uncustody<'info> {
     /// CHECK: Can be any marketplace authority
     pub marketplace_authority: UncheckedAccount<'info>,
 
-    /// User's token account of the mint to custody.
+    /// User's token account of the mint to uncustody.
     #[account(
         mut,
         constraint = token_account.owner == authority.key(),
@@ -22,11 +22,11 @@ pub struct Uncustody<'info> {
     )]
     pub token_account: Box<Account<'info, TokenAccount>>,
 
-    /// Mint to be custodied
+    /// Mint to be uncustodied
     pub mint: Box<Account<'info, Mint>>,
 
-    /// Edition of the NFT to custody.
-    /// CHECK: Verified in freeze
+    /// Edition of the NFT to uncustody.
+    /// CHECK: Verified in thaw
     pub edition: UncheckedAccount<'info>,
 
     #[account(

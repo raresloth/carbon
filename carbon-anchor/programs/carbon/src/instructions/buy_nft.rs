@@ -94,7 +94,7 @@ pub fn buy_nft_handler<'info>(
 		&ctx.accounts.listing.to_account_info(),
 		&ctx.accounts.token_program.to_account_info(),
 		&ctx.accounts.token_metadata_program.to_account_info(),
-		Some(&auth_seeds[..])
+		Some(&auth_seeds)
 	)?;
 
 	transfer_spl(
@@ -109,7 +109,7 @@ pub fn buy_nft_handler<'info>(
 		&ctx.accounts.system_program.to_account_info(),
 		&ctx.accounts.rent.to_account_info(),
 		Some(&ctx.accounts.listing.to_account_info()),
-		Some(&auth_seeds[..]),
+		Some(&auth_seeds),
 		None,
 		1
 	)?;

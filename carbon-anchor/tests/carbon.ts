@@ -263,9 +263,11 @@ describe("carbon", () => {
 
 		describe("uncustody", function () {
 
-			it("ab should uncustody the nft correctly", async function () {
+			it("should uncustody the nft correctly", async function () {
 				await carbon.methods.custody(seller, id)
-				await carbon.methods.uncustody(seller, id)
+
+				const custodyAccount = await program.account.custodyAccount.fetch(custodyAccountPDA)
+				await carbon.methods.uncustody(seller, custodyAccount)
 
 				// Custody account should no longer exist
 				await assertThrows(async () => await program.account.custodyAccount.fetch(custodyAccountPDA));
@@ -273,6 +275,27 @@ describe("carbon", () => {
 				const sellerTokenAccountObj = await getAccount(provider.connection, sellerTokenAccount);
 				assert.isNull(sellerTokenAccountObj.delegate);
 				assert.isFalse(sellerTokenAccountObj.isFrozen);
+			});
+
+		});
+
+		describe("take_ownership", function () {
+
+			it("should take ownership of the nft correctly", async function () {
+				await carbon.methods.custody(seller, id)
+
+				const custodyAccount = await program.account.custodyAccount.fetch(custodyAccountPDA)
+				await carbon.methods.takeOwnership(marketplaceAuthority, custodyAccount)
+
+				// Custody account should no longer exist
+				await assertThrows(async () => await program.account.custodyAccount.fetch(custodyAccountPDA));
+
+				// Should now be owned by the marketplace authority
+				const marketplaceTokenAccount = getAssociatedTokenAddressSync(id, marketplaceAuthority.publicKey)
+				const marketplaceTokenAccountObj = await getAccount(provider.connection, marketplaceTokenAccount);
+				assert.equal(marketplaceTokenAccountObj.amount.toString(), "1");
+				assert.isNull(marketplaceTokenAccountObj.delegate);
+				assert.isFalse(marketplaceTokenAccountObj.isFrozen);
 			});
 
 		});
