@@ -3,6 +3,7 @@ import {Program, Provider} from "@coral-xyz/anchor";
 import * as CarbonIDL from "./idl/carbon"
 import Pdas from "./pdas";
 import Methods from "./methods"
+import {PROGRAM_ID} from "./index";
 
 export class Carbon {
 	public program: Program<CarbonIDL.Carbon>;
@@ -10,9 +11,9 @@ export class Carbon {
 	public methods: Methods;
 
 	constructor(
-		public programId: PublicKey,
 		public provider: Provider,
-		public marketplaceAuthority: PublicKey
+		public marketplaceAuthority: PublicKey,
+		public programId: PublicKey = PROGRAM_ID,
 	) {
 		this.program = new Program<CarbonIDL.Carbon>(CarbonIDL.IDL, programId, provider);
 		this.pdas = new Pdas(this);

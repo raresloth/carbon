@@ -23,6 +23,7 @@
   },
   "scripts": {
     "build": "cp ../carbon-anchor/target/types/carbon.ts ./src/idl && rm -rf dist && tsc && tsc -p tsconfig.cjs.json",
+    "build:noidl": "rm -rf dist && tsc && tsc -p tsconfig.cjs.json",
     "dev": "concurrently \"cpx ../carbon-anchor/target/types/carbon.ts ./src/idl --watch\" \"tsc -p tsconfig.cjs.json --watch\" \"tsc --watch\""
   },
   "dependencies": {
