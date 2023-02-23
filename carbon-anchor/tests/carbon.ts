@@ -52,7 +52,7 @@ describe("carbon", () => {
 		let promises = []
 
 		marketplaceAuthority = Keypair.generate()
-		carbon = new Carbon(program.programId, provider, marketplaceAuthority.publicKey);
+		carbon = new Carbon(provider, marketplaceAuthority.publicKey, program.programId);
 		marketplaceConfigPDA = carbon.pdas.marketplaceConfig(marketplaceAuthority.publicKey)
 		promises.push(setBalance(provider, marketplaceAuthority, 100 * LAMPORTS_PER_SOL))
 
