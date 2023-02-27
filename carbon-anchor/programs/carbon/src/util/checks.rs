@@ -11,12 +11,12 @@ pub fn is_native_mint(key: Pubkey) -> bool {
 	return key == spl_token::native_mint::ID;
 }
 
-pub fn is_default(key: Pubkey) -> bool {
-	return key == Pubkey::default();
-}
-
 pub fn assert_keys_equal(key1: Pubkey, key2: Pubkey, error_message: &str) -> Result<()> {
-	assert!(key1 == key2, "{}", error_message);
+	if key1 != key2 {
+		msg!("{}: actual: {} expected: {}", error_message, key1, key2);
+	}
+
+	require!(key1 == key2, Error::PublicKeyMismatch);
 
 	Ok(())
 }

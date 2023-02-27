@@ -149,6 +149,11 @@ export type Carbon = {
           "isSigner": false
         },
         {
+          "name": "custodyAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
           "name": "tokenMetadataProgram",
           "isMut": false,
           "isSigner": false
@@ -281,6 +286,11 @@ export type Carbon = {
           "isSigner": false
         },
         {
+          "name": "custodyAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
           "name": "tokenMetadataProgram",
           "isMut": false,
           "isSigner": false
@@ -388,6 +398,11 @@ export type Carbon = {
         },
         {
           "name": "listing",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "custodyAccount",
           "isMut": true,
           "isSigner": false
         },
@@ -617,6 +632,11 @@ export type Carbon = {
           "isSigner": false
         },
         {
+          "name": "listing",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
           "name": "tokenMetadataProgram",
           "isMut": false,
           "isSigner": false
@@ -688,6 +708,11 @@ export type Carbon = {
           "isSigner": false
         },
         {
+          "name": "listing",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
           "name": "tokenMetadataProgram",
           "isMut": false,
           "isSigner": false
@@ -718,10 +743,10 @@ export type Carbon = {
         },
         {
           "name": "authority",
-          "isMut": false,
+          "isMut": true,
           "isSigner": false,
           "docs": [
-            "User wallet with authority over the custodied mint."
+            "User wallet with authority over the custodial mint."
           ]
         },
         {
@@ -729,7 +754,7 @@ export type Carbon = {
           "isMut": true,
           "isSigner": false,
           "docs": [
-            "User's token account of the custodied mint."
+            "User's token account of the custodial mint."
           ]
         },
         {
@@ -759,6 +784,11 @@ export type Carbon = {
         {
           "name": "custodyAccount",
           "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "listing",
+          "isMut": false,
           "isSigner": false
         },
         {
@@ -878,6 +908,13 @@ export type Carbon = {
               "Pubkey of the mint being custodied"
             ],
             "type": "publicKey"
+          },
+          {
+            "name": "isListed",
+            "docs": [
+              "True if the mint is listed for sale"
+            ],
+            "type": "bool"
           }
         ]
       }
@@ -1124,6 +1161,26 @@ export type Carbon = {
       "code": 6009,
       "name": "InvalidMint",
       "msg": "Invalid mint"
+    },
+    {
+      "code": 6010,
+      "name": "NftIsListed",
+      "msg": "Nft is listed"
+    },
+    {
+      "code": 6011,
+      "name": "InvalidCustodyAccount",
+      "msg": "Invalid custody account"
+    },
+    {
+      "code": 6012,
+      "name": "InvalidListingAccount",
+      "msg": "Invalid listing account"
+    },
+    {
+      "code": 6013,
+      "name": "InvalidSeller",
+      "msg": "Invalid seller"
     }
   ]
 };
@@ -1279,6 +1336,11 @@ export const IDL: Carbon = {
           "isSigner": false
         },
         {
+          "name": "custodyAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
           "name": "tokenMetadataProgram",
           "isMut": false,
           "isSigner": false
@@ -1411,6 +1473,11 @@ export const IDL: Carbon = {
           "isSigner": false
         },
         {
+          "name": "custodyAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
           "name": "tokenMetadataProgram",
           "isMut": false,
           "isSigner": false
@@ -1518,6 +1585,11 @@ export const IDL: Carbon = {
         },
         {
           "name": "listing",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "custodyAccount",
           "isMut": true,
           "isSigner": false
         },
@@ -1747,6 +1819,11 @@ export const IDL: Carbon = {
           "isSigner": false
         },
         {
+          "name": "listing",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
           "name": "tokenMetadataProgram",
           "isMut": false,
           "isSigner": false
@@ -1818,6 +1895,11 @@ export const IDL: Carbon = {
           "isSigner": false
         },
         {
+          "name": "listing",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
           "name": "tokenMetadataProgram",
           "isMut": false,
           "isSigner": false
@@ -1848,10 +1930,10 @@ export const IDL: Carbon = {
         },
         {
           "name": "authority",
-          "isMut": false,
+          "isMut": true,
           "isSigner": false,
           "docs": [
-            "User wallet with authority over the custodied mint."
+            "User wallet with authority over the custodial mint."
           ]
         },
         {
@@ -1859,7 +1941,7 @@ export const IDL: Carbon = {
           "isMut": true,
           "isSigner": false,
           "docs": [
-            "User's token account of the custodied mint."
+            "User's token account of the custodial mint."
           ]
         },
         {
@@ -1889,6 +1971,11 @@ export const IDL: Carbon = {
         {
           "name": "custodyAccount",
           "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "listing",
+          "isMut": false,
           "isSigner": false
         },
         {
@@ -2008,6 +2095,13 @@ export const IDL: Carbon = {
               "Pubkey of the mint being custodied"
             ],
             "type": "publicKey"
+          },
+          {
+            "name": "isListed",
+            "docs": [
+              "True if the mint is listed for sale"
+            ],
+            "type": "bool"
           }
         ]
       }
@@ -2254,6 +2348,26 @@ export const IDL: Carbon = {
       "code": 6009,
       "name": "InvalidMint",
       "msg": "Invalid mint"
+    },
+    {
+      "code": 6010,
+      "name": "NftIsListed",
+      "msg": "Nft is listed"
+    },
+    {
+      "code": 6011,
+      "name": "InvalidCustodyAccount",
+      "msg": "Invalid custody account"
+    },
+    {
+      "code": 6012,
+      "name": "InvalidListingAccount",
+      "msg": "Invalid listing account"
+    },
+    {
+      "code": 6013,
+      "name": "InvalidSeller",
+      "msg": "Invalid seller"
     }
   ]
 };

@@ -25,4 +25,14 @@ pub enum Error {
 	IsVirtual,
 	#[msg("Invalid mint")]
 	InvalidMint,
+
+	/// 10
+	#[msg("Nft is listed")]
+	NftIsListed,
+	#[msg("Invalid custody account")]
+	InvalidCustodyAccount,
+	#[msg("Invalid listing account")]
+	InvalidListingAccount,
+	#[msg("Invalid seller")]
+	InvalidSeller
 }

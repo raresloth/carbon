@@ -1,5 +1,10 @@
 use anchor_lang::prelude::*;
-use crate::{state::fee_config::{FeeConfig}, error::Error};
+use crate::{
+	state::fee_config::{FeeConfig},
+	util::assert_keys_equal,
+	error::Error
+};
+use crate::util::assert_owned_by;
 
 #[account]
 pub struct Listing {
@@ -34,6 +39,36 @@ impl Listing {
 		8 + 1 + 1 + 32 + 32 + 1 + 32 + 8 + 8 + FeeConfig::SPACE + 256;
 
 	pub const PREFIX: &'static str = "listing";
+
+	pub fn from_account_info_with_checks<'a>(
+		account_info: &AccountInfo<'a>,
+		id: Pubkey
+	) -> Result<Option<Account<'a, Listing>>> {
+		let (expected_pubkey, _) = Pubkey::find_program_address(
+			&[
+				Listing::PREFIX.as_bytes(),
+				id.as_ref()
+			],
+			&crate::id::ID
+		);
+
+		assert_keys_equal(
+			account_info.key(),
+			expected_pubkey,
+			"Invalid listing account key"
+		)?;
+
+
+		if account_info.data_is_empty() {
+			return Ok(None);
+		}
+
+		assert_owned_by(account_info, &crate::id::ID)?;
+
+		let listing_account = Account::<'a, Listing>::try_from(account_info)?;
+
+		Ok(Some(listing_account))
+	}
 
 	pub fn auth_seeds<'a>(&'a self) -> [&'a [u8]; 3] {
 		[

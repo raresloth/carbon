@@ -4,9 +4,9 @@ use anchor_spl::{
 	associated_token::AssociatedToken,
 };
 use anchor_spl::metadata::Metadata;
-use crate::{state::{Listing}};
+use crate::{CustodyAccount, state::{Listing}};
 use crate::error::Error;
-use crate::util::{thaw, transfer_payment, transfer_spl};
+use crate::util::{approve_and_freeze, assert_keys_equal, thaw, transfer_payment, transfer_spl};
 
 #[derive(Accounts)]
 pub struct BuyNft<'info> {
@@ -51,12 +51,16 @@ pub struct BuyNft<'info> {
 			mint.key().as_ref()
 		],
 		bump = listing.bump[0],
+		has_one = seller @ Error::InvalidListingAuthority,
 		constraint = !listing.is_virtual @ Error::IsVirtual,
 		constraint = listing.id == mint.key() @ Error::InvalidMint,
-		constraint = listing.seller == seller.key() @ Error::InvalidListingAuthority,
 		constraint = listing.fee_config.fee_account == fee_account.key() @ Error::InvalidFeeAccount,
 	)]
 	pub listing: Box<Account<'info, Listing>>,
+
+	#[account(mut)]
+	/// CHECK: Validated in handler
+	pub custody_account: UncheckedAccount<'info>,
 
 	/// Account to send fees to.
 	/// CHECK: Safe because of listing constraint
@@ -84,51 +88,114 @@ pub fn buy_nft_handler<'info>(
 ) -> Result<()> {
 	ctx.accounts.listing.assert_can_buy(price)?;
 
-	let listing = &ctx.accounts.listing;
-	let auth_seeds = listing.auth_seeds();
-
-	thaw(
-		&ctx.accounts.seller_token_account.to_account_info(),
-		&ctx.accounts.mint.to_account_info(),
-		&ctx.accounts.edition.to_account_info(),
-		&ctx.accounts.listing.to_account_info(),
-		&ctx.accounts.token_program.to_account_info(),
-		&ctx.accounts.token_metadata_program.to_account_info(),
-		Some(&auth_seeds)
+	CustodyAccount::assert_is_key_for_mint(
+		ctx.accounts.custody_account.key(),
+		ctx.accounts.mint.key(),
 	)?;
 
-	transfer_spl(
-		&ctx.accounts.seller.to_account_info(),
-		&ctx.accounts.buyer.to_account_info(),
-		&ctx.accounts.seller_token_account.to_account_info(),
-		&ctx.accounts.buyer_token_account.to_account_info(),
-		&ctx.accounts.mint.to_account_info(),
-		&ctx.accounts.buyer.to_account_info(),
-		&ctx.accounts.associated_token_program.to_account_info(),
-		&ctx.accounts.token_program.to_account_info(),
-		&ctx.accounts.system_program.to_account_info(),
-		&ctx.accounts.rent.to_account_info(),
-		Some(&ctx.accounts.listing.to_account_info()),
-		Some(&auth_seeds),
-		None,
-		1
-	)?;
+	if ctx.accounts.custody_account.data_is_empty() {
+		let listing = &ctx.accounts.listing;
+		let auth_seeds = listing.auth_seeds();
+		ctx.accounts.transfer_with_seeds(
+			&ctx.accounts.listing.to_account_info(),
+			&auth_seeds,
+			ctx.remaining_accounts
+		)?;
+	} else {
+		let account_loader = AccountLoader::<'info, CustodyAccount>::try_from(
+			&ctx.accounts.custody_account.to_account_info()
+		)?;
 
-	transfer_payment(
-		&ctx.accounts.buyer.to_account_info(),
-		&ctx.accounts.seller.to_account_info(),
-		&ctx.accounts.fee_account.to_account_info(),
-		&ctx.accounts.mint.to_account_info(),
-		&ctx.accounts.metadata_account.to_account_info(),
-		ctx.accounts.listing.currency_mint,
-		&ctx.accounts.associated_token_program.to_account_info(),
-		&ctx.accounts.token_program.to_account_info(),
-		&ctx.accounts.system_program.to_account_info(),
-		&ctx.accounts.rent.to_account_info(),
-		&ctx.remaining_accounts,
-		ctx.accounts.listing.price,
-		ctx.accounts.listing.get_fee_amount()?
-	)?;
+		assert_keys_equal(
+			account_loader.load()?.marketplace_authority,
+			ctx.accounts.listing.marketplace_authority,
+			"Invalid marketplace authority"
+		)?;
+
+		let bump = account_loader.load()?.bump;
+		let auth_seeds = CustodyAccount::auth_seeds_from_args(
+			ctx.accounts.mint.key,
+			&bump
+		);
+
+		ctx.accounts.transfer_with_seeds(
+			&ctx.accounts.custody_account.to_account_info(),
+			&auth_seeds,
+			ctx.remaining_accounts
+		)?;
+
+		approve_and_freeze(
+			&ctx.accounts.buyer_token_account.to_account_info(),
+			&ctx.accounts.mint.to_account_info(),
+			&ctx.accounts.edition.to_account_info(),
+			&ctx.accounts.buyer.to_account_info(),
+			&ctx.accounts.custody_account.to_account_info(),
+			&ctx.accounts.token_program.to_account_info(),
+			&ctx.accounts.token_metadata_program.to_account_info(),
+			Some(&auth_seeds),
+			1
+		)?;
+
+		let custody_account = &mut account_loader.load_mut()?;
+		custody_account.authority = ctx.accounts.buyer.key();
+		custody_account.is_listed = false;
+	}
 
 	Ok(())
+}
+
+impl<'info> BuyNft<'info> {
+
+	fn transfer_with_seeds<'b>(
+		&self,
+		delegate: &AccountInfo<'info>,
+		auth_seeds: &[&[u8]],
+		remaining_accounts: &'b [AccountInfo<'info>]
+	) -> Result<()> {
+		thaw(
+			&self.seller_token_account.to_account_info(),
+			&self.mint.to_account_info(),
+			&self.edition.to_account_info(),
+			delegate,
+			&self.token_program.to_account_info(),
+			&self.token_metadata_program.to_account_info(),
+			Some(auth_seeds)
+		)?;
+
+		transfer_spl(
+			&self.seller.to_account_info(),
+			&self.buyer.to_account_info(),
+			&self.seller_token_account.to_account_info(),
+			&self.buyer_token_account.to_account_info(),
+			&self.mint.to_account_info(),
+			&self.buyer.to_account_info(),
+			&self.associated_token_program.to_account_info(),
+			&self.token_program.to_account_info(),
+			&self.system_program.to_account_info(),
+			&self.rent.to_account_info(),
+			Some(delegate),
+			Some(auth_seeds),
+			None,
+			1
+		)?;
+
+		transfer_payment(
+			&self.buyer.to_account_info(),
+			&self.seller.to_account_info(),
+			&self.fee_account.to_account_info(),
+			&self.mint.to_account_info(),
+			&self.metadata_account.to_account_info(),
+			self.listing.currency_mint,
+			&self.associated_token_program.to_account_info(),
+			&self.token_program.to_account_info(),
+			&self.system_program.to_account_info(),
+			&self.rent.to_account_info(),
+			&remaining_accounts,
+			self.listing.price,
+			self.listing.get_fee_amount()?
+		)?;
+
+		Ok(())
+	}
+
 }

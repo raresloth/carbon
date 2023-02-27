@@ -1,8 +1,11 @@
 use anchor_lang::prelude::*;
 use anchor_spl::metadata::Metadata;
 use anchor_spl::token::{Mint, Token, TokenAccount};
-use crate::{CustodyAccount};
-use crate::util::{thaw_and_revoke};
+use crate::{
+    CustodyAccount, Listing,
+    util::{thaw_and_revoke},
+    error::Error
+};
 
 #[derive(Accounts)]
 pub struct Uncustody<'info> {
@@ -36,12 +39,15 @@ pub struct Uncustody<'info> {
             CustodyAccount::PREFIX.as_bytes(),
             mint.key().as_ref()
         ],
-        bump = custody_account.bump[0],
+        bump = custody_account.load()?.bump[0],
         has_one = marketplace_authority,
         has_one = authority,
         has_one = mint,
     )]
-    pub custody_account: Box<Account<'info, CustodyAccount>>,
+    pub custody_account: AccountLoader<'info, CustodyAccount>,
+
+    /// CHECK: Verified in handler
+    pub listing: UncheckedAccount<'info>,
 
     pub token_metadata_program: Program<'info, Metadata>,
     pub token_program: Program<'info, Token>,
@@ -51,15 +57,25 @@ pub struct Uncustody<'info> {
 pub fn uncustody_handler<'info>(
     ctx: Context<Uncustody>,
 ) -> Result<()> {
-    let custody_account = &ctx.accounts.custody_account;
-    let auth_seeds = custody_account.auth_seeds();
+    let listing = Listing::from_account_info_with_checks(
+        &ctx.accounts.listing.to_account_info(),
+        ctx.accounts.mint.key()
+    )?;
+
+    require!(listing.is_none(), Error::NftIsListed);
+
+    let bump = ctx.accounts.custody_account.load()?.bump;
+    let auth_seeds = CustodyAccount::auth_seeds_from_args(
+        ctx.accounts.mint.to_account_info().key,
+        &bump
+    );
 
     thaw_and_revoke(
         &ctx.accounts.token_account.to_account_info(),
-        &ctx.accounts.edition.to_account_info(),
         &ctx.accounts.mint.to_account_info(),
+        &ctx.accounts.edition.to_account_info(),
         &ctx.accounts.authority.to_account_info(),
-        &custody_account.to_account_info(),
+        &ctx.accounts.custody_account.to_account_info(),
         &ctx.accounts.token_program.to_account_info(),
         &ctx.accounts.token_metadata_program.to_account_info(),
         Some(&auth_seeds),

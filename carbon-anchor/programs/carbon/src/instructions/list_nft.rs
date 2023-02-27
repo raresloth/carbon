@@ -4,8 +4,11 @@ use anchor_spl::{
     metadata::Metadata
 };
 use anchor_spl::metadata::MetadataAccount;
-use crate::{state::{Listing}, util::{approve_and_freeze}, error::Error, MarketplaceConfig, CollectionConfig};
-use crate::util::assert_is_nft_in_collection;
+use crate::{
+    state::{Listing},
+    util::{approve_and_freeze, assert_is_nft_in_collection, assert_keys_equal},
+    error::Error, MarketplaceConfig, CollectionConfig, CustodyAccount
+};
 
 #[derive(Accounts)]
 pub struct ListNft<'info> {
@@ -72,6 +75,10 @@ pub struct ListNft<'info> {
     )]
     pub marketplace_config: Box<Account<'info, MarketplaceConfig>>,
 
+    #[account(mut)]
+    /// CHECK: Validated in handler
+    pub custody_account: UncheckedAccount<'info>,
+
     pub token_metadata_program: Program<'info, Metadata>,
     pub token_program: Program<'info, Token>,
     pub system_program: Program<'info, System>,
@@ -79,7 +86,7 @@ pub struct ListNft<'info> {
 }
 
 pub fn list_nft_handler<'info>(
-    ctx: Context<ListNft>,
+    ctx: Context<'_, '_, '_, 'info, ListNft<'info>>,
     price: u64,
     expiry: i64,
 ) -> Result<()> {
@@ -87,6 +94,11 @@ pub fn list_nft_handler<'info>(
         &ctx.accounts.mint,
         &ctx.accounts.metadata_account,
         ctx.accounts.collection_mint.key()
+    )?;
+
+    CustodyAccount::assert_is_key_for_mint(
+        ctx.accounts.custody_account.key(),
+        ctx.accounts.mint.key(),
     )?;
 
     let listing_account = &ctx.accounts.listing.to_account_info().clone();
@@ -105,18 +117,40 @@ pub fn list_nft_handler<'info>(
         expiry,
     )?;
 
-    let auth_seeds = listing.auth_seeds();
-    approve_and_freeze(
-        &ctx.accounts.token_account.to_account_info(),
-        &ctx.accounts.edition.to_account_info(),
-        &ctx.accounts.mint.to_account_info(),
-        &ctx.accounts.seller.to_account_info(),
-        &listing_account,
-        &ctx.accounts.token_program.to_account_info(),
-        &ctx.accounts.token_metadata_program.to_account_info(),
-        Some(&auth_seeds),
-        1
-    )?;
+    if ctx.accounts.custody_account.data_is_empty() {
+        let auth_seeds = listing.auth_seeds();
+        approve_and_freeze(
+            &ctx.accounts.token_account.to_account_info(),
+            &ctx.accounts.mint.to_account_info(),
+            &ctx.accounts.edition.to_account_info(),
+            &ctx.accounts.seller.to_account_info(),
+            &listing_account,
+            &ctx.accounts.token_program.to_account_info(),
+            &ctx.accounts.token_metadata_program.to_account_info(),
+            Some(&auth_seeds),
+            1
+        )?;
+    } else {
+        let account_loader = AccountLoader::<'info, CustodyAccount>::try_from(
+            &ctx.accounts.custody_account.to_account_info()
+        )?;
+
+        assert_keys_equal(
+            account_loader.load()?.marketplace_authority,
+            ctx.accounts.collection_config.marketplace_authority,
+            "Invalid marketplace authority"
+        )?;
+
+        // Only the owner or the marketplace authority can list a custodial NFT
+        require!(
+            ctx.accounts.seller.key() == account_loader.load()?.authority  ||
+            ctx.accounts.seller.key() == ctx.accounts.collection_config.marketplace_authority,
+            Error::InvalidSeller
+        );
+
+        let custody_account = &mut account_loader.load_mut()?;
+        custody_account.is_listed = true;
+    }
 
     Ok(())
 }

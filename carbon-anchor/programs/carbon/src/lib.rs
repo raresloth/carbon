@@ -1,14 +1,14 @@
 use anchor_lang::prelude::*;
 use instructions::*;
 use state::*;
+use id::*;
 
 pub mod instructions;
 pub mod state;
 pub mod error;
 mod util;
 mod constants;
-
-declare_id!("CRBNZ9mWZXkgX7Um6FsdFMGFHfeNgfwbyPYtuzHxbPWB");
+mod id;
 
 #[program]
 pub mod carbon {
@@ -22,7 +22,11 @@ pub mod carbon {
         instructions::init_collection_config_handler(ctx, args)
     }
 
-    pub fn list_nft(ctx: Context<ListNft>, price: u64, expiry: i64) -> Result<()> {
+    pub fn list_nft<'info>(
+        ctx: Context<'_, '_, '_, 'info, ListNft<'info>>,
+        price: u64,
+        expiry: i64
+    ) -> Result<()> {
         instructions::list_nft_handler(ctx, price, expiry)
     }
 
@@ -30,7 +34,7 @@ pub mod carbon {
         instructions::list_virtual_handler(ctx, id, price, expiry)
     }
 
-    pub fn delist_nft(ctx: Context<DelistNft>) -> Result<()> {
+    pub fn delist_nft<'info>(ctx: Context<'_, '_, '_, 'info, DelistNft<'info>>) -> Result<()> {
         instructions::delist_nft_handler(ctx)
     }
 

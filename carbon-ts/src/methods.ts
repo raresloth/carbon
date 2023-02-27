@@ -39,13 +39,14 @@ export class Methods {
 		price: number,
 		expiry: number,
 		currencyMint: PublicKey = NATIVE_MINT,
+		accounts: any = {}
 	) {
 		await this.carbon.program.methods
 			.listNft(
 				new BN(price),
 				new BN(expiry),
 			)
-			.accounts({
+			.accounts(Object.assign({
 				seller: seller.publicKey,
 				tokenAccount: getAssociatedTokenAddressSync(mint, seller.publicKey),
 				mint,
@@ -56,8 +57,9 @@ export class Methods {
 				listing: this.carbon.pdas.listing(mint),
 				collectionConfig: this.carbon.pdas.collectionConfig(collectionMint),
 				marketplaceConfig: this.carbon.pdas.marketplaceConfig(this.carbon.marketplaceAuthority),
+				custodyAccount: this.carbon.pdas.custodyAccount(mint),
 				tokenMetadataProgram: TOKEN_METADATA_PROGRAM_ID,
-			})
+			}, accounts))
 			.signers([seller])
 			.rpc();
 	}
@@ -74,6 +76,7 @@ export class Methods {
 				mint,
 				edition: getEditionPDA(mint),
 				listing: this.carbon.pdas.listing(mint),
+				custodyAccount: this.carbon.pdas.custodyAccount(mint),
 				tokenMetadataProgram: TOKEN_METADATA_PROGRAM_ID,
 			})
 			.signers([seller])
@@ -97,6 +100,7 @@ export class Methods {
 				metadataAccount: getMetadataPDA(listing.id),
 				edition: getEditionPDA(listing.id),
 				listing: this.carbon.pdas.listing(listing.id),
+				custodyAccount: this.carbon.pdas.custodyAccount(listing.id),
 				feeAccount: listing.feeConfig.feeAccount,
 				tokenMetadataProgram: TOKEN_METADATA_PROGRAM_ID,
 				associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
@@ -258,18 +262,20 @@ export class Methods {
 	async custody(
 		authority: Keypair,
 		mint: PublicKey,
+		accounts: any = {}
 	) {
 		await this.carbon.program.methods
 			.custody()
-			.accounts({
+			.accounts(Object.assign({
 				authority: authority.publicKey,
 				marketplaceAuthority: this.carbon.marketplaceAuthority,
 				tokenAccount: getAssociatedTokenAddressSync(mint, authority.publicKey),
 				mint,
 				edition: getEditionPDA(mint),
 				custodyAccount: this.carbon.pdas.custodyAccount(mint),
+				listing: this.carbon.pdas.listing(mint),
 				tokenMetadataProgram: TOKEN_METADATA_PROGRAM_ID,
-			})
+			}, accounts))
 			.signers([authority])
 			.rpc();
 	}
@@ -287,6 +293,7 @@ export class Methods {
 				mint: custodyAccount.mint,
 				edition: getEditionPDA(custodyAccount.mint),
 				custodyAccount: this.carbon.pdas.custodyAccount(custodyAccount.mint),
+				listing: this.carbon.pdas.listing(custodyAccount.mint),
 				tokenMetadataProgram: TOKEN_METADATA_PROGRAM_ID,
 			})
 			.signers([authority])
@@ -307,6 +314,7 @@ export class Methods {
 				mint: custodyAccount.mint,
 				edition: getEditionPDA(custodyAccount.mint),
 				custodyAccount: this.carbon.pdas.custodyAccount(custodyAccount.mint),
+				listing: this.carbon.pdas.listing(custodyAccount.mint),
 				tokenMetadataProgram: TOKEN_METADATA_PROGRAM_ID,
 				associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
 			})
