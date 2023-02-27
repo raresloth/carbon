@@ -52,7 +52,7 @@ describe("carbon", () => {
 		let promises = []
 
 		marketplaceAuthority = Keypair.generate()
-		carbon = new Carbon(provider, marketplaceAuthority.publicKey, program.programId);
+		carbon = new Carbon(provider, marketplaceAuthority, program.programId);
 		marketplaceConfigPDA = carbon.pdas.marketplaceConfig(marketplaceAuthority.publicKey)
 		promises.push(setBalance(provider, marketplaceAuthority, 100 * LAMPORTS_PER_SOL))
 
@@ -77,7 +77,7 @@ describe("carbon", () => {
 	describe("init_marketplace_config", function () {
 
 		it("should initialize the marketplace config correctly", async function () {
-			await carbon.methods.initMarketplaceConfig(marketplaceAuthority, {
+			await carbon.methods.initMarketplaceConfig({
 				feeConfig: defaultFeeConfig
 			})
 
@@ -92,7 +92,7 @@ describe("carbon", () => {
 	describe("init_collection_config", function () {
 
 		it("should initialize the collection config correctly", async function () {
-			await carbon.methods.initCollectionConfig(marketplaceAuthority, {
+			await carbon.methods.initCollectionConfig({
 				collectionMint,
 				sellerFeeBasisPoints: defaultSellerFeeBps,
 				symbol: defaultSymbol
@@ -113,10 +113,10 @@ describe("carbon", () => {
 		beforeEach(setUpData)
 		async function setUpData() {
 			const results = await Promise.all([
-				carbon.methods.initMarketplaceConfig(marketplaceAuthority, {
+				carbon.methods.initMarketplaceConfig({
 					feeConfig: defaultFeeConfig
 				}),
-				carbon.methods.initCollectionConfig(marketplaceAuthority, {
+				carbon.methods.initCollectionConfig({
 					collectionMint,
 					sellerFeeBasisPoints: defaultSellerFeeBps,
 					symbol: defaultSymbol
@@ -389,7 +389,7 @@ describe("carbon", () => {
 				await carbon.methods.custody(seller, id)
 
 				const custodyAccount = await program.account.custodyAccount.fetch(custodyAccountPDA)
-				await carbon.methods.takeOwnership(marketplaceAuthority, custodyAccount)
+				await carbon.methods.takeOwnership(custodyAccount)
 
 				// Custody account should no longer exist
 				await assertThrows(async () => await program.account.custodyAccount.fetch(custodyAccountPDA));
@@ -406,7 +406,7 @@ describe("carbon", () => {
 				await carbon.methods.custody(seller, id)
 				await carbon.methods.listNft(seller, id, collectionMint, price, expiry)
 				const custodyAccount = await program.account.custodyAccount.fetch(custodyAccountPDA)
-				await assertThrows(async () => await carbon.methods.takeOwnership(marketplaceAuthority, custodyAccount))
+				await assertThrows(async () => await carbon.methods.takeOwnership(custodyAccount))
 			});
 
 		});
@@ -418,10 +418,10 @@ describe("carbon", () => {
 		beforeEach(setUpData)
 		async function setUpData() {
 			await Promise.all([
-				carbon.methods.initMarketplaceConfig(marketplaceAuthority, {
+				carbon.methods.initMarketplaceConfig({
 					feeConfig: defaultFeeConfig
 				}),
-				carbon.methods.initCollectionConfig(marketplaceAuthority, {
+				carbon.methods.initCollectionConfig({
 					collectionMint,
 					sellerFeeBasisPoints: defaultSellerFeeBps,
 					symbol: defaultSymbol
@@ -435,7 +435,7 @@ describe("carbon", () => {
 		describe("list_virtual", function () {
 
 			it("should list the virtual item correctly", async function () {
-				await carbon.methods.listVirtual(marketplaceAuthority, id, collectionMint, price, expiry)
+				await carbon.methods.listVirtual(id, collectionMint, price, expiry)
 
 				const listing = await program.account.listing.fetch(listingPDA);
 				assert.equal(listing.version, 1);
@@ -454,8 +454,8 @@ describe("carbon", () => {
 		describe("delist_virtual", function () {
 
 			it("should delist the virtual item correctly", async function () {
-				await carbon.methods.listVirtual(marketplaceAuthority, id, collectionMint, price, expiry)
-				await carbon.methods.delistVirtual(marketplaceAuthority, id)
+				await carbon.methods.listVirtual(id, collectionMint, price, expiry)
+				await carbon.methods.delistVirtual(id)
 
 				// Listing should no longer exist
 				await assertThrows(async () => await program.account.listing.fetch(listingPDA));
@@ -467,7 +467,7 @@ describe("carbon", () => {
 
 			it("should buy the virtual item correctly", async function () {
 				const marketplaceAuthPreBalance = await provider.connection.getBalance(marketplaceAuthority.publicKey)
-				await carbon.methods.listVirtual(marketplaceAuthority, id, collectionMint, price, expiry)
+				await carbon.methods.listVirtual(id, collectionMint, price, expiry)
 				const listing = await program.account.listing.fetch(listingPDA);
 				const collectionConfig = await program.account.collectionConfig.fetch(collectionConfigPDA);
 
@@ -475,7 +475,6 @@ describe("carbon", () => {
 				const feeAccountPreBalance = await provider.connection.getBalance(FEE_ACCOUNT_KEY)
 				const mint = await carbon.methods.buyVirtual(
 					buyer,
-					marketplaceAuthority,
 					collectionConfig as IdlAccounts<CarbonIDL.Carbon>["collectionConfig"],
 					listing as IdlAccounts<CarbonIDL.Carbon>["listing"],
 					{
@@ -523,13 +522,12 @@ describe("carbon", () => {
 				const { mint: splTokenMint } =
 					await createSplToken(provider, marketplaceAuthority, buyer.publicKey, price)
 
-				await carbon.methods.listVirtual(marketplaceAuthority, id, collectionMint, price, expiry, splTokenMint)
+				await carbon.methods.listVirtual(id, collectionMint, price, expiry, splTokenMint)
 				const listing = await program.account.listing.fetch(listingPDA);
 				const collectionConfig = await program.account.collectionConfig.fetch(collectionConfigPDA);
 
 				await carbon.methods.buyVirtual(
 					buyer,
-					marketplaceAuthority,
 					collectionConfig as IdlAccounts<CarbonIDL.Carbon>["collectionConfig"],
 					listing as IdlAccounts<CarbonIDL.Carbon>["listing"],
 					{

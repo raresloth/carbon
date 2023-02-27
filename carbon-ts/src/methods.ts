@@ -11,25 +11,25 @@ export class Methods {
 	) {}
 
 	async initMarketplaceConfig(
-		marketplaceAuthority: Keypair,
-		args: IdlTypes<CarbonIDL.Carbon>["MarketplaceConfigArgs"]
+		args: IdlTypes<CarbonIDL.Carbon>["MarketplaceConfigArgs"],
+		marketplaceAuthority: Keypair | undefined = this.carbon.marketplaceAuthorityKeypair,
 	) {
 		await this.carbon.program.methods.initMarketplaceConfig(args)
 			.accounts({
-				marketplaceAuthority: marketplaceAuthority.publicKey,
-				marketplaceConfig: this.carbon.pdas.marketplaceConfig(marketplaceAuthority.publicKey),
-			}).signers([marketplaceAuthority]).rpc();
+				marketplaceAuthority: marketplaceAuthority!.publicKey,
+				marketplaceConfig: this.carbon.pdas.marketplaceConfig(marketplaceAuthority!.publicKey),
+			}).signers([marketplaceAuthority!]).rpc();
 	}
 
 	async initCollectionConfig(
-		marketplaceAuthority: Keypair,
-		args: IdlTypes<CarbonIDL.Carbon>["CollectionConfigArgs"]
+		args: IdlTypes<CarbonIDL.Carbon>["CollectionConfigArgs"],
+		marketplaceAuthority: Keypair | undefined = this.carbon.marketplaceAuthorityKeypair,
 	) {
 		await this.carbon.program.methods.initCollectionConfig(args)
 			.accounts({
-				marketplaceAuthority: marketplaceAuthority.publicKey,
+				marketplaceAuthority: marketplaceAuthority!.publicKey,
 				collectionConfig: this.carbon.pdas.collectionConfig(args.collectionMint),
-			}).signers([marketplaceAuthority]).rpc();
+			}).signers([marketplaceAuthority!]).rpc();
 	}
 
 	async listNft(
@@ -148,12 +148,12 @@ export class Methods {
 	}
 
 	async listVirtual(
-		marketplaceAuthority: Keypair,
 		id: PublicKey,
 		collectionMint: PublicKey,
 		price: number,
 		expiry: number,
 		currencyMint: PublicKey = NATIVE_MINT,
+		marketplaceAuthority: Keypair | undefined = this.carbon.marketplaceAuthorityKeypair,
 	) {
 		await this.carbon.program.methods
 			.listVirtual(
@@ -162,38 +162,38 @@ export class Methods {
 				new BN(expiry),
 			)
 			.accounts({
-				marketplaceAuthority: marketplaceAuthority.publicKey,
+				marketplaceAuthority: marketplaceAuthority!.publicKey,
 				currencyMint,
 				listing: this.carbon.pdas.listing(id),
 				collectionConfig: this.carbon.pdas.collectionConfig(collectionMint),
 				marketplaceConfig: this.carbon.pdas.marketplaceConfig(this.carbon.marketplaceAuthority),
 			})
-			.signers([marketplaceAuthority])
+			.signers([marketplaceAuthority!])
 			.rpc();
 	}
 
 	async delistVirtual(
-		marketplaceAuthority: Keypair,
 		id: PublicKey,
+		marketplaceAuthority: Keypair | undefined = this.carbon.marketplaceAuthorityKeypair,
 	) {
 		await this.carbon.program.methods
 			.delistVirtual(
 				id
 			)
 			.accounts({
-				marketplaceAuthority: marketplaceAuthority.publicKey,
+				marketplaceAuthority: marketplaceAuthority!.publicKey,
 				listing: this.carbon.pdas.listing(id),
 			})
-			.signers([marketplaceAuthority])
+			.signers([marketplaceAuthority!])
 			.rpc();
 	}
 
 	async buyVirtual(
 		buyer: Keypair,
-		marketplaceAuthority: Keypair,
 		collectionConfig: IdlAccounts<CarbonIDL.Carbon>["collectionConfig"],
 		listing: IdlAccounts<CarbonIDL.Carbon>["listing"],
-		metadata: IdlTypes<CarbonIDL.Carbon>["Metadata"]
+		metadata: IdlTypes<CarbonIDL.Carbon>["Metadata"],
+		marketplaceAuthority: Keypair | undefined = this.carbon.marketplaceAuthorityKeypair,
 	): Promise<PublicKey> {
 		const mint = Keypair.generate();
 
@@ -205,7 +205,7 @@ export class Methods {
 			)
 			.accounts({
 				buyer: buyer.publicKey,
-				marketplaceAuthority: marketplaceAuthority.publicKey,
+				marketplaceAuthority: marketplaceAuthority!.publicKey,
 				mint: mint.publicKey,
 				collectionConfig: this.carbon.pdas.collectionConfig(collectionConfig.collectionMint),
 				buyerTokenAccount: getAssociatedTokenAddressSync(mint.publicKey, buyer.publicKey),
@@ -222,7 +222,7 @@ export class Methods {
 
 		if (listing.currencyMint.equals(NATIVE_MINT)) {
 			builder.remainingAccounts([{
-				pubkey: marketplaceAuthority.publicKey,
+				pubkey: marketplaceAuthority!.publicKey,
 				isWritable: true,
 				isSigner: false,
 			}])
@@ -236,11 +236,11 @@ export class Methods {
 				isWritable: true,
 				isSigner: false,
 			}, {
-				pubkey: marketplaceAuthority.publicKey,
+				pubkey: marketplaceAuthority!.publicKey,
 				isWritable: false,
 				isSigner: false,
 			}, {
-				pubkey: getAssociatedTokenAddressSync(listing.currencyMint, marketplaceAuthority.publicKey),
+				pubkey: getAssociatedTokenAddressSync(listing.currencyMint, marketplaceAuthority!.publicKey),
 				isWritable: true,
 				isSigner: false,
 			}, {
@@ -254,7 +254,7 @@ export class Methods {
 			])
 		}
 
-		await builder.signers([buyer, marketplaceAuthority, mint]).rpc();
+		await builder.signers([buyer, marketplaceAuthority!, mint]).rpc();
 
 		return mint.publicKey;
 	}
@@ -262,13 +262,14 @@ export class Methods {
 	async custody(
 		authority: Keypair,
 		mint: PublicKey,
-		accounts: any = {}
+		accounts: any = {},
+		marketplaceAuthority: Keypair | undefined = this.carbon.marketplaceAuthorityKeypair,
 	) {
 		await this.carbon.program.methods
 			.custody()
 			.accounts(Object.assign({
 				authority: authority.publicKey,
-				marketplaceAuthority: this.carbon.marketplaceAuthority,
+				marketplaceAuthority: marketplaceAuthority!.publicKey,
 				tokenAccount: getAssociatedTokenAddressSync(mint, authority.publicKey),
 				mint,
 				edition: getEditionPDA(mint),
@@ -283,12 +284,13 @@ export class Methods {
 	async uncustody(
 		authority: Keypair,
 		custodyAccount: IdlAccounts<CarbonIDL.Carbon>["custodyAccount"],
+		marketplaceAuthority: Keypair | undefined = this.carbon.marketplaceAuthorityKeypair,
 	) {
 		await this.carbon.program.methods
 			.uncustody()
 			.accounts({
 				authority: authority.publicKey,
-				marketplaceAuthority: this.carbon.marketplaceAuthority,
+				marketplaceAuthority: marketplaceAuthority!.publicKey,
 				tokenAccount: getAssociatedTokenAddressSync(custodyAccount.mint, authority.publicKey),
 				mint: custodyAccount.mint,
 				edition: getEditionPDA(custodyAccount.mint),
@@ -301,8 +303,8 @@ export class Methods {
 	}
 
 	async takeOwnership(
-		marketplaceAuthority: Keypair,
 		custodyAccount: IdlAccounts<CarbonIDL.Carbon>["custodyAccount"],
+		marketplaceAuthority: Keypair | undefined = this.carbon.marketplaceAuthorityKeypair,
 	) {
 		await this.carbon.program.methods
 			.takeOwnership()
@@ -310,7 +312,7 @@ export class Methods {
 				marketplaceAuthority: this.carbon.marketplaceAuthority,
 				authority: custodyAccount.authority,
 				tokenAccount: getAssociatedTokenAddressSync(custodyAccount.mint, custodyAccount.authority),
-				marketplaceAuthorityTokenAccount: getAssociatedTokenAddressSync(custodyAccount.mint, marketplaceAuthority.publicKey),
+				marketplaceAuthorityTokenAccount: getAssociatedTokenAddressSync(custodyAccount.mint, marketplaceAuthority!.publicKey),
 				mint: custodyAccount.mint,
 				edition: getEditionPDA(custodyAccount.mint),
 				custodyAccount: this.carbon.pdas.custodyAccount(custodyAccount.mint),
@@ -318,7 +320,7 @@ export class Methods {
 				tokenMetadataProgram: TOKEN_METADATA_PROGRAM_ID,
 				associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
 			})
-			.signers([marketplaceAuthority])
+			.signers([marketplaceAuthority!])
 			.rpc();
 	}
 
