@@ -32,6 +32,38 @@ export class Methods {
 			}).signers([marketplaceAuthority!]).rpc();
 	}
 
+	async listItem(
+		id: PublicKey,
+		collectionMint: PublicKey,
+		price: number,
+		expiry: number,
+		currencyMint: PublicKey = NATIVE_MINT,
+		seller: Keypair | undefined = this.carbon.marketplaceAuthorityKeypair,
+	) {
+		const mintAccountInfo = await this.carbon.program.provider.connection.getAccountInfo(id);
+
+		// Account info does not exist, therefore has not been minted
+		if (mintAccountInfo == null) {
+			await this.listVirtual(
+				id,
+				collectionMint,
+				price,
+				expiry,
+				currencyMint,
+				seller,
+			)
+		} else {
+			await this.listNft(
+				seller!,
+				id,
+				collectionMint,
+				price,
+				expiry,
+				currencyMint,
+			)
+		}
+	}
+
 	async listNft(
 		seller: Keypair,
 		mint: PublicKey,

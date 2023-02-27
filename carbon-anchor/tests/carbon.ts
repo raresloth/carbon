@@ -555,4 +555,74 @@ describe("carbon", () => {
 
 	})
 
+	describe("combined flows", function () {
+
+		describe("listItem", function () {
+
+			it("should list as virtual if account for id does not exist", async function () {
+				await Promise.all([
+					carbon.methods.initMarketplaceConfig({
+						feeConfig: defaultFeeConfig
+					}),
+					carbon.methods.initCollectionConfig({
+						collectionMint,
+						sellerFeeBasisPoints: defaultSellerFeeBps,
+						symbol: defaultSymbol
+					})
+				])
+
+				id = Keypair.generate().publicKey
+				listingPDA = carbon.pdas.listing(id)
+
+				await carbon.methods.listItem(
+					id,
+					collectionMint,
+					price,
+					expiry,
+				)
+
+				const listing = await program.account.listing.fetch(listingPDA);
+				assert.isTrue(listing.isVirtual);
+			});
+
+			it("should list as not virtual if account for id not exist", async function () {
+				const results = await Promise.all([
+					carbon.methods.initMarketplaceConfig({
+						feeConfig: defaultFeeConfig
+					}),
+					carbon.methods.initCollectionConfig({
+						collectionMint,
+						sellerFeeBasisPoints: defaultSellerFeeBps,
+						symbol: defaultSymbol
+					}),
+					createNFT(provider, marketplaceAuthority, collectionMint, {
+						tokenOwner: seller.publicKey
+					})
+				])
+
+				const nft = results[2]
+				id = nft.mint
+				metadataAccount = nft.metadataAccount
+				edition = nft.edition
+				sellerTokenAccount = getAssociatedTokenAddressSync(id, seller.publicKey)
+				listingPDA = carbon.pdas.listing(id)
+				custodyAccountPDA = carbon.pdas.custodyAccount(id)
+
+				await carbon.methods.listItem(
+					id,
+					collectionMint,
+					price,
+					expiry,
+					NATIVE_MINT,
+					seller
+				)
+
+				const listing = await program.account.listing.fetch(listingPDA);
+				assert.isFalse(listing.isVirtual);
+			});
+
+		});
+
+	});
+
 });
