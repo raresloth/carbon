@@ -288,8 +288,8 @@ describe("carbon", () => {
 			});
 
 			it("should buy the custodial nft correctly", async function () {
-				await carbon.methods.custody(seller, id)
 				const sellerPreBalance = await provider.connection.getBalance(seller.publicKey)
+				await carbon.methods.custody(seller, id)
 				await carbon.methods.listNft(seller, id, collectionMint, price, expiry)
 				const listing = await program.account.listing.fetch(listingPDA);
 
@@ -305,6 +305,10 @@ describe("carbon", () => {
 				const marketplacePostBalance = await provider.connection.getBalance(marketplaceAuthority.publicKey)
 				const feeAccountPostBalance = await provider.connection.getBalance(FEE_ACCOUNT_KEY)
 
+				// Make sure buyer is the owner and can transfer the NFT
+				const buyerTokenAccount = getAssociatedTokenAddressSync(id, buyer.publicKey)
+				await transferChecked(provider.connection, buyer, buyerTokenAccount, id, sellerTokenAccount, buyer, 1, 0)
+
 				// Make sure correct amounts were sent to seller and fee account
 				// Rent fee for creating NFT account is a bit over 0.002 SOL
 				const ataRent = 0.002 * LAMPORTS_PER_SOL
@@ -317,14 +321,8 @@ describe("carbon", () => {
 				assert.equal(marketplacePostBalance - marketplacePreBalance, royalty)
 				assert.equal(feeAccountPostBalance - feeAccountPreBalance, marketplaceFee)
 
-				const custodyAccount = await program.account.custodyAccount.fetch(custodyAccountPDA);
-				assert.isFalse(custodyAccount.isListed);
-				assert.equal(custodyAccount.authority.toString(), buyer.publicKey.toString());
-
-				const buyerTokenAccount = getAssociatedTokenAddressSync(id, buyer.publicKey)
-				const buyerTokenAccountObj = await getAccount(provider.connection, buyerTokenAccount);
-				assert.equal(buyerTokenAccountObj.delegate.toString(), custodyAccountPDA.toString());
-				assert.isTrue(buyerTokenAccountObj.isFrozen);
+				// Custody account should no longer exist
+				await assertThrows(async () => await program.account.custodyAccount.fetch(custodyAccountPDA));
 			});
 
 		});

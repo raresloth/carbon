@@ -6,7 +6,7 @@ use anchor_spl::{
 use anchor_spl::metadata::Metadata;
 use crate::{CustodyAccount, state::{Listing}};
 use crate::error::Error;
-use crate::util::{approve_and_freeze, assert_keys_equal, thaw, transfer_payment, transfer_spl};
+use crate::util::{assert_keys_equal, thaw, transfer_payment, transfer_spl};
 
 #[derive(Accounts)]
 pub struct BuyNft<'info> {
@@ -124,21 +124,7 @@ pub fn buy_nft_handler<'info>(
 			ctx.remaining_accounts
 		)?;
 
-		approve_and_freeze(
-			&ctx.accounts.buyer_token_account.to_account_info(),
-			&ctx.accounts.mint.to_account_info(),
-			&ctx.accounts.edition.to_account_info(),
-			&ctx.accounts.buyer.to_account_info(),
-			&ctx.accounts.custody_account.to_account_info(),
-			&ctx.accounts.token_program.to_account_info(),
-			&ctx.accounts.token_metadata_program.to_account_info(),
-			Some(&auth_seeds),
-			1
-		)?;
-
-		let custody_account = &mut account_loader.load_mut()?;
-		custody_account.authority = ctx.accounts.buyer.key();
-		custody_account.is_listed = false;
+		account_loader.close(ctx.accounts.seller.to_account_info())?;
 	}
 
 	Ok(())
