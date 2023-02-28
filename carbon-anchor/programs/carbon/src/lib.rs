@@ -44,18 +44,18 @@ pub mod carbon {
 
     pub fn buy_nft<'info>(
         ctx: Context<'_, '_, '_, 'info, BuyNft<'info>>,
-        price: u64,
+        max_price: u64,
     ) -> Result<()> {
-        instructions::buy_nft_handler(ctx, price)
+        instructions::buy_nft_handler(ctx, max_price)
     }
 
     pub fn buy_virtual<'info>(
         ctx: Context<'_, '_, '_, 'info, BuyVirtual<'info>>,
         id: Pubkey,
-        price: u64,
+        max_price: u64,
         metadata: Metadata
     ) -> Result<()> {
-        instructions::buy_virtual_handler(ctx, id, price, metadata)
+        instructions::buy_virtual_handler(ctx, id, max_price, metadata)
     }
 
     pub fn custody<'info>(ctx: Context<Custody>) -> Result<()> {

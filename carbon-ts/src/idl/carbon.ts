@@ -442,7 +442,7 @@ export type Carbon = {
       ],
       "args": [
         {
-          "name": "price",
+          "name": "maxPrice",
           "type": "u64"
         }
       ]
@@ -572,7 +572,7 @@ export type Carbon = {
           "type": "publicKey"
         },
         {
-          "name": "price",
+          "name": "maxPrice",
           "type": "u64"
         },
         {
@@ -1134,8 +1134,8 @@ export type Carbon = {
     },
     {
       "code": 6004,
-      "name": "PriceMismatch",
-      "msg": "Price mismatch"
+      "name": "MaxPriceExceeded",
+      "msg": "Max price exceeded"
     },
     {
       "code": 6005,
@@ -1629,7 +1629,7 @@ export const IDL: Carbon = {
       ],
       "args": [
         {
-          "name": "price",
+          "name": "maxPrice",
           "type": "u64"
         }
       ]
@@ -1759,7 +1759,7 @@ export const IDL: Carbon = {
           "type": "publicKey"
         },
         {
-          "name": "price",
+          "name": "maxPrice",
           "type": "u64"
         },
         {
@@ -2321,8 +2321,8 @@ export const IDL: Carbon = {
     },
     {
       "code": 6004,
-      "name": "PriceMismatch",
-      "msg": "Price mismatch"
+      "name": "MaxPriceExceeded",
+      "msg": "Max price exceeded"
     },
     {
       "code": 6005,

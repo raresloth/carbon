@@ -118,13 +118,13 @@ impl Listing {
 			.ok_or(Error::OverflowError)? as u64);
 	}
 
-	pub fn assert_can_buy(&self, price: u64) -> Result<()> {
+	pub fn assert_can_buy(&self, max_price: u64) -> Result<()> {
 		if self.expiry <= Clock::get()?.unix_timestamp {
 			return err!(Error::ListingExpired);
 		}
 
-		if self.price != price {
-			return err!(Error::PriceMismatch);
+		if self.price > max_price {
+			return err!(Error::MaxPriceExceeded);
 		}
 
 		return Ok(());

@@ -84,9 +84,9 @@ pub struct BuyNft<'info> {
 /// 6. seller currency ata
 pub fn buy_nft_handler<'info>(
 	ctx: Context<'_, '_, '_, 'info, BuyNft<'info>>,
-	price: u64,
+	max_price: u64,
 ) -> Result<()> {
-	ctx.accounts.listing.assert_can_buy(price)?;
+	ctx.accounts.listing.assert_can_buy(max_price)?;
 
 	CustodyAccount::assert_is_key_for_mint(
 		ctx.accounts.custody_account.key(),

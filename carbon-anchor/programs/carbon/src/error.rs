@@ -11,8 +11,8 @@ pub enum Error {
 	NotVirtual,
 	#[msg("Listing expired")]
 	ListingExpired,
-	#[msg("Price mismatch")]
-	PriceMismatch,
+	#[msg("Max price exceeded")]
+	MaxPriceExceeded,
 
 	/// 5
 	#[msg("Invalid listing authority")]

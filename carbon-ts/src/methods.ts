@@ -90,6 +90,31 @@ export class Methods {
 		}
 	}
 
+	async delistOrBuyItem(
+		listing: IdlAccounts<CarbonIDL.Carbon>["listing"],
+		maxPrice?: number,
+	) {
+		if (listing.isVirtual) {
+			await this.delistVirtual(
+				listing.id,
+				this.carbon.marketplaceAuthorityKeypair,
+			)
+		} else {
+			if (listing.seller.equals(this.carbon.marketplaceAuthorityKeypair!.publicKey)) {
+				await this.delistNft(
+					this.carbon.marketplaceAuthorityKeypair!,
+					listing.id,
+				)
+			} else {
+				await this.buyNft(
+					this.carbon.marketplaceAuthorityKeypair!,
+					listing,
+					maxPrice
+				)
+			}
+		}
+	}
+
 	async listNft(
 		seller: Keypair,
 		mint: PublicKey,
@@ -144,10 +169,11 @@ export class Methods {
 	async buyNft(
 		buyer: Keypair,
 		listing: IdlAccounts<CarbonIDL.Carbon>["listing"],
+		maxPrice?: number,
 	): Promise<void> {
 		const builder = this.carbon.program.methods
 			.buyNft(
-				listing.price,
+				maxPrice ? new BN(maxPrice) : listing.price,
 			)
 			.accounts({
 				buyer: buyer.publicKey,
@@ -251,6 +277,7 @@ export class Methods {
 		collectionConfig: IdlAccounts<CarbonIDL.Carbon>["collectionConfig"],
 		listing: IdlAccounts<CarbonIDL.Carbon>["listing"],
 		metadata: IdlTypes<CarbonIDL.Carbon>["Metadata"],
+		maxPrice?: number,
 		marketplaceAuthority: Keypair | undefined = this.carbon.marketplaceAuthorityKeypair,
 	): Promise<PublicKey> {
 		const mint = Keypair.generate();
@@ -258,7 +285,7 @@ export class Methods {
 		const builder = this.carbon.program.methods
 			.buyVirtual(
 				listing.id,
-				listing.price,
+				maxPrice ? new BN(maxPrice) : listing.price,
 				metadata
 			)
 			.accounts({

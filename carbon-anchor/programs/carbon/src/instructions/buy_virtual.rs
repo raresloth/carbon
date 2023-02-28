@@ -110,10 +110,10 @@ pub struct BuyVirtual<'info> {
 pub fn buy_virtual_handler<'info>(
 	ctx: Context<'_, '_, '_, 'info, BuyVirtual<'info>>,
 	_id: Pubkey,
-	price: u64,
+	max_price: u64,
 	metadata: Metadata
 ) -> Result<()> {
-	ctx.accounts.listing.assert_can_buy(price)?;
+	ctx.accounts.listing.assert_can_buy(max_price)?;
 
 	let data = &ctx.accounts.collection_config.get_mpl_metadata(metadata)?;
 	// Mint the NFT to the buyer.
