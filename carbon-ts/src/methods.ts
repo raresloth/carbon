@@ -64,6 +64,32 @@ export class Methods {
 		}
 	}
 
+	async delistItem(
+		id: PublicKey,
+		seller: Keypair | undefined = this.carbon.marketplaceAuthorityKeypair,
+	) {
+		try {
+			const listing = await this.carbon.program.account.listing.fetch(this.carbon.pdas.listing(id));
+			if (listing.isVirtual) {
+				await this.delistVirtual(
+					id,
+					seller,
+				)
+			} else {
+				await this.delistNft(
+					seller!,
+					id,
+				)
+			}
+		} catch (e) {
+			if (e?.message.includes('Account does not exist')) {
+				return
+			} else {
+				throw e
+			}
+		}
+	}
+
 	async listNft(
 		seller: Keypair,
 		mint: PublicKey,
