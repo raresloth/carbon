@@ -2,7 +2,11 @@ use anchor_lang::prelude::*;
 use anchor_spl::{
     token::{Mint},
 };
-use crate::{state::{Listing}, error::Error, MarketplaceConfig, CollectionConfig};
+use crate::{
+    state::{Listing, MarketplaceConfig, CollectionConfig},
+    event::List,
+    error::Error,
+};
 
 #[derive(Accounts)]
 #[instruction(id: Pubkey)]
@@ -69,6 +73,18 @@ pub fn list_virtual_handler<'info>(
         price,
         expiry,
     )?;
+
+    emit!(List {
+        id,
+        price,
+        expiry,
+        seller: listing.seller,
+        is_virtual: true,
+        currency_mint: listing.currency_mint,
+        collection_mint: ctx.accounts.collection_config.collection_mint,
+        marketplace_authority: listing.marketplace_authority,
+        fee_config: listing.fee_config,
+    });
 
     Ok(())
 }

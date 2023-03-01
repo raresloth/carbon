@@ -2,11 +2,14 @@ use anchor_lang::prelude::*;
 use anchor_spl::{
 	token::{Token},
 	associated_token::AssociatedToken,
+	metadata::Metadata
 };
-use anchor_spl::metadata::Metadata;
-use crate::{CustodyAccount, state::{Listing}};
-use crate::error::Error;
-use crate::util::{assert_keys_equal, thaw, transfer_payment, transfer_spl};
+use crate::{
+	state::{Listing, CustodyAccount},
+	event::Buy,
+	util::{assert_keys_equal, thaw, transfer_payment, transfer_spl},
+	error::Error
+};
 
 #[derive(Accounts)]
 pub struct BuyNft<'info> {
@@ -126,6 +129,17 @@ pub fn buy_nft_handler<'info>(
 
 		account_loader.close(ctx.accounts.seller.to_account_info())?;
 	}
+
+	emit!(Buy {
+        mint: ctx.accounts.mint.key(),
+        price: ctx.accounts.listing.price,
+        seller: ctx.accounts.listing.seller,
+		buyer: ctx.accounts.buyer.key(),
+        is_virtual: false,
+        currency_mint: ctx.accounts.listing.currency_mint,
+        marketplace_authority: ctx.accounts.listing.marketplace_authority,
+        fee_config: ctx.accounts.listing.fee_config,
+    });
 
 	Ok(())
 }

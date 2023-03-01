@@ -5,9 +5,10 @@ use anchor_spl::{
 };
 use anchor_spl::metadata::MetadataAccount;
 use crate::{
-    state::{Listing},
+    state::{Listing, MarketplaceConfig, CollectionConfig, CustodyAccount},
+    event::List,
     util::{approve_and_freeze, assert_is_nft_in_collection, assert_keys_equal},
-    error::Error, MarketplaceConfig, CollectionConfig, CustodyAccount
+    error::Error
 };
 
 #[derive(Accounts)]
@@ -151,6 +152,18 @@ pub fn list_nft_handler<'info>(
         let custody_account = &mut account_loader.load_mut()?;
         custody_account.is_listed = true;
     }
+
+    emit!(List {
+        id: listing.id,
+        price,
+        expiry,
+        seller: listing.seller,
+        is_virtual: true,
+        currency_mint: listing.currency_mint,
+        collection_mint: ctx.accounts.collection_config.collection_mint,
+        marketplace_authority: listing.marketplace_authority,
+        fee_config: listing.fee_config,
+    });
 
     Ok(())
 }

@@ -10,9 +10,12 @@ use anchor_spl::{
 	},
 	metadata
 };
-use crate::{CollectionConfig, Metadata, state::{Listing}};
-use crate::error::Error;
-use crate::util::{mint_nft, transfer_payment};
+use crate::{
+	state::{Listing, CollectionConfig, Metadata},
+	event::Buy,
+	util::{mint_nft, transfer_payment},
+	error::Error
+};
 
 #[derive(Accounts)]
 #[instruction(id: Pubkey)]
@@ -176,6 +179,17 @@ pub fn buy_virtual_handler<'info>(
 		ctx.accounts.listing.price,
 		ctx.accounts.listing.get_fee_amount()?
 	)?;
+
+	emit!(Buy {
+        mint: ctx.accounts.mint.key(),
+        price: ctx.accounts.listing.price,
+        seller: ctx.accounts.listing.seller,
+		buyer: ctx.accounts.buyer.key(),
+        is_virtual: true,
+        currency_mint: ctx.accounts.listing.currency_mint,
+        marketplace_authority: ctx.accounts.listing.marketplace_authority,
+        fee_config: ctx.accounts.listing.fee_config,
+    });
 
 	Ok(())
 }

@@ -1111,6 +1111,122 @@ export type Carbon = {
       }
     }
   ],
+  "events": [
+    {
+      "name": "Buy",
+      "fields": [
+        {
+          "name": "mint",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "price",
+          "type": "u64",
+          "index": false
+        },
+        {
+          "name": "seller",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "buyer",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "isVirtual",
+          "type": "bool",
+          "index": false
+        },
+        {
+          "name": "currencyMint",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "marketplaceAuthority",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "feeConfig",
+          "type": {
+            "defined": "FeeConfig"
+          },
+          "index": false
+        }
+      ]
+    },
+    {
+      "name": "Delist",
+      "fields": [
+        {
+          "name": "id",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "seller",
+          "type": "publicKey",
+          "index": false
+        }
+      ]
+    },
+    {
+      "name": "List",
+      "fields": [
+        {
+          "name": "id",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "price",
+          "type": "u64",
+          "index": false
+        },
+        {
+          "name": "expiry",
+          "type": "i64",
+          "index": false
+        },
+        {
+          "name": "seller",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "isVirtual",
+          "type": "bool",
+          "index": false
+        },
+        {
+          "name": "currencyMint",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "collectionMint",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "marketplaceAuthority",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "feeConfig",
+          "type": {
+            "defined": "FeeConfig"
+          },
+          "index": false
+        }
+      ]
+    }
+  ],
   "errors": [
     {
       "code": 6000,
@@ -2296,6 +2412,122 @@ export const IDL: Carbon = {
           }
         ]
       }
+    }
+  ],
+  "events": [
+    {
+      "name": "Buy",
+      "fields": [
+        {
+          "name": "mint",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "price",
+          "type": "u64",
+          "index": false
+        },
+        {
+          "name": "seller",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "buyer",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "isVirtual",
+          "type": "bool",
+          "index": false
+        },
+        {
+          "name": "currencyMint",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "marketplaceAuthority",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "feeConfig",
+          "type": {
+            "defined": "FeeConfig"
+          },
+          "index": false
+        }
+      ]
+    },
+    {
+      "name": "Delist",
+      "fields": [
+        {
+          "name": "id",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "seller",
+          "type": "publicKey",
+          "index": false
+        }
+      ]
+    },
+    {
+      "name": "List",
+      "fields": [
+        {
+          "name": "id",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "price",
+          "type": "u64",
+          "index": false
+        },
+        {
+          "name": "expiry",
+          "type": "i64",
+          "index": false
+        },
+        {
+          "name": "seller",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "isVirtual",
+          "type": "bool",
+          "index": false
+        },
+        {
+          "name": "currencyMint",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "collectionMint",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "marketplaceAuthority",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "feeConfig",
+          "type": {
+            "defined": "FeeConfig"
+          },
+          "index": false
+        }
+      ]
     }
   ],
   "errors": [

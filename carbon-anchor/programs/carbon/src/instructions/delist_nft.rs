@@ -4,10 +4,10 @@ use anchor_spl::{
     metadata::Metadata
 };
 use crate::{
-    CustodyAccount,
-    state::{Listing},
+    state::{Listing, CustodyAccount},
+    event::Delist,
     util::{assert_keys_equal, thaw_and_revoke},
-    error::Error
+    error::Error,
 };
 
 #[derive(Accounts)]
@@ -90,6 +90,11 @@ pub fn delist_nft_handler<'info>(
         let custody_account = &mut account_loader.load_mut()?;
         custody_account.is_listed = false;
     }
+
+    emit!(Delist {
+        id: listing.id,
+        seller: listing.seller
+    });
 
     Ok(())
 }

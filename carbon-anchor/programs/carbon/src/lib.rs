@@ -6,9 +6,10 @@ use id::*;
 pub mod instructions;
 pub mod state;
 pub mod error;
-mod util;
-mod constants;
 mod id;
+mod constants;
+mod event;
+mod util;
 
 #[program]
 pub mod carbon {

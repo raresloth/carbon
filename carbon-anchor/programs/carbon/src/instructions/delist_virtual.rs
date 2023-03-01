@@ -1,5 +1,8 @@
 use anchor_lang::prelude::*;
-use crate::{state::{Listing}};
+use crate::{
+    state::{Listing},
+    event::Delist,
+};
 
 #[derive(Accounts)]
 #[instruction(id: Pubkey)]
@@ -24,8 +27,14 @@ pub struct DelistVirtual<'info> {
 }
 
 pub fn delist_virtual_handler<'info>(
-    _ctx: Context<DelistVirtual>,
-    _id: Pubkey,
+    ctx: Context<DelistVirtual>,
+    id: Pubkey,
 ) -> Result<()> {
+
+    emit!(Delist {
+        id,
+        seller: ctx.accounts.listing.seller
+    });
+
     Ok(())
 }
