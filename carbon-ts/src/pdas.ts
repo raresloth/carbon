@@ -20,10 +20,10 @@ export class Pdas {
 		], this.carbon.programId)[0];
 	}
 
-	listing(id: PublicKey): PublicKey {
+	listing(id: number[]): PublicKey {
 		return PublicKey.findProgramAddressSync([
 			Buffer.from("listing"),
-			id.toBuffer(),
+			Buffer.from(id),
 		], this.carbon.programId)[0];
 	}
 

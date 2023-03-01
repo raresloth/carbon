@@ -18,7 +18,7 @@ use crate::{
 };
 
 #[derive(Accounts)]
-#[instruction(id: Pubkey)]
+#[instruction(id: [u8;32])]
 pub struct BuyVirtual<'info> {
 	/// Buyer wallet.
 	#[account(mut)]
@@ -69,11 +69,11 @@ pub struct BuyVirtual<'info> {
 		close = marketplace_authority,
 		seeds = [
 			Listing::PREFIX.as_bytes(),
-			id.key().as_ref()
+			id.as_ref()
 		],
 		bump = listing.bump[0],
-		has_one = id,
 		has_one = collection_config,
+		constraint = listing.id == id,
 		constraint = listing.is_virtual @ Error::NotVirtual,
 		constraint = listing.seller == marketplace_authority.key() @ Error::InvalidListingAuthority,
 		constraint = listing.fee_config.fee_account == fee_account.key() @ Error::InvalidFeeAccount,
@@ -112,7 +112,7 @@ pub struct BuyVirtual<'info> {
 /// 5. marketplace fee currency ata
 pub fn buy_virtual_handler<'info>(
 	ctx: Context<'_, '_, '_, 'info, BuyVirtual<'info>>,
-	_id: Pubkey,
+	id: [u8;32],
 	max_price: u64,
 	metadata: Metadata
 ) -> Result<()> {
@@ -181,7 +181,7 @@ pub fn buy_virtual_handler<'info>(
 	)?;
 
 	emit!(Buy {
-		id: ctx.accounts.listing.id,
+		id,
         mint: ctx.accounts.mint.key(),
         price: ctx.accounts.listing.price,
         seller: ctx.accounts.listing.seller,

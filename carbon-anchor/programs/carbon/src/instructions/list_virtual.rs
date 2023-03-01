@@ -9,7 +9,7 @@ use crate::{
 };
 
 #[derive(Accounts)]
-#[instruction(id: Pubkey)]
+#[instruction(id: [u8;32])]
 pub struct ListVirtual<'info> {
     /// Marketplace authority wallet.
     #[account(mut)]
@@ -56,7 +56,7 @@ pub struct ListVirtual<'info> {
 
 pub fn list_virtual_handler<'info>(
     ctx: Context<ListVirtual>,
-    id: Pubkey,
+    id: [u8;32],
     price: u64,
     expiry: i64,
 ) -> Result<()> {

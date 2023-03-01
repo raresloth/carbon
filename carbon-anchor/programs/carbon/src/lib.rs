@@ -31,7 +31,7 @@ pub mod carbon {
         instructions::list_nft_handler(ctx, price, expiry)
     }
 
-    pub fn list_virtual(ctx: Context<ListVirtual>, id: Pubkey, price: u64, expiry: i64) -> Result<()> {
+    pub fn list_virtual(ctx: Context<ListVirtual>, id: [u8;32], price: u64, expiry: i64) -> Result<()> {
         instructions::list_virtual_handler(ctx, id, price, expiry)
     }
 
@@ -39,7 +39,7 @@ pub mod carbon {
         instructions::delist_nft_handler(ctx)
     }
 
-    pub fn delist_virtual(ctx: Context<DelistVirtual>, id: Pubkey) -> Result<()> {
+    pub fn delist_virtual(ctx: Context<DelistVirtual>, id: [u8;32]) -> Result<()> {
         instructions::delist_virtual_handler(ctx, id)
     }
 
@@ -52,7 +52,7 @@ pub mod carbon {
 
     pub fn buy_virtual<'info>(
         ctx: Context<'_, '_, '_, 'info, BuyVirtual<'info>>,
-        id: Pubkey,
+        id: [u8;32],
         max_price: u64,
         metadata: Metadata
     ) -> Result<()> {

@@ -59,7 +59,7 @@ pub fn uncustody_handler<'info>(
 ) -> Result<()> {
     let listing = Listing::from_account_info_with_checks(
         &ctx.accounts.listing.to_account_info(),
-        ctx.accounts.mint.key()
+        ctx.accounts.mint.key().to_bytes()
     )?;
 
     require!(listing.is_none(), Error::NftIsListed);

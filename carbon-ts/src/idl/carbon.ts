@@ -233,7 +233,12 @@ export type Carbon = {
       "args": [
         {
           "name": "id",
-          "type": "publicKey"
+          "type": {
+            "array": [
+              "u8",
+              32
+            ]
+          }
         },
         {
           "name": "price",
@@ -333,7 +338,12 @@ export type Carbon = {
       "args": [
         {
           "name": "id",
-          "type": "publicKey"
+          "type": {
+            "array": [
+              "u8",
+              32
+            ]
+          }
         }
       ]
     },
@@ -569,7 +579,12 @@ export type Carbon = {
       "args": [
         {
           "name": "id",
-          "type": "publicKey"
+          "type": {
+            "array": [
+              "u8",
+              32
+            ]
+          }
         },
         {
           "name": "maxPrice",
@@ -954,9 +969,14 @@ export type Carbon = {
           {
             "name": "id",
             "docs": [
-              "Set to mint of NFT if listing is for NFT, otherwise a unique ID for the virtual item"
+              "Set to bytes of NFT mint if listing is for NFT, otherwise a unique ID for the virtual item"
             ],
-            "type": "publicKey"
+            "type": {
+              "array": [
+                "u8",
+                32
+              ]
+            }
           },
           {
             "name": "isVirtual",
@@ -1117,7 +1137,12 @@ export type Carbon = {
       "fields": [
         {
           "name": "id",
-          "type": "publicKey",
+          "type": {
+            "array": [
+              "u8",
+              32
+            ]
+          },
           "index": false
         },
         {
@@ -1169,7 +1194,12 @@ export type Carbon = {
       "fields": [
         {
           "name": "id",
-          "type": "publicKey",
+          "type": {
+            "array": [
+              "u8",
+              32
+            ]
+          },
           "index": false
         },
         {
@@ -1184,7 +1214,12 @@ export type Carbon = {
       "fields": [
         {
           "name": "id",
-          "type": "publicKey",
+          "type": {
+            "array": [
+              "u8",
+              32
+            ]
+          },
           "index": false
         },
         {
@@ -1541,7 +1576,12 @@ export const IDL: Carbon = {
       "args": [
         {
           "name": "id",
-          "type": "publicKey"
+          "type": {
+            "array": [
+              "u8",
+              32
+            ]
+          }
         },
         {
           "name": "price",
@@ -1641,7 +1681,12 @@ export const IDL: Carbon = {
       "args": [
         {
           "name": "id",
-          "type": "publicKey"
+          "type": {
+            "array": [
+              "u8",
+              32
+            ]
+          }
         }
       ]
     },
@@ -1877,7 +1922,12 @@ export const IDL: Carbon = {
       "args": [
         {
           "name": "id",
-          "type": "publicKey"
+          "type": {
+            "array": [
+              "u8",
+              32
+            ]
+          }
         },
         {
           "name": "maxPrice",
@@ -2262,9 +2312,14 @@ export const IDL: Carbon = {
           {
             "name": "id",
             "docs": [
-              "Set to mint of NFT if listing is for NFT, otherwise a unique ID for the virtual item"
+              "Set to bytes of NFT mint if listing is for NFT, otherwise a unique ID for the virtual item"
             ],
-            "type": "publicKey"
+            "type": {
+              "array": [
+                "u8",
+                32
+              ]
+            }
           },
           {
             "name": "isVirtual",
@@ -2425,7 +2480,12 @@ export const IDL: Carbon = {
       "fields": [
         {
           "name": "id",
-          "type": "publicKey",
+          "type": {
+            "array": [
+              "u8",
+              32
+            ]
+          },
           "index": false
         },
         {
@@ -2477,7 +2537,12 @@ export const IDL: Carbon = {
       "fields": [
         {
           "name": "id",
-          "type": "publicKey",
+          "type": {
+            "array": [
+              "u8",
+              32
+            ]
+          },
           "index": false
         },
         {
@@ -2492,7 +2557,12 @@ export const IDL: Carbon = {
       "fields": [
         {
           "name": "id",
-          "type": "publicKey",
+          "type": {
+            "array": [
+              "u8",
+              32
+            ]
+          },
           "index": false
         },
         {

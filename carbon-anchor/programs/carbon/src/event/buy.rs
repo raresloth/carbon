@@ -4,7 +4,7 @@ use crate::FeeConfig;
 
 #[event]
 pub struct Buy {
-	pub id: Pubkey,
+	pub id: [u8;32],
 	pub mint: Pubkey,
 	pub price: u64,
 	pub seller: Pubkey,

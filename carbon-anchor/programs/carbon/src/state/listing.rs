@@ -14,8 +14,8 @@ pub struct Listing {
 	pub marketplace_authority: Pubkey,
 	/// Pubkey of the seller's wallet
 	pub seller: Pubkey,
-	/// Set to mint of NFT if listing is for NFT, otherwise a unique ID for the virtual item
-	pub id: Pubkey,
+	/// Set to bytes of NFT mint if listing is for NFT, otherwise a unique ID for the virtual item
+	pub id: [u8;32],
 	/// True if the listing is for a virtual item, false if it is for an NFT
 	pub is_virtual: bool,
 	/// Currency to accept for payment
@@ -42,7 +42,7 @@ impl Listing {
 
 	pub fn from_account_info_with_checks<'a>(
 		account_info: &AccountInfo<'a>,
-		id: Pubkey
+		id: [u8;32]
 	) -> Result<Option<Account<'a, Listing>>> {
 		let (expected_pubkey, _) = Pubkey::find_program_address(
 			&[
@@ -83,7 +83,7 @@ impl Listing {
 		bump: [u8; 1],
 		marketplace_authority: Pubkey,
 		seller: Pubkey,
-		id: Pubkey,
+		id: [u8;32],
 		is_virtual: bool,
 		currency_mint: Pubkey,
 		collection_config: Pubkey,

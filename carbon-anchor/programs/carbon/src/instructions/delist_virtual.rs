@@ -5,7 +5,7 @@ use crate::{
 };
 
 #[derive(Accounts)]
-#[instruction(id: Pubkey)]
+#[instruction(id: [u8;32])]
 pub struct DelistVirtual<'info> {
     /// Marketplace authority wallet.
     #[account(mut)]
@@ -28,7 +28,7 @@ pub struct DelistVirtual<'info> {
 
 pub fn delist_virtual_handler<'info>(
     ctx: Context<DelistVirtual>,
-    id: Pubkey,
+    id: [u8;32],
 ) -> Result<()> {
 
     emit!(Delist {

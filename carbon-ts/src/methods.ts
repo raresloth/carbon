@@ -33,14 +33,18 @@ export class Methods {
 	}
 
 	async listItem(
-		id: PublicKey,
+		id: number[],
 		collectionMint: PublicKey,
 		price: number,
 		expiry: number,
 		currencyMint: PublicKey = NATIVE_MINT,
 		seller: Keypair | undefined = this.carbon.marketplaceAuthorityKeypair,
 	) {
-		const mintAccountInfo = await this.carbon.program.provider.connection.getAccountInfo(id);
+		let mintAccountInfo
+		try {
+			const mint = new PublicKey(id)
+			mintAccountInfo = await this.carbon.program.provider.connection.getAccountInfo(mint);
+		} catch (e) {}
 
 		// Account info does not exist, therefore has not been minted
 		if (mintAccountInfo == null) {
@@ -55,7 +59,7 @@ export class Methods {
 		} else {
 			await this.listNft(
 				seller!,
-				id,
+				new PublicKey(id),
 				collectionMint,
 				price,
 				expiry,
@@ -65,7 +69,7 @@ export class Methods {
 	}
 
 	async delistItem(
-		id: PublicKey,
+		id: number[],
 		seller: Keypair | undefined = this.carbon.marketplaceAuthorityKeypair,
 	) {
 		try {
@@ -78,7 +82,7 @@ export class Methods {
 			} else {
 				await this.delistNft(
 					seller!,
-					id,
+					new PublicKey(id),
 				)
 			}
 		} catch (e) {
@@ -103,7 +107,7 @@ export class Methods {
 			if (listing.seller.equals(this.carbon.marketplaceAuthorityKeypair!.publicKey)) {
 				await this.delistNft(
 					this.carbon.marketplaceAuthorityKeypair!,
-					listing.id,
+					new PublicKey(listing.id),
 				)
 			} else {
 				await this.buyNft(
@@ -137,7 +141,7 @@ export class Methods {
 				metadataAccount: getMetadataPDA(mint),
 				edition: getEditionPDA(mint),
 				currencyMint,
-				listing: this.carbon.pdas.listing(mint),
+				listing: this.carbon.pdas.listing(Array.from(mint.toBytes())),
 				collectionConfig: this.carbon.pdas.collectionConfig(collectionMint),
 				marketplaceConfig: this.carbon.pdas.marketplaceConfig(this.carbon.marketplaceAuthority),
 				custodyAccount: this.carbon.pdas.custodyAccount(mint),
@@ -158,7 +162,7 @@ export class Methods {
 				tokenAccount: getAssociatedTokenAddressSync(mint, seller.publicKey),
 				mint,
 				edition: getEditionPDA(mint),
-				listing: this.carbon.pdas.listing(mint),
+				listing: this.carbon.pdas.listing(Array.from(mint.toBuffer())),
 				custodyAccount: this.carbon.pdas.custodyAccount(mint),
 				tokenMetadataProgram: TOKEN_METADATA_PROGRAM_ID,
 			})
@@ -171,6 +175,7 @@ export class Methods {
 		listing: IdlAccounts<CarbonIDL.Carbon>["listing"],
 		maxPrice?: number,
 	): Promise<void> {
+		const mint: PublicKey = new PublicKey(listing.id);
 		const builder = this.carbon.program.methods
 			.buyNft(
 				maxPrice ? new BN(maxPrice) : listing.price,
@@ -178,13 +183,13 @@ export class Methods {
 			.accounts({
 				buyer: buyer.publicKey,
 				seller: listing.seller,
-				mint: listing.id,
-				sellerTokenAccount: getAssociatedTokenAddressSync(listing.id, listing.seller),
-				buyerTokenAccount: getAssociatedTokenAddressSync(listing.id, buyer.publicKey),
-				metadataAccount: getMetadataPDA(listing.id),
-				edition: getEditionPDA(listing.id),
+				mint,
+				sellerTokenAccount: getAssociatedTokenAddressSync(mint, listing.seller),
+				buyerTokenAccount: getAssociatedTokenAddressSync(mint, buyer.publicKey),
+				metadataAccount: getMetadataPDA(mint),
+				edition: getEditionPDA(mint),
 				listing: this.carbon.pdas.listing(listing.id),
-				custodyAccount: this.carbon.pdas.custodyAccount(listing.id),
+				custodyAccount: this.carbon.pdas.custodyAccount(mint),
 				feeAccount: listing.feeConfig.feeAccount,
 				tokenMetadataProgram: TOKEN_METADATA_PROGRAM_ID,
 				associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
@@ -232,7 +237,7 @@ export class Methods {
 	}
 
 	async listVirtual(
-		id: PublicKey,
+		id: number[],
 		collectionMint: PublicKey,
 		price: number,
 		expiry: number,
@@ -257,7 +262,7 @@ export class Methods {
 	}
 
 	async delistVirtual(
-		id: PublicKey,
+		id: number[],
 		marketplaceAuthority: Keypair | undefined = this.carbon.marketplaceAuthorityKeypair,
 	) {
 		await this.carbon.program.methods
@@ -359,7 +364,7 @@ export class Methods {
 				mint,
 				edition: getEditionPDA(mint),
 				custodyAccount: this.carbon.pdas.custodyAccount(mint),
-				listing: this.carbon.pdas.listing(mint),
+				listing: this.carbon.pdas.listing(Array.from(mint.toBuffer())),
 				tokenMetadataProgram: TOKEN_METADATA_PROGRAM_ID,
 			}, accounts))
 			.signers([authority])
@@ -380,7 +385,7 @@ export class Methods {
 				mint: custodyAccount.mint,
 				edition: getEditionPDA(custodyAccount.mint),
 				custodyAccount: this.carbon.pdas.custodyAccount(custodyAccount.mint),
-				listing: this.carbon.pdas.listing(custodyAccount.mint),
+				listing: this.carbon.pdas.listing(Array.from(custodyAccount.mint.toBuffer())),
 				tokenMetadataProgram: TOKEN_METADATA_PROGRAM_ID,
 			})
 			.signers([authority])
@@ -401,7 +406,7 @@ export class Methods {
 				mint: custodyAccount.mint,
 				edition: getEditionPDA(custodyAccount.mint),
 				custodyAccount: this.carbon.pdas.custodyAccount(custodyAccount.mint),
-				listing: this.carbon.pdas.listing(custodyAccount.mint),
+				listing: this.carbon.pdas.listing(Array.from(custodyAccount.mint.toBuffer())),
 				tokenMetadataProgram: TOKEN_METADATA_PROGRAM_ID,
 				associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
 			})
