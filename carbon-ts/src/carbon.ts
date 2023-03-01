@@ -28,14 +28,6 @@ export class Carbon {
 		this.pdas = new Pdas(this);
 		this.methods = new Methods(this);
 	}
-
-	async getIdFromString(value: string): Promise<PublicKey> {
-		return await PublicKey.createWithSeed(
-			this.marketplaceAuthority,
-			value,
-			this.programId
-		)
-	}
 }
 
 export default Carbon;

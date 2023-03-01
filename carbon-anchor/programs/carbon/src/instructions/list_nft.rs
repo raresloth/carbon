@@ -154,7 +154,7 @@ pub fn list_nft_handler<'info>(
     }
 
     emit!(List {
-        id: listing.id,
+        item_id: listing.item_id,
         price,
         expiry,
         seller: listing.seller,

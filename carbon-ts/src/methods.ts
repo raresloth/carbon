@@ -1,4 +1,4 @@
-import {ComputeBudgetProgram, Keypair, PublicKey, SystemProgram} from "@solana/web3.js";
+import {ComputeBudgetProgram, Keypair, PublicKey} from "@solana/web3.js";
 import Carbon from "./carbon";
 import {ASSOCIATED_TOKEN_PROGRAM_ID, getAssociatedTokenAddressSync, NATIVE_MINT} from "@solana/spl-token";
 import {BN, IdlAccounts, IdlTypes} from "@coral-xyz/anchor";
@@ -33,7 +33,7 @@ export class Methods {
 	}
 
 	async listItem(
-		id: number[],
+		itemId: number[],
 		collectionMint: PublicKey,
 		price: number,
 		expiry: number,
@@ -42,14 +42,14 @@ export class Methods {
 	) {
 		let mintAccountInfo
 		try {
-			const mint = new PublicKey(id)
+			const mint = new PublicKey(itemId)
 			mintAccountInfo = await this.carbon.program.provider.connection.getAccountInfo(mint);
 		} catch (e) {}
 
 		// Account info does not exist, therefore has not been minted
 		if (mintAccountInfo == null) {
 			await this.listVirtual(
-				id,
+				itemId,
 				collectionMint,
 				price,
 				expiry,
@@ -59,7 +59,7 @@ export class Methods {
 		} else {
 			await this.listNft(
 				seller!,
-				new PublicKey(id),
+				new PublicKey(itemId),
 				collectionMint,
 				price,
 				expiry,
@@ -69,20 +69,20 @@ export class Methods {
 	}
 
 	async delistItem(
-		id: number[],
+		itemId: number[],
 		seller: Keypair | undefined = this.carbon.marketplaceAuthorityKeypair,
 	) {
 		try {
-			const listing = await this.carbon.program.account.listing.fetch(this.carbon.pdas.listing(id));
+			const listing = await this.carbon.program.account.listing.fetch(this.carbon.pdas.listing(itemId));
 			if (listing.isVirtual) {
 				await this.delistVirtual(
-					id,
+					itemId,
 					seller,
 				)
 			} else {
 				await this.delistNft(
 					seller!,
-					new PublicKey(id),
+					new PublicKey(itemId),
 				)
 			}
 		} catch (e) {
@@ -100,14 +100,14 @@ export class Methods {
 	) {
 		if (listing.isVirtual) {
 			await this.delistVirtual(
-				listing.id,
+				listing.itemId,
 				this.carbon.marketplaceAuthorityKeypair,
 			)
 		} else {
 			if (listing.seller.equals(this.carbon.marketplaceAuthorityKeypair!.publicKey)) {
 				await this.delistNft(
 					this.carbon.marketplaceAuthorityKeypair!,
-					new PublicKey(listing.id),
+					new PublicKey(listing.itemId),
 				)
 			} else {
 				await this.buyNft(
@@ -175,7 +175,7 @@ export class Methods {
 		listing: IdlAccounts<CarbonIDL.Carbon>["listing"],
 		maxPrice?: number,
 	): Promise<void> {
-		const mint: PublicKey = new PublicKey(listing.id);
+		const mint: PublicKey = new PublicKey(listing.itemId);
 		const builder = this.carbon.program.methods
 			.buyNft(
 				maxPrice ? new BN(maxPrice) : listing.price,
@@ -188,7 +188,7 @@ export class Methods {
 				buyerTokenAccount: getAssociatedTokenAddressSync(mint, buyer.publicKey),
 				metadataAccount: getMetadataPDA(mint),
 				edition: getEditionPDA(mint),
-				listing: this.carbon.pdas.listing(listing.id),
+				listing: this.carbon.pdas.listing(listing.itemId),
 				custodyAccount: this.carbon.pdas.custodyAccount(mint),
 				feeAccount: listing.feeConfig.feeAccount,
 				tokenMetadataProgram: TOKEN_METADATA_PROGRAM_ID,
@@ -237,7 +237,7 @@ export class Methods {
 	}
 
 	async listVirtual(
-		id: number[],
+		itemId: number[],
 		collectionMint: PublicKey,
 		price: number,
 		expiry: number,
@@ -246,14 +246,14 @@ export class Methods {
 	) {
 		await this.carbon.program.methods
 			.listVirtual(
-				id,
+				itemId,
 				new BN(price),
 				new BN(expiry),
 			)
 			.accounts({
 				marketplaceAuthority: marketplaceAuthority!.publicKey,
 				currencyMint,
-				listing: this.carbon.pdas.listing(id),
+				listing: this.carbon.pdas.listing(itemId),
 				collectionConfig: this.carbon.pdas.collectionConfig(collectionMint),
 				marketplaceConfig: this.carbon.pdas.marketplaceConfig(this.carbon.marketplaceAuthority),
 			})
@@ -262,16 +262,16 @@ export class Methods {
 	}
 
 	async delistVirtual(
-		id: number[],
+		itemId: number[],
 		marketplaceAuthority: Keypair | undefined = this.carbon.marketplaceAuthorityKeypair,
 	) {
 		await this.carbon.program.methods
 			.delistVirtual(
-				id
+				itemId
 			)
 			.accounts({
 				marketplaceAuthority: marketplaceAuthority!.publicKey,
-				listing: this.carbon.pdas.listing(id),
+				listing: this.carbon.pdas.listing(itemId),
 			})
 			.signers([marketplaceAuthority!])
 			.rpc();
@@ -289,7 +289,7 @@ export class Methods {
 
 		const builder = this.carbon.program.methods
 			.buyVirtual(
-				listing.id,
+				listing.itemId,
 				maxPrice ? new BN(maxPrice) : listing.price,
 				metadata
 			)
@@ -304,7 +304,7 @@ export class Methods {
 				collectionMint: collectionConfig.collectionMint,
 				collectionMetadataAccount: getMetadataPDA(collectionConfig.collectionMint),
 				collectionEdition: getEditionPDA(collectionConfig.collectionMint),
-				listing: this.carbon.pdas.listing(listing.id),
+				listing: this.carbon.pdas.listing(listing.itemId),
 				feeAccount: listing.feeConfig.feeAccount,
 				tokenMetadataProgram: TOKEN_METADATA_PROGRAM_ID,
 				associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID,

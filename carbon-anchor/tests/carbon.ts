@@ -32,7 +32,7 @@ describe("carbon", () => {
 	let seller: Keypair;
 	let sellerTokenAccount: PublicKey;
 	let buyer: Keypair;
-	let id: number[];
+	let itemId: number[];
 	let metadataAccount: PublicKey;
 	let edition: PublicKey;
 	let collectionMint: PublicKey;
@@ -128,11 +128,11 @@ describe("carbon", () => {
 
 			const nft = results[2]
 			mint = nft.mint
-			id = Array.from(mint.toBuffer())
+			itemId = Array.from(mint.toBuffer())
 			metadataAccount = nft.metadataAccount
 			edition = nft.edition
 			sellerTokenAccount = getAssociatedTokenAddressSync(mint, seller.publicKey)
-			listingPDA = carbon.pdas.listing(id)
+			listingPDA = carbon.pdas.listing(itemId)
 			custodyAccountPDA = carbon.pdas.custodyAccount(mint)
 		}
 
@@ -144,7 +144,7 @@ describe("carbon", () => {
 				const listing = await program.account.listing.fetch(listingPDA);
 				assert.equal(listing.version, 1);
 				assert.equal(listing.seller.toString(), seller.publicKey.toString());
-				assert.deepEqual(listing.id, id);
+				assert.deepEqual(listing.itemId, itemId);
 				assert.equal(listing.isVirtual, false);
 				assert.equal(listing.currencyMint.toString(), currencyMint.toString());
 				assert.equal(listing.price.toNumber(), price);
@@ -163,7 +163,7 @@ describe("carbon", () => {
 				const listing = await program.account.listing.fetch(listingPDA);
 				assert.equal(listing.version, 1);
 				assert.equal(listing.seller.toString(), seller.publicKey.toString());
-				assert.deepEqual(listing.id, id);
+				assert.deepEqual(listing.itemId, itemId);
 				assert.equal(listing.isVirtual, false);
 				assert.equal(listing.currencyMint.toString(), currencyMint.toString());
 				assert.equal(listing.price.toNumber(), price);
@@ -337,7 +337,7 @@ describe("carbon", () => {
 				assert.equal(custodyAccount.version, 1);
 				assert.equal(custodyAccount.marketplaceAuthority.toString(), marketplaceAuthority.publicKey.toString());
 				assert.equal(custodyAccount.authority.toString(), seller.publicKey.toString());
-				assert.deepEqual(Array.from(custodyAccount.mint.toBuffer()), id);
+				assert.deepEqual(Array.from(custodyAccount.mint.toBuffer()), itemId);
 
 				const sellerTokenAccountObj = await getAccount(provider.connection, sellerTokenAccount);
 				assert.equal(sellerTokenAccountObj.delegate.toString(), custodyAccountPDA.toString());
@@ -429,19 +429,19 @@ describe("carbon", () => {
 			])
 
 			i++
-			id = toItemId("my_item" + i.toString())
-			listingPDA = carbon.pdas.listing(id)
+			itemId = toItemId("my_item" + i.toString())
+			listingPDA = carbon.pdas.listing(itemId)
 		}
 
 		describe("list_virtual", function () {
 
 			it("should list the virtual item correctly", async function () {
-				await carbon.methods.listVirtual(id, collectionMint, price, expiry)
+				await carbon.methods.listVirtual(itemId, collectionMint, price, expiry)
 
 				const listing = await program.account.listing.fetch(listingPDA);
 				assert.equal(listing.version, 1);
 				assert.equal(listing.seller.toString(), marketplaceAuthority.publicKey.toString());
-				assert.deepEqual(listing.id, id);
+				assert.deepEqual(listing.itemId, itemId);
 				assert.equal(listing.isVirtual, true);
 				assert.equal(listing.currencyMint.toString(), currencyMint.toString());
 				assert.equal(listing.price.toNumber(), price);
@@ -455,8 +455,8 @@ describe("carbon", () => {
 		describe("delist_virtual", function () {
 
 			it("should delist the virtual item correctly", async function () {
-				await carbon.methods.listVirtual(id, collectionMint, price, expiry)
-				await carbon.methods.delistVirtual(id)
+				await carbon.methods.listVirtual(itemId, collectionMint, price, expiry)
+				await carbon.methods.delistVirtual(itemId)
 
 				// Listing should no longer exist
 				await assertThrows(async () => await program.account.listing.fetch(listingPDA));
@@ -468,7 +468,7 @@ describe("carbon", () => {
 
 			it("should buy the virtual item correctly", async function () {
 				const marketplaceAuthPreBalance = await provider.connection.getBalance(marketplaceAuthority.publicKey)
-				await carbon.methods.listVirtual(id, collectionMint, price, expiry)
+				await carbon.methods.listVirtual(itemId, collectionMint, price, expiry)
 				const listing = await program.account.listing.fetch(listingPDA);
 				const collectionConfig = await program.account.collectionConfig.fetch(collectionConfigPDA);
 
@@ -523,7 +523,7 @@ describe("carbon", () => {
 				const { mint: splTokenMint } =
 					await createSplToken(provider, marketplaceAuthority, buyer.publicKey, price)
 
-				await carbon.methods.listVirtual(id, collectionMint, price, expiry, splTokenMint)
+				await carbon.methods.listVirtual(itemId, collectionMint, price, expiry, splTokenMint)
 				const listing = await program.account.listing.fetch(listingPDA);
 				const collectionConfig = await program.account.collectionConfig.fetch(collectionConfigPDA);
 
@@ -572,11 +572,11 @@ describe("carbon", () => {
 					})
 				])
 
-				id = toItemId('listItemTest')
-				listingPDA = carbon.pdas.listing(id)
+				itemId = toItemId('listItemTest')
+				listingPDA = carbon.pdas.listing(itemId)
 
 				await carbon.methods.listItem(
-					id,
+					itemId,
 					collectionMint,
 					price,
 					expiry,
@@ -602,16 +602,16 @@ describe("carbon", () => {
 				])
 
 				const nft = results[2]
-				id = Array.from(nft.mint.toBuffer())
+				itemId = Array.from(nft.mint.toBuffer())
 				mint = nft.mint
 				metadataAccount = nft.metadataAccount
 				edition = nft.edition
 				sellerTokenAccount = getAssociatedTokenAddressSync(mint, seller.publicKey)
-				listingPDA = carbon.pdas.listing(id)
+				listingPDA = carbon.pdas.listing(itemId)
 				custodyAccountPDA = carbon.pdas.custodyAccount(mint)
 
 				await carbon.methods.listItem(
-					id,
+					itemId,
 					collectionMint,
 					price,
 					expiry,

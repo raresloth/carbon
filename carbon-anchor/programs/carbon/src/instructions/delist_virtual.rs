@@ -5,7 +5,7 @@ use crate::{
 };
 
 #[derive(Accounts)]
-#[instruction(id: [u8;32])]
+#[instruction(item_id: [u8;32])]
 pub struct DelistVirtual<'info> {
     /// Marketplace authority wallet.
     #[account(mut)]
@@ -16,7 +16,7 @@ pub struct DelistVirtual<'info> {
         close = marketplace_authority,
         seeds = [
             Listing::PREFIX.as_bytes(),
-            id.as_ref()
+            item_id.as_ref()
         ],
         bump = listing.bump[0],
         has_one = marketplace_authority,
@@ -28,11 +28,11 @@ pub struct DelistVirtual<'info> {
 
 pub fn delist_virtual_handler<'info>(
     ctx: Context<DelistVirtual>,
-    id: [u8;32],
+    item_id: [u8;32],
 ) -> Result<()> {
 
     emit!(Delist {
-        id,
+        item_id,
         seller: ctx.accounts.listing.seller
     });
 

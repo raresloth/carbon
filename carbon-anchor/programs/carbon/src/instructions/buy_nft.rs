@@ -4,7 +4,6 @@ use anchor_spl::{
 	associated_token::AssociatedToken,
 	metadata::Metadata
 };
-use solana_program::pubkey;
 use crate::{
 	state::{Listing, CustodyAccount},
 	event::Buy,
@@ -57,7 +56,7 @@ pub struct BuyNft<'info> {
 		bump = listing.bump[0],
 		has_one = seller @ Error::InvalidListingAuthority,
 		constraint = !listing.is_virtual @ Error::IsVirtual,
-		constraint = Pubkey::new_from_array(listing.id) == mint.key() @ Error::InvalidMint,
+		constraint = listing.item_id == mint.key().to_bytes() @ Error::InvalidMint,
 		constraint = listing.fee_config.fee_account == fee_account.key() @ Error::InvalidFeeAccount,
 	)]
 	pub listing: Box<Account<'info, Listing>>,
@@ -132,7 +131,7 @@ pub fn buy_nft_handler<'info>(
 	}
 
 	emit!(Buy {
-		id: ctx.accounts.listing.id,
+		item_id: ctx.accounts.listing.item_id,
         mint: ctx.accounts.mint.key(),
         price: ctx.accounts.listing.price,
         seller: ctx.accounts.listing.seller,

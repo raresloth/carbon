@@ -31,16 +31,16 @@ pub mod carbon {
         instructions::list_nft_handler(ctx, price, expiry)
     }
 
-    pub fn list_virtual(ctx: Context<ListVirtual>, id: [u8;32], price: u64, expiry: i64) -> Result<()> {
-        instructions::list_virtual_handler(ctx, id, price, expiry)
+    pub fn list_virtual(ctx: Context<ListVirtual>, item_id: [u8;32], price: u64, expiry: i64) -> Result<()> {
+        instructions::list_virtual_handler(ctx, item_id, price, expiry)
     }
 
     pub fn delist_nft<'info>(ctx: Context<'_, '_, '_, 'info, DelistNft<'info>>) -> Result<()> {
         instructions::delist_nft_handler(ctx)
     }
 
-    pub fn delist_virtual(ctx: Context<DelistVirtual>, id: [u8;32]) -> Result<()> {
-        instructions::delist_virtual_handler(ctx, id)
+    pub fn delist_virtual(ctx: Context<DelistVirtual>, item_id: [u8;32]) -> Result<()> {
+        instructions::delist_virtual_handler(ctx, item_id)
     }
 
     pub fn buy_nft<'info>(
@@ -52,11 +52,11 @@ pub mod carbon {
 
     pub fn buy_virtual<'info>(
         ctx: Context<'_, '_, '_, 'info, BuyVirtual<'info>>,
-        id: [u8;32],
+        item_id: [u8;32],
         max_price: u64,
         metadata: Metadata
     ) -> Result<()> {
-        instructions::buy_virtual_handler(ctx, id, max_price, metadata)
+        instructions::buy_virtual_handler(ctx, item_id, max_price, metadata)
     }
 
     pub fn custody<'info>(ctx: Context<Custody>) -> Result<()> {

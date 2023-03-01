@@ -15,7 +15,7 @@ pub struct Listing {
 	/// Pubkey of the seller's wallet
 	pub seller: Pubkey,
 	/// Set to bytes of NFT mint if listing is for NFT, otherwise a unique ID for the virtual item
-	pub id: [u8;32],
+	pub item_id: [u8;32],
 	/// True if the listing is for a virtual item, false if it is for an NFT
 	pub is_virtual: bool,
 	/// Currency to accept for payment
@@ -42,12 +42,12 @@ impl Listing {
 
 	pub fn from_account_info_with_checks<'a>(
 		account_info: &AccountInfo<'a>,
-		id: [u8;32]
+		item_id: [u8;32]
 	) -> Result<Option<Account<'a, Listing>>> {
 		let (expected_pubkey, _) = Pubkey::find_program_address(
 			&[
 				Listing::PREFIX.as_bytes(),
-				id.as_ref()
+				item_id.as_ref()
 			],
 			&crate::id::ID
 		);
@@ -73,7 +73,7 @@ impl Listing {
 	pub fn auth_seeds<'a>(&'a self) -> [&'a [u8]; 3] {
 		[
 			Listing::PREFIX.as_bytes(),
-			self.id.as_ref(),
+			self.item_id.as_ref(),
 			self.bump.as_ref()
 		]
 	}
@@ -83,7 +83,7 @@ impl Listing {
 		bump: [u8; 1],
 		marketplace_authority: Pubkey,
 		seller: Pubkey,
-		id: [u8;32],
+		item_id: [u8;32],
 		is_virtual: bool,
 		currency_mint: Pubkey,
 		collection_config: Pubkey,
@@ -99,7 +99,7 @@ impl Listing {
 		self.version = Listing::VERSION;
 		self.marketplace_authority = marketplace_authority;
 		self.seller = seller;
-		self.id = id;
+		self.item_id = item_id;
 		self.is_virtual = is_virtual;
 		self.currency_mint = currency_mint;
 		self.collection_config = collection_config;

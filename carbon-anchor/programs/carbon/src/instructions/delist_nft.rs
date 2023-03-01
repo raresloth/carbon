@@ -41,7 +41,7 @@ pub struct DelistNft<'info> {
         bump = listing.bump[0],
         has_one = seller @ Error::InvalidListingAuthority,
         constraint = !listing.is_virtual @ Error::IsVirtual,
-        constraint = Pubkey::new_from_array(listing.id) == mint.key() @ Error::InvalidMint,
+        constraint = listing.item_id == mint.key().to_bytes() @ Error::InvalidMint,
     )]
     pub listing: Box<Account<'info, Listing>>,
 
@@ -92,7 +92,7 @@ pub fn delist_nft_handler<'info>(
     }
 
     emit!(Delist {
-        id: listing.id,
+        item_id: listing.item_id,
         seller: listing.seller
     });
 

@@ -9,7 +9,7 @@ use crate::{
 };
 
 #[derive(Accounts)]
-#[instruction(id: [u8;32])]
+#[instruction(item_id: [u8;32])]
 pub struct ListVirtual<'info> {
     /// Marketplace authority wallet.
     #[account(mut)]
@@ -22,7 +22,7 @@ pub struct ListVirtual<'info> {
         init,
         seeds = [
             Listing::PREFIX.as_bytes(),
-            id.as_ref()
+            item_id.as_ref()
         ],
         bump,
         space = Listing::SPACE,
@@ -56,7 +56,7 @@ pub struct ListVirtual<'info> {
 
 pub fn list_virtual_handler<'info>(
     ctx: Context<ListVirtual>,
-    id: [u8;32],
+    item_id: [u8;32],
     price: u64,
     expiry: i64,
 ) -> Result<()> {
@@ -65,7 +65,7 @@ pub fn list_virtual_handler<'info>(
         [*ctx.bumps.get(Listing::PREFIX).ok_or(Error::BumpSeedNotInHashMap)?],
         ctx.accounts.marketplace_authority.key(),
         ctx.accounts.marketplace_authority.key(),
-        id,
+        item_id,
         true,
         ctx.accounts.currency_mint.key(),
         ctx.accounts.collection_config.key(),
@@ -75,7 +75,7 @@ pub fn list_virtual_handler<'info>(
     )?;
 
     emit!(List {
-        id,
+        item_id,
         price,
         expiry,
         seller: listing.seller,

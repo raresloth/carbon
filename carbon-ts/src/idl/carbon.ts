@@ -232,7 +232,7 @@ export type Carbon = {
       ],
       "args": [
         {
-          "name": "id",
+          "name": "itemId",
           "type": {
             "array": [
               "u8",
@@ -337,7 +337,7 @@ export type Carbon = {
       ],
       "args": [
         {
-          "name": "id",
+          "name": "itemId",
           "type": {
             "array": [
               "u8",
@@ -578,7 +578,7 @@ export type Carbon = {
       ],
       "args": [
         {
-          "name": "id",
+          "name": "itemId",
           "type": {
             "array": [
               "u8",
@@ -967,7 +967,7 @@ export type Carbon = {
             "type": "publicKey"
           },
           {
-            "name": "id",
+            "name": "itemId",
             "docs": [
               "Set to bytes of NFT mint if listing is for NFT, otherwise a unique ID for the virtual item"
             ],
@@ -1136,7 +1136,7 @@ export type Carbon = {
       "name": "Buy",
       "fields": [
         {
-          "name": "id",
+          "name": "itemId",
           "type": {
             "array": [
               "u8",
@@ -1193,7 +1193,7 @@ export type Carbon = {
       "name": "Delist",
       "fields": [
         {
-          "name": "id",
+          "name": "itemId",
           "type": {
             "array": [
               "u8",
@@ -1213,7 +1213,7 @@ export type Carbon = {
       "name": "List",
       "fields": [
         {
-          "name": "id",
+          "name": "itemId",
           "type": {
             "array": [
               "u8",
@@ -1575,7 +1575,7 @@ export const IDL: Carbon = {
       ],
       "args": [
         {
-          "name": "id",
+          "name": "itemId",
           "type": {
             "array": [
               "u8",
@@ -1680,7 +1680,7 @@ export const IDL: Carbon = {
       ],
       "args": [
         {
-          "name": "id",
+          "name": "itemId",
           "type": {
             "array": [
               "u8",
@@ -1921,7 +1921,7 @@ export const IDL: Carbon = {
       ],
       "args": [
         {
-          "name": "id",
+          "name": "itemId",
           "type": {
             "array": [
               "u8",
@@ -2310,7 +2310,7 @@ export const IDL: Carbon = {
             "type": "publicKey"
           },
           {
-            "name": "id",
+            "name": "itemId",
             "docs": [
               "Set to bytes of NFT mint if listing is for NFT, otherwise a unique ID for the virtual item"
             ],
@@ -2479,7 +2479,7 @@ export const IDL: Carbon = {
       "name": "Buy",
       "fields": [
         {
-          "name": "id",
+          "name": "itemId",
           "type": {
             "array": [
               "u8",
@@ -2536,7 +2536,7 @@ export const IDL: Carbon = {
       "name": "Delist",
       "fields": [
         {
-          "name": "id",
+          "name": "itemId",
           "type": {
             "array": [
               "u8",
@@ -2556,7 +2556,7 @@ export const IDL: Carbon = {
       "name": "List",
       "fields": [
         {
-          "name": "id",
+          "name": "itemId",
           "type": {
             "array": [
               "u8",
