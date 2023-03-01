@@ -1116,6 +1116,11 @@ export type Carbon = {
       "name": "Buy",
       "fields": [
         {
+          "name": "id",
+          "type": "publicKey",
+          "index": false
+        },
+        {
           "name": "mint",
           "type": "publicKey",
           "index": false
@@ -2418,6 +2423,11 @@ export const IDL: Carbon = {
     {
       "name": "Buy",
       "fields": [
+        {
+          "name": "id",
+          "type": "publicKey",
+          "index": false
+        },
         {
           "name": "mint",
           "type": "publicKey",

@@ -181,6 +181,7 @@ pub fn buy_virtual_handler<'info>(
 	)?;
 
 	emit!(Buy {
+		id: ctx.accounts.listing.id,
         mint: ctx.accounts.mint.key(),
         price: ctx.accounts.listing.price,
         seller: ctx.accounts.listing.seller,

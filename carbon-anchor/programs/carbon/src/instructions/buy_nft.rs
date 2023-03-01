@@ -131,6 +131,7 @@ pub fn buy_nft_handler<'info>(
 	}
 
 	emit!(Buy {
+		id: ctx.accounts.listing.id,
         mint: ctx.accounts.mint.key(),
         price: ctx.accounts.listing.price,
         seller: ctx.accounts.listing.seller,
