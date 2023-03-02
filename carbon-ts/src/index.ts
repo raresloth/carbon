@@ -16,3 +16,13 @@ export function toItemId(value: string) {
 
 	return Array.from(Buffer.from(value.padEnd(32, "\0")))
 }
+
+export function parseItemId(itemId: number[]) {
+	if (itemId.length !== 32) {
+		throw new Error(`Item ID must be 32 bytes`)
+	}
+
+	const i = itemId.indexOf(0x00);
+	const trimmed = itemId.slice(0, i);
+	return Buffer.from(trimmed).toString('utf8');
+}
