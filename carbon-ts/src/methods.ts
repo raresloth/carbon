@@ -1,4 +1,4 @@
-import {Transaction} from "@solana/web3.js";
+import {ComputeBudgetProgram, Transaction} from "@solana/web3.js";
 import Carbon from "./carbon";
 import { Wallet } from "@coral-xyz/anchor/dist/esm/provider";
 import {
@@ -108,7 +108,13 @@ export class Methods {
 			buyer: buyer!.publicKey
 		})
 		const provider = this.carbon.getProviderWithWallet(buyer!)
-		return await provider.sendAndConfirm(new Transaction().add(ix))
+		return await provider.sendAndConfirm(
+			new Transaction()
+				.add(ComputeBudgetProgram.setComputeUnitLimit({
+					units: 300_000
+				}))
+				.add(ix)
+		)
 	}
 
 	async listVirtual(

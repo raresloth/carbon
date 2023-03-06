@@ -51,7 +51,7 @@ pub fn mint_nft<'a>(
 		}),
 		0,
 		&mint_authority.key(),
-		None,
+		Some(&mint_authority.key()),
 	)?;
 
 	// Initialize the receiver's token account

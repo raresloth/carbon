@@ -1,4 +1,4 @@
-import { Transaction } from "@solana/web3.js";
+import { ComputeBudgetProgram, Transaction } from "@solana/web3.js";
 export class Methods {
     constructor(carbon) {
         this.carbon = carbon;
@@ -79,7 +79,11 @@ export class Methods {
             buyer: buyer.publicKey
         });
         const provider = this.carbon.getProviderWithWallet(buyer);
-        return await provider.sendAndConfirm(new Transaction().add(ix));
+        return await provider.sendAndConfirm(new Transaction()
+            .add(ComputeBudgetProgram.setComputeUnitLimit({
+            units: 300000
+        }))
+            .add(ix));
     }
     async listVirtual(args) {
         var _a;

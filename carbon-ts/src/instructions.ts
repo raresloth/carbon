@@ -314,11 +314,7 @@ export class Instructions {
 				pubkey: getAssociatedTokenAddressSync(listing.currencyMint, listing.seller),
 				isWritable: true,
 				isSigner: false,
-			}]).preInstructions([
-				ComputeBudgetProgram.setComputeUnitLimit({
-					units: 300_000
-				})
-			])
+			}])
 		}
 
 		return await builder.instruction()
@@ -365,7 +361,7 @@ export class Instructions {
 
 	async buyVirtual(
 		args: BuyVirtualArgs,
-	): Promise<{ mint: PublicKey, instruction: TransactionInstruction }> {
+	): Promise<{ mint: Keypair, instruction: TransactionInstruction }> {
 		const {buyer, listing, metadata, collectionConfig, maxPrice} = args
 		const marketplaceAuthority = args.marketplaceAuthority ?? this.carbon.marketplaceAuthority
 
@@ -421,16 +417,12 @@ export class Instructions {
 				pubkey: getAssociatedTokenAddressSync(listing.currencyMint, listing.feeConfig.feeAccount),
 				isWritable: true,
 				isSigner: false,
-			}]).preInstructions([
-				ComputeBudgetProgram.setComputeUnitLimit({
-					units: 400_000
-				})
-			])
+			}])
 		}
 
 		return {
-			mint: mint.publicKey,
-			instruction: await builder.signers([mint]).instruction()
+			mint,
+			instruction: await builder.instruction()
 		};
 	}
 

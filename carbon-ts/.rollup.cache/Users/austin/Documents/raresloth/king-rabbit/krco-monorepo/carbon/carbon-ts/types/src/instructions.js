@@ -1,4 +1,4 @@
-import { ComputeBudgetProgram, Keypair, PublicKey } from "@solana/web3.js";
+import { Keypair, PublicKey } from "@solana/web3.js";
 import { ASSOCIATED_TOKEN_PROGRAM_ID, getAssociatedTokenAddressSync, NATIVE_MINT } from "@solana/spl-token";
 import { BN } from "@coral-xyz/anchor";
 import { getEditionPDA, getMetadataPDA, TOKEN_METADATA_PROGRAM_ID } from "./solana";
@@ -187,11 +187,7 @@ export class Instructions {
                     pubkey: getAssociatedTokenAddressSync(listing.currencyMint, listing.seller),
                     isWritable: true,
                     isSigner: false,
-                }]).preInstructions([
-                ComputeBudgetProgram.setComputeUnitLimit({
-                    units: 300000
-                })
-            ]);
+                }]);
         }
         return await builder.instruction();
     }
@@ -273,15 +269,11 @@ export class Instructions {
                     pubkey: getAssociatedTokenAddressSync(listing.currencyMint, listing.feeConfig.feeAccount),
                     isWritable: true,
                     isSigner: false,
-                }]).preInstructions([
-                ComputeBudgetProgram.setComputeUnitLimit({
-                    units: 400000
-                })
-            ]);
+                }]);
         }
         return {
-            mint: mint.publicKey,
-            instruction: await builder.signers([mint]).instruction()
+            mint,
+            instruction: await builder.instruction()
         };
     }
     async custody(args) {

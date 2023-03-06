@@ -1,4 +1,4 @@
-import { PublicKey, TransactionInstruction } from "@solana/web3.js";
+import { Keypair, PublicKey, TransactionInstruction } from "@solana/web3.js";
 import Carbon from "./carbon";
 import { IdlAccounts, IdlTypes } from "@coral-xyz/anchor";
 import * as CarbonIDL from "./idl/carbon";
@@ -93,7 +93,7 @@ export declare class Instructions {
     listVirtual(args: ListVirtualArgs): Promise<TransactionInstruction>;
     delistVirtual(args: DelistVirtualArgs): Promise<TransactionInstruction>;
     buyVirtual(args: BuyVirtualArgs): Promise<{
-        mint: PublicKey;
+        mint: Keypair;
         instruction: TransactionInstruction;
     }>;
     custody(args: CustodyArgs): Promise<TransactionInstruction>;
