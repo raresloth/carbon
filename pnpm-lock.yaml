@@ -51,6 +51,7 @@ importers:
       '@types/node': ^16.18.11
       '@typescript-eslint/eslint-plugin': ^4.6.0
       '@typescript-eslint/parser': ^4.6.0
+      bn.js: ^5.2.1
       concurrently: ^7.6.0
       cpx: ^1.5.0
       eslint: ^7.12.1
@@ -79,6 +80,7 @@ importers:
       '@types/node': 16.18.12
       '@typescript-eslint/eslint-plugin': 4.33.0_s2qqtxhzmb7vugvfoyripfgp7i
       '@typescript-eslint/parser': 4.33.0_jofidmxrjzhj7l6vknpw5ecvfe
+      bn.js: 5.2.1
       concurrently: 7.6.0
       cpx: 1.5.0
       eslint: 7.32.0

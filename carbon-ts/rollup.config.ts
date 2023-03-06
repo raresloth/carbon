@@ -30,10 +30,7 @@ export default {
 		}),
 	],
 	external: [
-		"@solana/web3.js",
-		"assert",
 		"buffer",
-		"eventemitter3",
 	],
 	output: {
 		file: "dist/browser/index.js",
