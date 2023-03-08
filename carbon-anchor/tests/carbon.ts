@@ -1,6 +1,6 @@
 import * as anchor from "@coral-xyz/anchor";
-import {IdlAccounts, Program} from "@coral-xyz/anchor";
-import { Keypair, PublicKey, LAMPORTS_PER_SOL } from "@solana/web3.js";
+import {AnchorProvider, Program, Wallet} from "@coral-xyz/anchor";
+import {Keypair, PublicKey, LAMPORTS_PER_SOL, Transaction, ComputeBudgetProgram} from "@solana/web3.js";
 import * as CarbonIDL from "../target/types/carbon";
 import {assertThrows, createCollectionNFT, createNFT, createSplToken, fetchNFT, setBalance} from "./helpers";
 import moment from "moment";
@@ -15,11 +15,9 @@ import {
 import { assert } from "chai";
 
 describe("carbon", () => {
-	const provider = anchor.AnchorProvider.env();
-	provider.opts.skipPreflight = true;
-	anchor.setProvider(provider);
-
+	const localProvider = AnchorProvider.env()
 	const program = anchor.workspace.Carbon as Program<CarbonIDL.Carbon>;
+	const TX_FEE = 0.000005 * LAMPORTS_PER_SOL;
 	const defaultFeeConfig = {
 		feeAccount: FEE_ACCOUNT_KEY,
 		bps: 200
@@ -27,6 +25,7 @@ describe("carbon", () => {
 	const defaultSellerFeeBps = 500;
 	const defaultSymbol = 'KR';
 
+	let provider: AnchorProvider;
 	let marketplaceAuthority: Keypair;
 	let carbon: Carbon;
 	let seller: Keypair;
@@ -52,7 +51,17 @@ describe("carbon", () => {
 		let promises = []
 
 		marketplaceAuthority = Keypair.generate()
-		carbon = new Carbon(provider, marketplaceAuthority, program.programId);
+		provider = new AnchorProvider(
+			localProvider.connection,
+			new Wallet(marketplaceAuthority),
+			{
+				...localProvider.opts,
+				skipPreflight: true
+			}
+		);
+		anchor.setProvider(provider);
+
+		carbon = new Carbon(provider, marketplaceAuthority.publicKey, program.programId);
 		marketplaceConfigPDA = carbon.pdas.marketplaceConfig(marketplaceAuthority.publicKey)
 		promises.push(setBalance(provider, marketplaceAuthority, 100 * LAMPORTS_PER_SOL))
 
@@ -78,13 +87,16 @@ describe("carbon", () => {
 
 		it("should initialize the marketplace config correctly", async function () {
 			await carbon.methods.initMarketplaceConfig({
-				feeConfig: defaultFeeConfig
+				args: {
+					feeConfig: defaultFeeConfig
+				}
 			})
 
 			const marketplaceConfig = await program.account.marketplaceConfig.fetch(marketplaceConfigPDA);
 			assert.equal(marketplaceConfig.version, 1);
 			assert.equal(marketplaceConfig.marketplaceAuthority.toString(), marketplaceAuthority.publicKey.toString());
-			assert.deepEqual(marketplaceConfig.feeConfig, defaultFeeConfig);
+			assert.equal(marketplaceConfig.feeConfig.feeAccount.toString(), defaultFeeConfig.feeAccount.toString());
+			assert.equal(marketplaceConfig.feeConfig.bps, defaultFeeConfig.bps);
 		});
 
 	});
@@ -93,9 +105,11 @@ describe("carbon", () => {
 
 		it("should initialize the collection config correctly", async function () {
 			await carbon.methods.initCollectionConfig({
-				collectionMint,
-				sellerFeeBasisPoints: defaultSellerFeeBps,
-				symbol: defaultSymbol
+				args: {
+					collectionMint,
+					sellerFeeBasisPoints: defaultSellerFeeBps,
+					symbol: defaultSymbol
+				}
 			})
 
 			const collectionConfig = await program.account.collectionConfig.fetch(collectionConfigPDA);
@@ -114,12 +128,16 @@ describe("carbon", () => {
 		async function setUpData() {
 			const results = await Promise.all([
 				carbon.methods.initMarketplaceConfig({
-					feeConfig: defaultFeeConfig
+					args: {
+						feeConfig: defaultFeeConfig
+					}
 				}),
 				carbon.methods.initCollectionConfig({
-					collectionMint,
-					sellerFeeBasisPoints: defaultSellerFeeBps,
-					symbol: defaultSymbol
+					args: {
+						collectionMint,
+						sellerFeeBasisPoints: defaultSellerFeeBps,
+						symbol: defaultSymbol
+					}
 				}),
 				createNFT(provider, marketplaceAuthority, collectionMint, {
 					tokenOwner: seller.publicKey
@@ -139,7 +157,13 @@ describe("carbon", () => {
 		describe("list_nft", function () {
 
 			it("should list the nft correctly", async function () {
-				await carbon.methods.listNft(seller, mint, collectionMint, price, expiry)
+				await carbon.methods.listNft({
+					seller: new Wallet(seller),
+					mint,
+					collectionMint,
+					price,
+					expiry
+				})
 
 				const listing = await program.account.listing.fetch(listingPDA);
 				assert.equal(listing.version, 1);
@@ -149,7 +173,8 @@ describe("carbon", () => {
 				assert.equal(listing.currencyMint.toString(), currencyMint.toString());
 				assert.equal(listing.price.toNumber(), price);
 				assert.equal(listing.expiry.toNumber(), expiry);
-				assert.deepEqual(listing.feeConfig, defaultFeeConfig)
+				assert.equal(listing.feeConfig.feeAccount.toString(), defaultFeeConfig.feeAccount.toString());
+				assert.equal(listing.feeConfig.bps, defaultFeeConfig.bps);
 
 				const sellerTokenAccountObj = await getAccount(provider.connection, sellerTokenAccount);
 				assert.equal(sellerTokenAccountObj.delegate.toString(), listingPDA.toString());
@@ -157,8 +182,17 @@ describe("carbon", () => {
 			});
 
 			it("should list the custodial nft correctly", async function () {
-				await carbon.methods.custody(seller, mint)
-				await carbon.methods.listNft(seller, mint, collectionMint, price, expiry)
+				await carbon.methods.custody({
+					owner: new Wallet(seller),
+					mint
+				})
+				await carbon.methods.listNft({
+					seller: new Wallet(seller),
+					mint,
+					collectionMint,
+					price,
+					expiry
+				})
 
 				const listing = await program.account.listing.fetch(listingPDA);
 				assert.equal(listing.version, 1);
@@ -168,7 +202,8 @@ describe("carbon", () => {
 				assert.equal(listing.currencyMint.toString(), currencyMint.toString());
 				assert.equal(listing.price.toNumber(), price);
 				assert.equal(listing.expiry.toNumber(), expiry);
-				assert.deepEqual(listing.feeConfig, defaultFeeConfig)
+				assert.equal(listing.feeConfig.feeAccount.toString(), defaultFeeConfig.feeAccount.toString());
+				assert.equal(listing.feeConfig.bps, defaultFeeConfig.bps);
 
 				const custodyAccount = await program.account.custodyAccount.fetch(custodyAccountPDA);
 				assert.isTrue(custodyAccount.isListed);
@@ -180,8 +215,15 @@ describe("carbon", () => {
 
 			it("should throw when custody account key is incorrect", async function () {
 				await assertThrows(async () =>
-					await carbon.methods.listNft(seller, mint, collectionMint, price, expiry, NATIVE_MINT, {
-						custodyAccount: NATIVE_MINT
+					await carbon.methods.listNft({
+						seller: new Wallet(seller),
+						mint,
+						collectionMint,
+						price,
+						expiry,
+						accounts: {
+							custodyAccount: NATIVE_MINT
+						}
 					})
 				)
 			});
@@ -191,8 +233,17 @@ describe("carbon", () => {
 		describe("delist_nft", function () {
 
 			it("should delist the nft correctly", async function () {
-				await carbon.methods.listNft(seller, mint, collectionMint, price, expiry)
-				await carbon.methods.delistNft(seller, mint)
+				await carbon.methods.listNft({
+					seller: new Wallet(seller),
+					mint,
+					collectionMint,
+					price,
+					expiry
+				})
+				await carbon.methods.delistNft({
+					seller: new Wallet(seller),
+					mint,
+				})
 
 				// Listing should no longer exist
 				await assertThrows(async () => await program.account.listing.fetch(listingPDA));
@@ -203,9 +254,21 @@ describe("carbon", () => {
 			});
 
 			it("should delist the custodial nft correctly", async function () {
-				await carbon.methods.custody(seller, mint)
-				await carbon.methods.listNft(seller, mint, collectionMint, price, expiry)
-				await carbon.methods.delistNft(seller, mint)
+				await carbon.methods.custody({
+					owner: new Wallet(seller),
+					mint,
+				})
+				await carbon.methods.listNft({
+					seller: new Wallet(seller),
+					mint,
+					collectionMint,
+					price,
+					expiry
+				})
+				await carbon.methods.delistNft({
+					seller: new Wallet(seller),
+					mint,
+				})
 
 				// Listing should no longer exist
 				await assertThrows(async () => await program.account.listing.fetch(listingPDA));
@@ -224,16 +287,22 @@ describe("carbon", () => {
 
 			it("should buy the nft correctly", async function () {
 				const sellerPreBalance = await provider.connection.getBalance(seller.publicKey)
-				await carbon.methods.listNft(seller, mint, collectionMint, price, expiry)
+				await carbon.methods.listNft({
+					seller: new Wallet(seller),
+					mint,
+					collectionMint,
+					price,
+					expiry
+				})
 				const listing = await program.account.listing.fetch(listingPDA);
 
 				const buyerPreBalance = await provider.connection.getBalance(buyer.publicKey)
 				const marketplacePreBalance = await provider.connection.getBalance(marketplaceAuthority.publicKey)
 				const feeAccountPreBalance = await provider.connection.getBalance(FEE_ACCOUNT_KEY)
-				await carbon.methods.buyNft(
-					buyer,
-					listing as IdlAccounts<CarbonIDL.Carbon>["listing"]
-				)
+				await carbon.methods.buyNft({
+					buyer: new Wallet(buyer),
+					listing
+				})
 				const sellerPostBalance = await provider.connection.getBalance(seller.publicKey)
 				const buyerPostBalance = await provider.connection.getBalance(buyer.publicKey)
 				const marketplacePostBalance = await provider.connection.getBalance(marketplaceAuthority.publicKey)
@@ -251,7 +320,7 @@ describe("carbon", () => {
 				const marketplaceFee = (price * defaultFeeConfig.bps / 10000)
 				const royalty = (price * defaultSellerFeeBps / 10000)
 				assert.equal(sellerPostBalance - sellerPreBalance,
-					price - marketplaceFee - royalty)
+					price - marketplaceFee - royalty - TX_FEE)
 				assert.equal(marketplacePostBalance - marketplacePreBalance, royalty)
 				assert.equal(feeAccountPostBalance - feeAccountPreBalance, marketplaceFee)
 			});
@@ -261,13 +330,20 @@ describe("carbon", () => {
 				const { mint: splTokenMint } =
 					await createSplToken(provider, marketplaceAuthority, buyer.publicKey, price)
 
-				await carbon.methods.listNft(seller, mint, collectionMint, price, expiry, splTokenMint)
+				await carbon.methods.listNft({
+					seller: new Wallet(seller),
+					mint,
+					collectionMint,
+					price,
+					expiry,
+					currencyMint: splTokenMint
+				})
 				const listing = await program.account.listing.fetch(listingPDA);
 
-				await carbon.methods.buyNft(
-					buyer,
-					listing as IdlAccounts<CarbonIDL.Carbon>["listing"]
-				)
+				await carbon.methods.buyNft({
+					buyer: new Wallet(buyer),
+					listing
+				})
 
 				const sellerCurrencyTokenAddress = await getAssociatedTokenAddressSync(splTokenMint, seller.publicKey)
 				const sellerPostBalance = await provider.connection.getTokenAccountBalance(sellerCurrencyTokenAddress)
@@ -290,17 +366,26 @@ describe("carbon", () => {
 
 			it("should buy the custodial nft correctly", async function () {
 				const sellerPreBalance = await provider.connection.getBalance(seller.publicKey)
-				await carbon.methods.custody(seller, mint)
-				await carbon.methods.listNft(seller, mint, collectionMint, price, expiry)
+				await carbon.methods.custody({
+					owner: new Wallet(seller),
+					mint
+				})
+				await carbon.methods.listNft({
+					seller: new Wallet(seller),
+					mint,
+					collectionMint,
+					price,
+					expiry
+				})
 				const listing = await program.account.listing.fetch(listingPDA);
 
 				const buyerPreBalance = await provider.connection.getBalance(buyer.publicKey)
 				const marketplacePreBalance = await provider.connection.getBalance(marketplaceAuthority.publicKey)
 				const feeAccountPreBalance = await provider.connection.getBalance(FEE_ACCOUNT_KEY)
-				await carbon.methods.buyNft(
-					buyer,
-					listing as IdlAccounts<CarbonIDL.Carbon>["listing"]
-				)
+				await carbon.methods.buyNft({
+					buyer: new Wallet(buyer),
+					listing
+				})
 				const sellerPostBalance = await provider.connection.getBalance(seller.publicKey)
 				const buyerPostBalance = await provider.connection.getBalance(buyer.publicKey)
 				const marketplacePostBalance = await provider.connection.getBalance(marketplaceAuthority.publicKey)
@@ -318,7 +403,7 @@ describe("carbon", () => {
 				const marketplaceFee = (price * defaultFeeConfig.bps / 10000)
 				const royalty = (price * defaultSellerFeeBps / 10000)
 				assert.equal(sellerPostBalance - sellerPreBalance,
-					price - marketplaceFee - royalty)
+					price - marketplaceFee - royalty - TX_FEE * 2)
 				assert.equal(marketplacePostBalance - marketplacePreBalance, royalty)
 				assert.equal(feeAccountPostBalance - feeAccountPreBalance, marketplaceFee)
 
@@ -331,12 +416,15 @@ describe("carbon", () => {
 		describe("custody", function () {
 
 			it("should custody the nft correctly", async function () {
-				await carbon.methods.custody(seller, mint)
+				await carbon.methods.custody({
+					owner: new Wallet(seller),
+					mint
+				})
 
 				const custodyAccount = await program.account.custodyAccount.fetch(custodyAccountPDA);
 				assert.equal(custodyAccount.version, 1);
 				assert.equal(custodyAccount.marketplaceAuthority.toString(), marketplaceAuthority.publicKey.toString());
-				assert.equal(custodyAccount.authority.toString(), seller.publicKey.toString());
+				assert.equal(custodyAccount.owner.toString(), seller.publicKey.toString());
 				assert.deepEqual(Array.from(custodyAccount.mint.toBuffer()), itemId);
 
 				const sellerTokenAccountObj = await getAccount(provider.connection, sellerTokenAccount);
@@ -345,13 +433,26 @@ describe("carbon", () => {
 			});
 
 			it("should throw when nft is listed", async function () {
-				await carbon.methods.listNft(seller, mint, collectionMint, price, expiry)
-				await assertThrows(async () => await carbon.methods.custody(seller, mint))
+				await carbon.methods.listNft({
+					seller: new Wallet(seller),
+					mint,
+					collectionMint,
+					price,
+					expiry
+				})
+				await assertThrows(async () => await carbon.methods.custody({
+					owner: new Wallet(seller),
+					mint
+				}))
 			});
 
 			it("should throw when listing key is incorrect", async function () {
-				await assertThrows(async () => await carbon.methods.custody(seller, mint, {
-					listing: NATIVE_MINT
+				await assertThrows(async () => await carbon.methods.custody({
+					owner: new Wallet(seller),
+					mint,
+					accounts: {
+						listing: NATIVE_MINT
+					}
 				}))
 			});
 
@@ -360,10 +461,16 @@ describe("carbon", () => {
 		describe("uncustody", function () {
 
 			it("should uncustody the nft correctly", async function () {
-				await carbon.methods.custody(seller, mint)
+				await carbon.methods.custody({
+					owner: new Wallet(seller),
+					mint
+				})
 
 				const custodyAccount = await program.account.custodyAccount.fetch(custodyAccountPDA)
-				await carbon.methods.uncustody(seller, custodyAccount)
+				await carbon.methods.uncustody({
+					owner: new Wallet(seller),
+					custodyAccount
+				})
 
 				// Custody account should no longer exist
 				await assertThrows(async () => await program.account.custodyAccount.fetch(custodyAccountPDA));
@@ -374,10 +481,22 @@ describe("carbon", () => {
 			});
 
 			it("should throw when nft is listed", async function () {
-				await carbon.methods.custody(seller, mint)
-				await carbon.methods.listNft(seller, mint, collectionMint, price, expiry)
+				await carbon.methods.custody({
+					owner: new Wallet(seller),
+					mint
+				})
+				await carbon.methods.listNft({
+					seller: new Wallet(seller),
+					mint,
+					collectionMint,
+					price,
+					expiry
+				})
 				const custodyAccount = await program.account.custodyAccount.fetch(custodyAccountPDA)
-				await assertThrows(async () => await carbon.methods.uncustody(seller, custodyAccount))
+				await assertThrows(async () => await carbon.methods.uncustody({
+					owner: new Wallet(seller),
+					custodyAccount
+				}))
 			});
 
 		});
@@ -385,10 +504,15 @@ describe("carbon", () => {
 		describe("take_ownership", function () {
 
 			it("should take ownership of the nft correctly", async function () {
-				await carbon.methods.custody(seller, mint)
+				await carbon.methods.custody({
+					owner: new Wallet(seller),
+					mint
+				})
 
 				const custodyAccount = await program.account.custodyAccount.fetch(custodyAccountPDA)
-				await carbon.methods.takeOwnership(custodyAccount)
+				await carbon.methods.takeOwnership({
+					custodyAccount
+				})
 
 				// Custody account should no longer exist
 				await assertThrows(async () => await program.account.custodyAccount.fetch(custodyAccountPDA));
@@ -402,10 +526,21 @@ describe("carbon", () => {
 			});
 
 			it("should throw when nft is listed", async function () {
-				await carbon.methods.custody(seller, mint)
-				await carbon.methods.listNft(seller, mint, collectionMint, price, expiry)
+				await carbon.methods.custody({
+					owner: new Wallet(seller),
+					mint
+				})
+				await carbon.methods.listNft({
+					seller: new Wallet(seller),
+					mint,
+					collectionMint,
+					price,
+					expiry
+				})
 				const custodyAccount = await program.account.custodyAccount.fetch(custodyAccountPDA)
-				await assertThrows(async () => await carbon.methods.takeOwnership(custodyAccount))
+				await assertThrows(async () => await carbon.methods.takeOwnership({
+					custodyAccount
+				}))
 			});
 
 		});
@@ -419,12 +554,16 @@ describe("carbon", () => {
 		async function setUpData() {
 			await Promise.all([
 				carbon.methods.initMarketplaceConfig({
-					feeConfig: defaultFeeConfig
+					args: {
+						feeConfig: defaultFeeConfig
+					}
 				}),
 				carbon.methods.initCollectionConfig({
-					collectionMint,
-					sellerFeeBasisPoints: defaultSellerFeeBps,
-					symbol: defaultSymbol
+					args: {
+						collectionMint,
+						sellerFeeBasisPoints: defaultSellerFeeBps,
+						symbol: defaultSymbol
+					}
 				})
 			])
 
@@ -436,7 +575,7 @@ describe("carbon", () => {
 		describe("list_virtual", function () {
 
 			it("should list the virtual item correctly", async function () {
-				await carbon.methods.listVirtual(itemId, collectionMint, price, expiry)
+				await carbon.methods.listVirtual({itemId, collectionMint, price, expiry})
 
 				const listing = await program.account.listing.fetch(listingPDA);
 				assert.equal(listing.version, 1);
@@ -455,8 +594,8 @@ describe("carbon", () => {
 		describe("delist_virtual", function () {
 
 			it("should delist the virtual item correctly", async function () {
-				await carbon.methods.listVirtual(itemId, collectionMint, price, expiry)
-				await carbon.methods.delistVirtual(itemId)
+				await carbon.methods.listVirtual({itemId, collectionMint, price, expiry})
+				await carbon.methods.delistVirtual({itemId})
 
 				// Listing should no longer exist
 				await assertThrows(async () => await program.account.listing.fetch(listingPDA));
@@ -468,25 +607,29 @@ describe("carbon", () => {
 
 			it("should buy the virtual item correctly", async function () {
 				const marketplaceAuthPreBalance = await provider.connection.getBalance(marketplaceAuthority.publicKey)
-				await carbon.methods.listVirtual(itemId, collectionMint, price, expiry)
+				await carbon.methods.listVirtual({itemId, collectionMint, price, expiry})
 				const listing = await program.account.listing.fetch(listingPDA);
 				const collectionConfig = await program.account.collectionConfig.fetch(collectionConfigPDA);
 
 				const buyerPreBalance = await provider.connection.getBalance(buyer.publicKey)
 				const feeAccountPreBalance = await provider.connection.getBalance(FEE_ACCOUNT_KEY)
-				const mint = await carbon.methods.buyVirtual(
-					buyer,
-					collectionConfig as IdlAccounts<CarbonIDL.Carbon>["collectionConfig"],
-					listing as IdlAccounts<CarbonIDL.Carbon>["listing"],
-					{
+				const {mint: mintKeypair, instruction} = await carbon.instructions.buyVirtual({
+					buyer: buyer.publicKey,
+					collectionConfig,
+					listing,
+					metadata: {
 						name: "Ghost #1",
-						uri: "https://example.com",
-					})
+						uri:"https://example.com",
+					}
+				})
+				await provider.sendAndConfirm(new Transaction().add(instruction), [marketplaceAuthority, mintKeypair, buyer])
+
 				const marketplaceAuthPostBalance = await provider.connection.getBalance(marketplaceAuthority.publicKey)
 				const buyerPostBalance = await provider.connection.getBalance(buyer.publicKey)
 				const feeAccountPostBalance = await provider.connection.getBalance(FEE_ACCOUNT_KEY)
 
 				// An NFT should now exist with the correct metadata
+				const mint = mintKeypair.publicKey
 				const nft = await fetchNFT(provider, marketplaceAuthority, mint)
 				assert.equal(nft.updateAuthorityAddress.toString(), marketplaceAuthority.publicKey.toString())
 				assert.equal(nft.name, "Ghost #1")
@@ -523,18 +666,25 @@ describe("carbon", () => {
 				const { mint: splTokenMint } =
 					await createSplToken(provider, marketplaceAuthority, buyer.publicKey, price)
 
-				await carbon.methods.listVirtual(itemId, collectionMint, price, expiry, splTokenMint)
+				await carbon.methods.listVirtual({itemId, collectionMint, price, expiry, currencyMint: splTokenMint})
 				const listing = await program.account.listing.fetch(listingPDA);
 				const collectionConfig = await program.account.collectionConfig.fetch(collectionConfigPDA);
 
-				await carbon.methods.buyVirtual(
-					buyer,
-					collectionConfig as IdlAccounts<CarbonIDL.Carbon>["collectionConfig"],
-					listing as IdlAccounts<CarbonIDL.Carbon>["listing"],
-					{
+				const {mint: mintKeypair, instruction} = await carbon.instructions.buyVirtual({
+					buyer: buyer.publicKey,
+					collectionConfig,
+					listing,
+					metadata: {
 						name: "Ghost #1",
-						uri: "https://example.com",
-					})
+						uri:"https://example.com",
+					}
+				})
+				await provider.sendAndConfirm(new Transaction()
+					.add(
+						ComputeBudgetProgram.setComputeUnitLimit({
+							units: 400_000
+						})
+					).add(instruction), [marketplaceAuthority, mintKeypair, buyer])
 
 				const marketplaceAuthTokenAddress = await getAssociatedTokenAddressSync(splTokenMint, marketplaceAuthority.publicKey)
 				const marketplaceAuthPostBalance = await provider.connection.getTokenAccountBalance(marketplaceAuthTokenAddress)
@@ -547,7 +697,7 @@ describe("carbon", () => {
 				assert.equal(buyerPostBalance.value.uiAmount, 0)
 
 				const marketplaceFee = (price * defaultFeeConfig.bps / 10000)
-				assert.isAtLeast(marketplaceAuthPostBalance.value.uiAmount, price - marketplaceFee)
+				assert.isAtLeast(marketplaceAuthPostBalance.value.uiAmount, price - marketplaceFee - TX_FEE)
 
 				assert.equal(feeAccountPostBalance.value.uiAmount, marketplaceFee)
 			});
@@ -563,24 +713,28 @@ describe("carbon", () => {
 			it("should list as virtual if account for id does not exist", async function () {
 				await Promise.all([
 					carbon.methods.initMarketplaceConfig({
-						feeConfig: defaultFeeConfig
+						args: {
+							feeConfig: defaultFeeConfig
+						}
 					}),
 					carbon.methods.initCollectionConfig({
-						collectionMint,
-						sellerFeeBasisPoints: defaultSellerFeeBps,
-						symbol: defaultSymbol
+						args: {
+							collectionMint,
+							sellerFeeBasisPoints: defaultSellerFeeBps,
+							symbol: defaultSymbol
+						}
 					})
 				])
 
 				itemId = toItemId('listItemTest')
 				listingPDA = carbon.pdas.listing(itemId)
 
-				await carbon.methods.listItem(
+				await carbon.methods.listItem({
 					itemId,
 					collectionMint,
 					price,
 					expiry,
-				)
+				})
 
 				const listing = await program.account.listing.fetch(listingPDA);
 				assert.isTrue(listing.isVirtual);
@@ -589,12 +743,16 @@ describe("carbon", () => {
 			it("should list as nft if account for id exists", async function () {
 				const results = await Promise.all([
 					carbon.methods.initMarketplaceConfig({
-						feeConfig: defaultFeeConfig
+						args: {
+							feeConfig: defaultFeeConfig
+						}
 					}),
 					carbon.methods.initCollectionConfig({
-						collectionMint,
-						sellerFeeBasisPoints: defaultSellerFeeBps,
-						symbol: defaultSymbol
+						args: {
+							collectionMint,
+							sellerFeeBasisPoints: defaultSellerFeeBps,
+							symbol: defaultSymbol
+						}
 					}),
 					createNFT(provider, marketplaceAuthority, collectionMint, {
 						tokenOwner: seller.publicKey
@@ -610,14 +768,13 @@ describe("carbon", () => {
 				listingPDA = carbon.pdas.listing(itemId)
 				custodyAccountPDA = carbon.pdas.custodyAccount(mint)
 
-				await carbon.methods.listItem(
+				await carbon.methods.listItem({
+					seller: new Wallet(seller),
 					itemId,
 					collectionMint,
 					price,
 					expiry,
-					NATIVE_MINT,
-					seller
-				)
+				})
 
 				const listing = await program.account.listing.fetch(listingPDA);
 				assert.isFalse(listing.isVirtual);

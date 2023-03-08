@@ -18,12 +18,12 @@ pub struct TakeOwnership<'info> {
     /// User wallet with authority over the custodial mint.
     /// CHECK: Safe because of custody account constraint
     #[account(mut)]
-    pub authority: UncheckedAccount<'info>,
+    pub owner: UncheckedAccount<'info>,
 
     /// User's token account of the custodial mint.
     #[account(
         mut,
-        constraint = token_account.owner == authority.key(),
+        constraint = token_account.owner == owner.key(),
         token::mint = mint,
     )]
     pub token_account: Box<Account<'info, TokenAccount>>,
@@ -42,14 +42,14 @@ pub struct TakeOwnership<'info> {
 
     #[account(
         mut,
-        close = authority,
+        close = owner,
         seeds = [
             CustodyAccount::PREFIX.as_bytes(),
             mint.key().as_ref()
         ],
         bump = custody_account.load()?.bump[0],
         has_one = marketplace_authority,
-        has_one = authority,
+        has_one = owner,
         has_one = mint,
     )]
     pub custody_account: AccountLoader<'info, CustodyAccount>,
@@ -91,7 +91,7 @@ pub fn take_ownership_handler<'info>(
     )?;
 
     transfer_spl(
-        &ctx.accounts.authority.to_account_info(),
+        &ctx.accounts.owner.to_account_info(),
         &ctx.accounts.marketplace_authority.to_account_info(),
         &ctx.accounts.token_account.to_account_info(),
         &ctx.accounts.marketplace_authority_token_account.to_account_info(),

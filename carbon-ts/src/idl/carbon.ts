@@ -602,7 +602,7 @@ export type Carbon = {
       "name": "custody",
       "accounts": [
         {
-          "name": "authority",
+          "name": "owner",
           "isMut": true,
           "isSigner": true,
           "docs": [
@@ -678,7 +678,7 @@ export type Carbon = {
       "name": "uncustody",
       "accounts": [
         {
-          "name": "authority",
+          "name": "owner",
           "isMut": true,
           "isSigner": true,
           "docs": [
@@ -757,7 +757,7 @@ export type Carbon = {
           ]
         },
         {
-          "name": "authority",
+          "name": "owner",
           "isMut": true,
           "isSigner": false,
           "docs": [
@@ -911,7 +911,7 @@ export type Carbon = {
             "type": "publicKey"
           },
           {
-            "name": "authority",
+            "name": "owner",
             "docs": [
               "Pubkey of the user's wallet"
             ],
@@ -1190,6 +1190,26 @@ export type Carbon = {
       ]
     },
     {
+      "name": "Custody",
+      "fields": [
+        {
+          "name": "marketplaceAuthority",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "owner",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "mint",
+          "type": "publicKey",
+          "index": false
+        }
+      ]
+    },
+    {
       "name": "Delist",
       "fields": [
         {
@@ -1262,6 +1282,26 @@ export type Carbon = {
           "type": {
             "defined": "FeeConfig"
           },
+          "index": false
+        }
+      ]
+    },
+    {
+      "name": "Uncustody",
+      "fields": [
+        {
+          "name": "marketplaceAuthority",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "owner",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "mint",
+          "type": "publicKey",
           "index": false
         }
       ]
@@ -1945,7 +1985,7 @@ export const IDL: Carbon = {
       "name": "custody",
       "accounts": [
         {
-          "name": "authority",
+          "name": "owner",
           "isMut": true,
           "isSigner": true,
           "docs": [
@@ -2021,7 +2061,7 @@ export const IDL: Carbon = {
       "name": "uncustody",
       "accounts": [
         {
-          "name": "authority",
+          "name": "owner",
           "isMut": true,
           "isSigner": true,
           "docs": [
@@ -2100,7 +2140,7 @@ export const IDL: Carbon = {
           ]
         },
         {
-          "name": "authority",
+          "name": "owner",
           "isMut": true,
           "isSigner": false,
           "docs": [
@@ -2254,7 +2294,7 @@ export const IDL: Carbon = {
             "type": "publicKey"
           },
           {
-            "name": "authority",
+            "name": "owner",
             "docs": [
               "Pubkey of the user's wallet"
             ],
@@ -2533,6 +2573,26 @@ export const IDL: Carbon = {
       ]
     },
     {
+      "name": "Custody",
+      "fields": [
+        {
+          "name": "marketplaceAuthority",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "owner",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "mint",
+          "type": "publicKey",
+          "index": false
+        }
+      ]
+    },
+    {
       "name": "Delist",
       "fields": [
         {
@@ -2605,6 +2665,26 @@ export const IDL: Carbon = {
           "type": {
             "defined": "FeeConfig"
           },
+          "index": false
+        }
+      ]
+    },
+    {
+      "name": "Uncustody",
+      "fields": [
+        {
+          "name": "marketplaceAuthority",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "owner",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "mint",
+          "type": "publicKey",
           "index": false
         }
       ]

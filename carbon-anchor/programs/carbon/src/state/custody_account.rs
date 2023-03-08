@@ -10,7 +10,7 @@ pub struct CustodyAccount {
 	/// Pubkey of the marketplace authority's wallet
 	pub marketplace_authority: Pubkey,
 	/// Pubkey of the user's wallet
-	pub authority: Pubkey,
+	pub owner: Pubkey,
 	/// Pubkey of the mint being custodied
 	pub mint: Pubkey,
 	/// True if the mint is listed for sale
@@ -68,13 +68,13 @@ impl CustodyAccount {
 		&mut self,
 		bump: [u8; 1],
 		marketplace_authority: Pubkey,
-		authority: Pubkey,
+		owner: Pubkey,
 		mint: Pubkey,
 	) -> Result<()> {
 		self.bump = bump;
 		self.version = CustodyAccount::VERSION;
 		self.marketplace_authority = marketplace_authority;
-		self.authority = authority;
+		self.owner = owner;
 		self.mint = mint;
 		self.is_listed = false;
 

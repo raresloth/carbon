@@ -1,14 +1,17 @@
 use anchor_lang::prelude::*;
 use anchor_spl::metadata::Metadata;
 use anchor_spl::token::{Mint, Token, TokenAccount};
-use crate::{error::Error, CustodyAccount, Listing};
-use crate::util::approve_and_freeze;
+use crate::{
+    state::{CustodyAccount, Listing},
+    util::approve_and_freeze,
+    error::Error
+};
 
 #[derive(Accounts)]
 pub struct Custody<'info> {
     /// User wallet.
     #[account(mut)]
-    pub authority: Signer<'info>,
+    pub owner: Signer<'info>,
 
     /// Marketplace authority wallet.
     /// CHECK: Can be any marketplace authority
@@ -17,7 +20,7 @@ pub struct Custody<'info> {
     /// User's token account of the mint to custody.
     #[account(
         mut,
-        constraint = token_account.owner == authority.key(),
+        constraint = token_account.owner == owner.key(),
         token::mint = mint,
     )]
     pub token_account: Box<Account<'info, TokenAccount>>,
@@ -37,7 +40,7 @@ pub struct Custody<'info> {
         ],
         bump,
         space = CustodyAccount::SPACE,
-        payer = authority,
+        payer = owner,
     )]
     pub custody_account: AccountLoader<'info, CustodyAccount>,
 
@@ -65,7 +68,7 @@ pub fn custody_handler<'info>(
         custody_account.init(
             [*ctx.bumps.get(CustodyAccount::PREFIX).ok_or(Error::BumpSeedNotInHashMap)?],
             ctx.accounts.marketplace_authority.key(),
-            ctx.accounts.authority.key(),
+            ctx.accounts.owner.key(),
             ctx.accounts.mint.key(),
         )?;
     }
@@ -80,13 +83,19 @@ pub fn custody_handler<'info>(
         &ctx.accounts.token_account.to_account_info(),
         &ctx.accounts.mint.to_account_info(),
         &ctx.accounts.edition.to_account_info(),
-        &ctx.accounts.authority.to_account_info(),
+        &ctx.accounts.owner.to_account_info(),
         &ctx.accounts.custody_account.to_account_info(),
         &ctx.accounts.token_program.to_account_info(),
         &ctx.accounts.token_metadata_program.to_account_info(),
         Some(&auth_seeds),
         1
     )?;
+
+    emit!(crate::event::Custody {
+        marketplace_authority: ctx.accounts.marketplace_authority.key(),
+        owner: ctx.accounts.owner.key(),
+        mint: ctx.accounts.mint.key(),
+    });
 
     Ok(())
 }

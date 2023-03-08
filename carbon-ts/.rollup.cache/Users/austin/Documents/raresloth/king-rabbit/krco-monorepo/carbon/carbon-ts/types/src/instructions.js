@@ -278,14 +278,14 @@ export class Instructions {
     }
     async custody(args) {
         var _a;
-        const { authority, mint, accounts } = args;
+        const { owner, mint, accounts } = args;
         const marketplaceAuthority = (_a = args.marketplaceAuthority) !== null && _a !== void 0 ? _a : this.carbon.marketplaceAuthority;
         return await this.carbon.program.methods
             .custody()
             .accounts({
-            authority,
+            owner,
             marketplaceAuthority,
-            tokenAccount: getAssociatedTokenAddressSync(mint, authority),
+            tokenAccount: getAssociatedTokenAddressSync(mint, owner),
             mint,
             edition: getEditionPDA(mint),
             custodyAccount: this.carbon.pdas.custodyAccount(mint),
@@ -297,14 +297,14 @@ export class Instructions {
     }
     async uncustody(args) {
         var _a;
-        const { authority, custodyAccount } = args;
+        const { owner, custodyAccount } = args;
         const marketplaceAuthority = (_a = args.marketplaceAuthority) !== null && _a !== void 0 ? _a : this.carbon.marketplaceAuthority;
         return await this.carbon.program.methods
             .uncustody()
             .accounts({
-            authority,
+            owner,
             marketplaceAuthority,
-            tokenAccount: getAssociatedTokenAddressSync(custodyAccount.mint, authority),
+            tokenAccount: getAssociatedTokenAddressSync(custodyAccount.mint, owner),
             mint: custodyAccount.mint,
             edition: getEditionPDA(custodyAccount.mint),
             custodyAccount: this.carbon.pdas.custodyAccount(custodyAccount.mint),
@@ -321,8 +321,8 @@ export class Instructions {
             .takeOwnership()
             .accounts({
             marketplaceAuthority,
-            authority: custodyAccount.authority,
-            tokenAccount: getAssociatedTokenAddressSync(custodyAccount.mint, custodyAccount.authority),
+            owner: custodyAccount.owner,
+            tokenAccount: getAssociatedTokenAddressSync(custodyAccount.mint, custodyAccount.owner),
             marketplaceAuthorityTokenAccount: getAssociatedTokenAddressSync(custodyAccount.mint, marketplaceAuthority),
             mint: custodyAccount.mint,
             edition: getEditionPDA(custodyAccount.mint),

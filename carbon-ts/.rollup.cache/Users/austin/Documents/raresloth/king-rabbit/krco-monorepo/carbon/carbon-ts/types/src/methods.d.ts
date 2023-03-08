@@ -32,11 +32,11 @@ export declare class Methods {
     delistVirtual(args: Omit<DelistVirtualArgs, 'marketplaceAuthority'> & {
         marketplaceAuthority?: Wallet;
     }): Promise<string>;
-    custody(args: Omit<CustodyArgs, 'authority'> & {
-        authority?: Wallet;
+    custody(args: Omit<CustodyArgs, 'owner'> & {
+        owner?: Wallet;
     }): Promise<string>;
-    uncustody(args: Omit<UncustodyArgs, 'authority'> & {
-        authority?: Wallet;
+    uncustody(args: Omit<UncustodyArgs, 'owner'> & {
+        owner?: Wallet;
     }): Promise<string>;
     takeOwnership(args: Omit<TakeOwnershipArgs, 'marketplaceAuthority'> & {
         marketplaceAuthority?: Wallet;

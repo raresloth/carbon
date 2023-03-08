@@ -109,22 +109,22 @@ export class Methods {
     // should be used instead of helper methods
     async custody(args) {
         var _a;
-        const authority = (_a = args.authority) !== null && _a !== void 0 ? _a : this.carbon.provider.wallet;
+        const owner = (_a = args.owner) !== null && _a !== void 0 ? _a : this.carbon.provider.wallet;
         const ix = await this.carbon.instructions.custody({
             ...args,
-            authority: authority.publicKey
+            owner: owner.publicKey
         });
-        const provider = this.carbon.getProviderWithWallet(authority);
+        const provider = this.carbon.getProviderWithWallet(owner);
         return await provider.sendAndConfirm(new Transaction().add(ix));
     }
     async uncustody(args) {
         var _a;
-        const authority = (_a = args.authority) !== null && _a !== void 0 ? _a : this.carbon.provider.wallet;
+        const owner = (_a = args.owner) !== null && _a !== void 0 ? _a : this.carbon.provider.wallet;
         const ix = await this.carbon.instructions.uncustody({
             ...args,
-            authority: authority.publicKey
+            owner: owner.publicKey
         });
-        const provider = this.carbon.getProviderWithWallet(authority);
+        const provider = this.carbon.getProviderWithWallet(owner);
         return await provider.sendAndConfirm(new Transaction().add(ix));
     }
     async takeOwnership(args) {

@@ -11,7 +11,7 @@ use crate::{
 pub struct Uncustody<'info> {
     /// User wallet.
     #[account(mut)]
-    pub authority: Signer<'info>,
+    pub owner: Signer<'info>,
 
     /// Marketplace authority wallet.
     /// CHECK: Can be any marketplace authority
@@ -20,7 +20,7 @@ pub struct Uncustody<'info> {
     /// User's token account of the mint to uncustody.
     #[account(
         mut,
-        constraint = token_account.owner == authority.key(),
+        constraint = token_account.owner == owner.key(),
         token::mint = mint,
     )]
     pub token_account: Box<Account<'info, TokenAccount>>,
@@ -34,14 +34,14 @@ pub struct Uncustody<'info> {
 
     #[account(
         mut,
-        close = authority,
+        close = owner,
         seeds = [
             CustodyAccount::PREFIX.as_bytes(),
             mint.key().as_ref()
         ],
         bump = custody_account.load()?.bump[0],
         has_one = marketplace_authority,
-        has_one = authority,
+        has_one = owner,
         has_one = mint,
     )]
     pub custody_account: AccountLoader<'info, CustodyAccount>,
@@ -74,12 +74,18 @@ pub fn uncustody_handler<'info>(
         &ctx.accounts.token_account.to_account_info(),
         &ctx.accounts.mint.to_account_info(),
         &ctx.accounts.edition.to_account_info(),
-        &ctx.accounts.authority.to_account_info(),
+        &ctx.accounts.owner.to_account_info(),
         &ctx.accounts.custody_account.to_account_info(),
         &ctx.accounts.token_program.to_account_info(),
         &ctx.accounts.token_metadata_program.to_account_info(),
         Some(&auth_seeds),
     )?;
+
+    emit!(crate::event::Uncustody {
+        marketplace_authority: ctx.accounts.marketplace_authority.key(),
+        owner: ctx.accounts.owner.key(),
+        mint: ctx.accounts.mint.key(),
+    });
 
     Ok(())
 }

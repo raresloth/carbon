@@ -144,7 +144,7 @@ pub fn list_nft_handler<'info>(
 
         // Only the owner or the marketplace authority can list a custodial NFT
         require!(
-            ctx.accounts.seller.key() == account_loader.load()?.authority  ||
+            ctx.accounts.seller.key() == account_loader.load()?.owner  ||
             ctx.accounts.seller.key() == ctx.accounts.collection_config.marketplace_authority,
             Error::InvalidSeller
         );

@@ -66,13 +66,13 @@ export type BuyVirtualArgs = {
 };
 export type CustodyArgs = {
     marketplaceAuthority?: PublicKey;
-    authority: PublicKey;
+    owner: PublicKey;
     mint: PublicKey;
-    accounts: any;
+    accounts?: any;
 };
 export type UncustodyArgs = {
     marketplaceAuthority?: PublicKey;
-    authority: PublicKey;
+    owner: PublicKey;
     custodyAccount: IdlAccounts<CarbonIDL.Carbon>["custodyAccount"];
 };
 export type TakeOwnershipArgs = {
