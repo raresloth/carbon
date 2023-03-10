@@ -91,7 +91,8 @@ impl Listing {
 		price: u64,
 		expiry: i64
 	) -> Result<()> {
-		if expiry <= Clock::get()?.unix_timestamp {
+		if expiry != 0 &&
+			expiry <= Clock::get()?.unix_timestamp {
 			return err!(Error::InvalidExpiry);
 		}
 
@@ -119,7 +120,8 @@ impl Listing {
 	}
 
 	pub fn assert_can_buy(&self, max_price: u64) -> Result<()> {
-		if self.expiry <= Clock::get()?.unix_timestamp {
+		if self.expiry != 0 &&
+			self.expiry <= Clock::get()?.unix_timestamp {
 			return err!(Error::ListingExpired);
 		}
 
