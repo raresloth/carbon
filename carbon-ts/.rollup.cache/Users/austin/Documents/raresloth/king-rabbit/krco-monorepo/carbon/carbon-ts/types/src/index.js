@@ -1,5 +1,6 @@
 import { PublicKey } from "@solana/web3.js";
 export * from './carbon';
+export * from './types';
 export * as CarbonIDL from './idl/carbon';
 export const PROGRAM_ADDRESS = 'CRBNZ9mWZXkgX7Um6FsdFMGFHfeNgfwbyPYtuzHxbPWB';
 export const PROGRAM_ID = new PublicKey(PROGRAM_ADDRESS);

@@ -4,6 +4,7 @@ import {ASSOCIATED_TOKEN_PROGRAM_ID, getAssociatedTokenAddressSync, NATIVE_MINT}
 import {BN, IdlAccounts, IdlTypes} from "@coral-xyz/anchor";
 import {getEditionPDA, getMetadataPDA, TOKEN_METADATA_PROGRAM_ID} from "./solana";
 import * as CarbonIDL from "./idl/carbon";
+import {CollectionConfig, CustodyAccount, Listing} from "./types";
 
 export type InitMarketplaceConfigArgs = {
 	marketplaceAuthority: PublicKey,
@@ -30,7 +31,7 @@ export type DelistItemArgs = {
 }
 
 export type DelistOrBuyItemArgs = {
-	listing: IdlAccounts<CarbonIDL.Carbon>["listing"];
+	listing: Listing;
 	maxPrice?: number;
 }
 
@@ -51,7 +52,7 @@ export type DelistNftArgs = {
 
 export type BuyNftArgs = {
 	buyer: PublicKey,
-	listing: IdlAccounts<CarbonIDL.Carbon>["listing"],
+	listing: Listing,
 	maxPrice?: number,
 }
 
@@ -72,8 +73,8 @@ export type DelistVirtualArgs = {
 export type BuyVirtualArgs = {
 	marketplaceAuthority?: PublicKey;
 	buyer: PublicKey,
-	collectionConfig: IdlAccounts<CarbonIDL.Carbon>["collectionConfig"],
-	listing: IdlAccounts<CarbonIDL.Carbon>["listing"],
+	collectionConfig: CollectionConfig,
+	listing: Listing,
 	metadata: IdlTypes<CarbonIDL.Carbon>["Metadata"],
 	maxPrice?: number,
 }
@@ -88,12 +89,12 @@ export type CustodyArgs = {
 export type UncustodyArgs = {
 	marketplaceAuthority?: PublicKey;
 	owner: PublicKey,
-	custodyAccount: IdlAccounts<CarbonIDL.Carbon>["custodyAccount"],
+	custodyAccount: CustodyAccount,
 }
 
 export type TakeOwnershipArgs = {
 	marketplaceAuthority?: PublicKey;
-	custodyAccount: IdlAccounts<CarbonIDL.Carbon>["custodyAccount"],
+	custodyAccount: CustodyAccount,
 }
 
 export class Instructions {
