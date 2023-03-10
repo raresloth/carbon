@@ -1,4 +1,4 @@
-import { ComputeBudgetProgram, Transaction } from "@solana/web3.js";
+import { ComputeBudgetProgram, PublicKey, Transaction } from "@solana/web3.js";
 export class Methods {
     constructor(carbon) {
         this.carbon = carbon;
@@ -84,6 +84,25 @@ export class Methods {
             units: 300000
         }))
             .add(ix));
+    }
+    async buyNftAndCustody(args) {
+        var _a;
+        const buyer = (_a = args.buyer) !== null && _a !== void 0 ? _a : this.carbon.provider.wallet;
+        const buyIx = await this.carbon.instructions.buyNft({
+            ...args,
+            buyer: buyer.publicKey
+        });
+        const custodyIx = await this.carbon.instructions.custody({
+            owner: buyer.publicKey,
+            mint: new PublicKey(args.listing.itemId)
+        });
+        const provider = this.carbon.getProviderWithWallet(buyer);
+        return await provider.sendAndConfirm(new Transaction()
+            .add(ComputeBudgetProgram.setComputeUnitLimit({
+            units: 400000
+        }))
+            .add(buyIx)
+            .add(custodyIx));
     }
     async listVirtual(args) {
         var _a;

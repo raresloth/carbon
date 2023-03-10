@@ -26,6 +26,9 @@ export declare class Methods {
     buyNft(args: Omit<BuyNftArgs, 'buyer'> & {
         buyer?: Wallet;
     }): Promise<string>;
+    buyNftAndCustody(args: Omit<BuyNftArgs, 'buyer'> & {
+        buyer?: Wallet;
+    }): Promise<string>;
     listVirtual(args: Omit<ListVirtualArgs, 'marketplaceAuthority'> & {
         marketplaceAuthority?: Wallet;
     }): Promise<string>;

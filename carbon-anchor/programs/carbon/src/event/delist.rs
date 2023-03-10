@@ -5,4 +5,5 @@ use solana_program::pubkey::Pubkey;
 pub struct Delist {
 	pub item_id: [u8;32],
 	pub seller: Pubkey,
+	pub marketplace_authority: Pubkey,
 }

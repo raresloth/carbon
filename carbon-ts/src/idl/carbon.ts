@@ -1226,6 +1226,11 @@ export type Carbon = {
           "name": "seller",
           "type": "publicKey",
           "index": false
+        },
+        {
+          "name": "marketplaceAuthority",
+          "type": "publicKey",
+          "index": false
         }
       ]
     },
@@ -2607,6 +2612,11 @@ export const IDL: Carbon = {
         },
         {
           "name": "seller",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "marketplaceAuthority",
           "type": "publicKey",
           "index": false
         }

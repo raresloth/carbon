@@ -158,7 +158,7 @@ pub fn list_nft_handler<'info>(
         price,
         expiry,
         seller: listing.seller,
-        is_virtual: true,
+        is_virtual: false,
         currency_mint: listing.currency_mint,
         collection_mint: ctx.accounts.collection_config.collection_mint,
         marketplace_authority: listing.marketplace_authority,

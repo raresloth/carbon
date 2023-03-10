@@ -93,7 +93,8 @@ pub fn delist_nft_handler<'info>(
 
     emit!(Delist {
         item_id: listing.item_id,
-        seller: listing.seller
+        seller: listing.seller,
+        marketplace_authority: listing.marketplace_authority,
     });
 
     Ok(())

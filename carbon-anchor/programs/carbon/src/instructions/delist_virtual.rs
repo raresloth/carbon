@@ -33,7 +33,8 @@ pub fn delist_virtual_handler<'info>(
 
     emit!(Delist {
         item_id,
-        seller: ctx.accounts.listing.seller
+        seller: ctx.accounts.listing.seller,
+        marketplace_authority: ctx.accounts.listing.marketplace_authority,
     });
 
     Ok(())

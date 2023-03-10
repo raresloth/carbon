@@ -1226,6 +1226,11 @@ export const IDL = {
                     "name": "seller",
                     "type": "publicKey",
                     "index": false
+                },
+                {
+                    "name": "marketplaceAuthority",
+                    "type": "publicKey",
+                    "index": false
                 }
             ]
         },
