@@ -1,4 +1,4 @@
 # pnpm-workspace.yaml
 packages:
   - 'carbon-anchor'
-  - 'carbon-ts'
+  - 'carbon-sdk'

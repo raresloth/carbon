@@ -6,4 +6,5 @@ pub struct Uncustody {
 	pub marketplace_authority: Pubkey,
 	pub owner: Pubkey,
 	pub mint: Pubkey,
+	pub item_id: [u8; 32],
 }

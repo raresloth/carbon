@@ -4,7 +4,7 @@ import {Keypair, PublicKey, LAMPORTS_PER_SOL, Transaction, ComputeBudgetProgram}
 import * as CarbonIDL from "../target/types/carbon";
 import {assertThrows, createCollectionNFT, createNFT, createSplToken, fetchNFT, setBalance} from "./helpers";
 import moment from "moment";
-import { Carbon, FEE_ACCOUNT_KEY, toItemId } from "@raresloth/carbon-ts"
+import { Carbon, FEE_ACCOUNT_KEY, toItemId } from "@raresloth/carbon-sdk"
 import {
 	createAssociatedTokenAccount,
 	getAccount,
@@ -184,7 +184,8 @@ describe("carbon", () => {
 			it("should list the custodial nft correctly", async function () {
 				await carbon.methods.custody({
 					owner: new Wallet(seller),
-					mint
+					mint,
+					itemId
 				})
 				await carbon.methods.listNft({
 					seller: new Wallet(seller),
@@ -257,6 +258,7 @@ describe("carbon", () => {
 				await carbon.methods.custody({
 					owner: new Wallet(seller),
 					mint,
+					itemId
 				})
 				await carbon.methods.listNft({
 					seller: new Wallet(seller),
@@ -368,7 +370,8 @@ describe("carbon", () => {
 				const sellerPreBalance = await provider.connection.getBalance(seller.publicKey)
 				await carbon.methods.custody({
 					owner: new Wallet(seller),
-					mint
+					mint,
+					itemId
 				})
 				await carbon.methods.listNft({
 					seller: new Wallet(seller),
@@ -418,7 +421,8 @@ describe("carbon", () => {
 			it("should custody the nft correctly", async function () {
 				await carbon.methods.custody({
 					owner: new Wallet(seller),
-					mint
+					mint,
+					itemId
 				})
 
 				const custodyAccount = await program.account.custodyAccount.fetch(custodyAccountPDA);
@@ -442,7 +446,8 @@ describe("carbon", () => {
 				})
 				await assertThrows(async () => await carbon.methods.custody({
 					owner: new Wallet(seller),
-					mint
+					mint,
+					itemId
 				}))
 			});
 
@@ -450,6 +455,7 @@ describe("carbon", () => {
 				await assertThrows(async () => await carbon.methods.custody({
 					owner: new Wallet(seller),
 					mint,
+					itemId,
 					accounts: {
 						listing: NATIVE_MINT
 					}
@@ -463,7 +469,8 @@ describe("carbon", () => {
 			it("should uncustody the nft correctly", async function () {
 				await carbon.methods.custody({
 					owner: new Wallet(seller),
-					mint
+					mint,
+					itemId
 				})
 
 				const custodyAccount = await program.account.custodyAccount.fetch(custodyAccountPDA)
@@ -483,7 +490,8 @@ describe("carbon", () => {
 			it("should throw when nft is listed", async function () {
 				await carbon.methods.custody({
 					owner: new Wallet(seller),
-					mint
+					mint,
+					itemId
 				})
 				await carbon.methods.listNft({
 					seller: new Wallet(seller),
@@ -506,7 +514,8 @@ describe("carbon", () => {
 			it("should take ownership of the nft correctly", async function () {
 				await carbon.methods.custody({
 					owner: new Wallet(seller),
-					mint
+					mint,
+					itemId
 				})
 
 				const custodyAccount = await program.account.custodyAccount.fetch(custodyAccountPDA)
@@ -528,7 +537,8 @@ describe("carbon", () => {
 			it("should throw when nft is listed", async function () {
 				await carbon.methods.custody({
 					owner: new Wallet(seller),
-					mint
+					mint,
+					itemId
 				})
 				await carbon.methods.listNft({
 					seller: new Wallet(seller),

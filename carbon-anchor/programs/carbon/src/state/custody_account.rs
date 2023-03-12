@@ -13,6 +13,8 @@ pub struct CustodyAccount {
 	pub owner: Pubkey,
 	/// Pubkey of the mint being custodied
 	pub mint: Pubkey,
+	/// A unique ID for the virtual item matching the mint
+	pub item_id: [u8; 32],
 	/// True if the mint is listed for sale
 	pub is_listed: bool,
 }
@@ -23,7 +25,7 @@ impl CustodyAccount {
 
 	// Additional padding for future proofing
 	pub const SPACE: usize =
-		8 + 1 + 1 + 32 + 32 + 32 + 1 + 128;
+		8 + 1 + 1 + 32 + 32 + 32 + 32 + 1 + 256;
 
 	pub const PREFIX: &'static str = "custody_account";
 
@@ -70,12 +72,14 @@ impl CustodyAccount {
 		marketplace_authority: Pubkey,
 		owner: Pubkey,
 		mint: Pubkey,
+		item_id: [u8; 32],
 	) -> Result<()> {
 		self.bump = bump;
 		self.version = CustodyAccount::VERSION;
 		self.marketplace_authority = marketplace_authority;
 		self.owner = owner;
 		self.mint = mint;
+		self.item_id = item_id;
 		self.is_listed = false;
 
 		return Ok(());

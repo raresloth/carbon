@@ -65,6 +65,7 @@ pub fn uncustody_handler<'info>(
     require!(listing.is_none(), Error::NftIsListed);
 
     let bump = ctx.accounts.custody_account.load()?.bump;
+    let item_id = ctx.accounts.custody_account.load()?.item_id;
     let auth_seeds = CustodyAccount::auth_seeds_from_args(
         ctx.accounts.mint.to_account_info().key,
         &bump
@@ -85,6 +86,7 @@ pub fn uncustody_handler<'info>(
         marketplace_authority: ctx.accounts.marketplace_authority.key(),
         owner: ctx.accounts.owner.key(),
         mint: ctx.accounts.mint.key(),
+        item_id
     });
 
     Ok(())

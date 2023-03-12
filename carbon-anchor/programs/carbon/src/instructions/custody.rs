@@ -55,6 +55,7 @@ pub struct Custody<'info> {
 
 pub fn custody_handler<'info>(
     ctx: Context<Custody>,
+    item_id: [u8; 32],
 ) -> Result<()> {
     let listing = Listing::from_account_info_with_checks(
         &ctx.accounts.listing.to_account_info(),
@@ -70,6 +71,7 @@ pub fn custody_handler<'info>(
             ctx.accounts.marketplace_authority.key(),
             ctx.accounts.owner.key(),
             ctx.accounts.mint.key(),
+            item_id
         )?;
     }
 
@@ -95,6 +97,7 @@ pub fn custody_handler<'info>(
         marketplace_authority: ctx.accounts.marketplace_authority.key(),
         owner: ctx.accounts.owner.key(),
         mint: ctx.accounts.mint.key(),
+        item_id
     });
 
     Ok(())

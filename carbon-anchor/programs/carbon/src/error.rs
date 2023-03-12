@@ -34,5 +34,7 @@ pub enum Error {
 	#[msg("Invalid listing account")]
 	InvalidListingAccount,
 	#[msg("Invalid seller")]
-	InvalidSeller
+	InvalidSeller,
+	#[msg("Invalid price")]
+	InvalidPrice
 }

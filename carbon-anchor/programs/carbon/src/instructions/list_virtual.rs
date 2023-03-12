@@ -60,6 +60,9 @@ pub fn list_virtual_handler<'info>(
     price: u64,
     expiry: i64,
 ) -> Result<()> {
+    require!(price > 0, Error::InvalidPrice);
+    require!(expiry >= 0, Error::InvalidExpiry);
+
     let listing = &mut ctx.accounts.listing;
     listing.init(
         [*ctx.bumps.get(Listing::PREFIX).ok_or(Error::BumpSeedNotInHashMap)?],

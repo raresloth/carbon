@@ -91,6 +91,9 @@ pub fn list_nft_handler<'info>(
     price: u64,
     expiry: i64,
 ) -> Result<()> {
+    require!(price > 0, Error::InvalidPrice);
+    require!(expiry >= 0, Error::InvalidExpiry);
+
     assert_is_nft_in_collection(
         &ctx.accounts.mint,
         &ctx.accounts.metadata_account,
