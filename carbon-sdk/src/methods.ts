@@ -149,6 +149,7 @@ export class Methods {
 		const marketplaceAuthority = args.marketplaceAuthority ?? this.carbon.provider.wallet
 		const ix = await this.carbon.instructions.listVirtual({
 			...args,
+			seller: marketplaceAuthority!.publicKey,
 			marketplaceAuthority: marketplaceAuthority!.publicKey
 		})
 		const provider = this.carbon.getProviderWithWallet(marketplaceAuthority!)
@@ -156,19 +157,19 @@ export class Methods {
 	}
 
 	async delistVirtual(
-		args: Omit<DelistVirtualArgs, 'marketplaceAuthority'> & { marketplaceAuthority?: Wallet }
+		args: Omit<DelistVirtualArgs, 'seller'> & { seller?: Wallet }
 	): Promise<string> {
-		const marketplaceAuthority = args.marketplaceAuthority ?? this.carbon.provider.wallet
+		const seller = args.seller ?? this.carbon.provider.wallet
 		const ix = await this.carbon.instructions.delistVirtual({
 			...args,
-			marketplaceAuthority: marketplaceAuthority!.publicKey
+			seller: seller!.publicKey
 		})
-		const provider = this.carbon.getProviderWithWallet(marketplaceAuthority!)
+		const provider = this.carbon.getProviderWithWallet(seller!)
 		return await provider.sendAndConfirm(new Transaction().add(ix))
 	}
 
-	// buyVirtual requires a signature from the buyer and marketplace authority so the instruction
-	// should be used instead of helper methods
+	// buyVirtual requires a signature from the buyer and marketplace authority so the
+	// instruction or transaction helpers should be used instead
 
 	async custody(
 		args: Omit<CustodyArgs, 'owner'> & { owner?: Wallet }

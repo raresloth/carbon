@@ -11,8 +11,11 @@ use crate::{
 #[derive(Accounts)]
 #[instruction(item_id: [u8;32])]
 pub struct ListVirtual<'info> {
-    /// Marketplace authority wallet.
+    /// Seller wallet.
     #[account(mut)]
+    pub seller: Signer<'info>,
+
+    /// Marketplace authority wallet.
     pub marketplace_authority: Signer<'info>,
 
     /// The currency to use or native mint if using SOL
@@ -26,7 +29,7 @@ pub struct ListVirtual<'info> {
         ],
         bump,
         space = Listing::SPACE,
-        payer = marketplace_authority,
+        payer = seller,
     )]
     pub listing: Box<Account<'info, Listing>>,
 
@@ -67,7 +70,7 @@ pub fn list_virtual_handler<'info>(
     listing.init(
         [*ctx.bumps.get(Listing::PREFIX).ok_or(Error::BumpSeedNotInHashMap)?],
         ctx.accounts.marketplace_authority.key(),
-        ctx.accounts.marketplace_authority.key(),
+        ctx.accounts.seller.key(),
         item_id,
         true,
         ctx.accounts.currency_mint.key(),

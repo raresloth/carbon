@@ -110,6 +110,7 @@ export class Methods {
         const marketplaceAuthority = (_a = args.marketplaceAuthority) !== null && _a !== void 0 ? _a : this.carbon.provider.wallet;
         const ix = await this.carbon.instructions.listVirtual({
             ...args,
+            seller: marketplaceAuthority.publicKey,
             marketplaceAuthority: marketplaceAuthority.publicKey
         });
         const provider = this.carbon.getProviderWithWallet(marketplaceAuthority);
@@ -117,16 +118,16 @@ export class Methods {
     }
     async delistVirtual(args) {
         var _a;
-        const marketplaceAuthority = (_a = args.marketplaceAuthority) !== null && _a !== void 0 ? _a : this.carbon.provider.wallet;
+        const seller = (_a = args.seller) !== null && _a !== void 0 ? _a : this.carbon.provider.wallet;
         const ix = await this.carbon.instructions.delistVirtual({
             ...args,
-            marketplaceAuthority: marketplaceAuthority.publicKey
+            seller: seller.publicKey
         });
-        const provider = this.carbon.getProviderWithWallet(marketplaceAuthority);
+        const provider = this.carbon.getProviderWithWallet(seller);
         return await provider.sendAndConfirm(new Transaction().add(ix));
     }
-    // buyVirtual requires a signature from the buyer and marketplace authority so the instruction
-    // should be used instead of helper methods
+    // buyVirtual requires a signature from the buyer and marketplace authority so the
+    // instruction or transaction helpers should be used instead
     async custody(args) {
         var _a;
         const owner = (_a = args.owner) !== null && _a !== void 0 ? _a : this.carbon.provider.wallet;

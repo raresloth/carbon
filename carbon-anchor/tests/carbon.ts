@@ -599,6 +599,40 @@ describe("carbon", () => {
 				assert.equal(listing.feeConfig.bps, defaultFeeConfig.bps)
 			});
 
+			it("should list the virtual item correctly as a third-party seller", async function () {
+				const listTx = await carbon.transactions.listVirtual({
+					seller: seller.publicKey,
+					itemId,
+					collectionMint,
+					price,
+					expiry
+				})
+				await provider.sendAndConfirm(listTx, [seller])
+
+				const listing = await program.account.listing.fetch(listingPDA);
+				assert.equal(listing.version, 1);
+				assert.equal(listing.seller.toString(), seller.publicKey.toString());
+				assert.deepEqual(listing.itemId, itemId);
+				assert.equal(listing.isVirtual, true);
+				assert.equal(listing.currencyMint.toString(), currencyMint.toString());
+				assert.equal(listing.price.toNumber(), price);
+				assert.equal(listing.expiry.toNumber(), expiry);
+				assert.equal(listing.feeConfig.feeAccount.toString(), FEE_ACCOUNT_KEY.toString())
+				assert.equal(listing.feeConfig.bps, defaultFeeConfig.bps)
+			});
+
+			it("should throw when seller is not a signer", async function () {
+				const listTx = await carbon.transactions.listVirtual({
+					seller: seller.publicKey,
+					itemId,
+					collectionMint,
+					price,
+					expiry
+				})
+
+				await assertThrows(async () => await provider.sendAndConfirm(listTx, []))
+			});
+
 		});
 
 		describe("delist_virtual", function () {
@@ -609,6 +643,41 @@ describe("carbon", () => {
 
 				// Listing should no longer exist
 				await assertThrows(async () => await program.account.listing.fetch(listingPDA));
+			});
+
+			it("should delist the virtual item correctly with a third-party seller", async function () {
+				const listTx = await carbon.transactions.listVirtual({
+					seller: seller.publicKey,
+					itemId,
+					collectionMint,
+					price,
+					expiry
+				})
+				await provider.sendAndConfirm(listTx, [seller])
+
+				await carbon.methods.delistVirtual({
+					seller: new Wallet(seller),
+					itemId
+				})
+
+				// Listing should no longer exist
+				await assertThrows(async () => await program.account.listing.fetch(listingPDA));
+			});
+
+			it("should throw when delisting as a different seller", async function () {
+				const listTx = await carbon.transactions.listVirtual({
+					seller: seller.publicKey,
+					itemId,
+					collectionMint,
+					price,
+					expiry
+				})
+				await provider.sendAndConfirm(listTx, [seller])
+
+				await assertThrows(async () => await carbon.methods.delistVirtual({
+					seller: new Wallet(marketplaceAuthority),
+					itemId
+				}));
 			});
 
 		});
@@ -710,6 +779,109 @@ describe("carbon", () => {
 				assert.isAtLeast(marketplaceAuthPostBalance.value.uiAmount, price - marketplaceFee - TX_FEE)
 
 				assert.equal(feeAccountPostBalance.value.uiAmount, marketplaceFee)
+			});
+
+			it("should buy the virtual item correctly with a third-party seller", async function () {
+				const sellerPreBalance = await provider.connection.getBalance(seller.publicKey)
+				const marketplaceAuthPreBalance = await provider.connection.getBalance(marketplaceAuthority.publicKey)
+
+				const listTx = await carbon.transactions.listVirtual({
+					seller: seller.publicKey,
+					itemId,
+					collectionMint,
+					price,
+					expiry
+				})
+				await provider.sendAndConfirm(listTx, [seller])
+
+				const listing = await program.account.listing.fetch(listingPDA);
+				const collectionConfig = await program.account.collectionConfig.fetch(collectionConfigPDA);
+
+				const buyerPreBalance = await provider.connection.getBalance(buyer.publicKey)
+				const feeAccountPreBalance = await provider.connection.getBalance(FEE_ACCOUNT_KEY)
+				const {mint: mintKeypair, transaction} = await carbon.transactions.buyVirtual({
+					buyer: buyer.publicKey,
+					collectionConfig,
+					listing,
+					metadata: {
+						name: "Ghost #1",
+						uri:"https://example.com",
+					}
+				})
+				await provider.sendAndConfirm(transaction, [buyer])
+
+				const sellerPostBalance = await provider.connection.getBalance(seller.publicKey)
+				const marketplaceAuthPostBalance = await provider.connection.getBalance(marketplaceAuthority.publicKey)
+				const buyerPostBalance = await provider.connection.getBalance(buyer.publicKey)
+				const feeAccountPostBalance = await provider.connection.getBalance(FEE_ACCOUNT_KEY)
+
+				// An NFT should now exist with the correct metadata
+				const mint = mintKeypair.publicKey
+				const nft = await fetchNFT(provider, marketplaceAuthority, mint)
+				assert.equal(nft.updateAuthorityAddress.toString(), marketplaceAuthority.publicKey.toString())
+				assert.equal(nft.name, "Ghost #1")
+				assert.equal(nft.uri, "https://example.com")
+				assert.equal(nft.symbol, defaultSymbol)
+				assert.equal(nft.sellerFeeBasisPoints, defaultSellerFeeBps)
+				assert.isTrue(nft.collection.verified)
+				assert.equal(nft.collection.address.toString(), collectionMint.toString())
+				assert.isTrue(nft.primarySaleHappened)
+				assert.deepEqual(nft.creators, [{
+					address: marketplaceAuthority.publicKey,
+					verified: true,
+					share: 100
+				}])
+
+				// Make sure buyer is the owner and can transfer the NFT
+				const sellerTokenAccount = await createAssociatedTokenAccount(provider.connection, buyer, mint, seller.publicKey)
+				const buyerTokenAccount = getAssociatedTokenAddressSync(mint, buyer.publicKey)
+				await transferChecked(provider.connection, buyer, buyerTokenAccount, mint, sellerTokenAccount, buyer, 1, 0)
+
+				assert.equal(buyerPreBalance - buyerPostBalance, price)
+
+				// Make sure correct amounts were sent to seller and fee account
+				const royalty = (price * defaultSellerFeeBps / 10000)
+				const marketplaceFee = (price * defaultFeeConfig.bps / 10000)
+				assert.isAtLeast(sellerPostBalance - sellerPreBalance,
+					price - marketplaceFee - royalty)
+
+				const mintingFee = (0.02 * LAMPORTS_PER_SOL)
+				assert.isAtLeast(marketplaceAuthPostBalance,
+					marketplaceAuthPreBalance + royalty - mintingFee)
+
+				assert.equal(feeAccountPostBalance - feeAccountPreBalance, marketplaceFee)
+			});
+
+			it("should throw when giving an incorrect collection config", async function () {
+				await carbon.methods.listVirtual({itemId, collectionMint, price, expiry})
+
+				const listing = await program.account.listing.fetch(listingPDA);
+				collectionMint = Keypair.generate().publicKey
+				await carbon.methods.initCollectionConfig({
+					args: {
+						collectionMint,
+						sellerFeeBasisPoints: defaultSellerFeeBps,
+						symbol: defaultSymbol
+					}
+				})
+
+				collectionConfigPDA = carbon.pdas.collectionConfig(collectionMint)
+				const collectionConfig = await program.account.collectionConfig.fetch(collectionConfigPDA);
+
+				const {mint: mintKeypair, instruction} = await carbon.instructions.buyVirtual({
+					buyer: buyer.publicKey,
+					collectionConfig,
+					listing,
+					metadata: {
+						name: "Ghost #1",
+						uri:"https://example.com",
+					}
+				})
+
+				await assertThrows(async () => {
+					await provider.sendAndConfirm(new Transaction().add(instruction),
+						[marketplaceAuthority, mintKeypair, buyer])
+				}, 6014)
 			});
 
 		});

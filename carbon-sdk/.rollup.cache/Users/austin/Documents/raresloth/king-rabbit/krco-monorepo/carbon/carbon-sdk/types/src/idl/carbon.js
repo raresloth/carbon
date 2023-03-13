@@ -189,8 +189,16 @@ export const IDL = {
             "name": "listVirtual",
             "accounts": [
                 {
-                    "name": "marketplaceAuthority",
+                    "name": "seller",
                     "isMut": true,
+                    "isSigner": true,
+                    "docs": [
+                        "Seller wallet."
+                    ]
+                },
+                {
+                    "name": "marketplaceAuthority",
+                    "isMut": false,
                     "isSigner": true,
                     "docs": [
                         "Marketplace authority wallet."
@@ -317,11 +325,11 @@ export const IDL = {
             "name": "delistVirtual",
             "accounts": [
                 {
-                    "name": "marketplaceAuthority",
+                    "name": "seller",
                     "isMut": true,
                     "isSigner": true,
                     "docs": [
-                        "Marketplace authority wallet."
+                        "Seller wallet."
                     ]
                 },
                 {
@@ -469,11 +477,11 @@ export const IDL = {
                     ]
                 },
                 {
-                    "name": "marketplaceAuthority",
+                    "name": "seller",
                     "isMut": true,
-                    "isSigner": true,
+                    "isSigner": false,
                     "docs": [
-                        "Marketplace authority wallet."
+                        "Seller wallet."
                     ]
                 },
                 {
@@ -1382,7 +1390,7 @@ export const IDL = {
         },
         {
             "code": 6005,
-            "name": "InvalidListingAuthority",
+            "name": "InvalidSeller",
             "msg": "Invalid listing authority"
         },
         {
@@ -1422,13 +1430,13 @@ export const IDL = {
         },
         {
             "code": 6013,
-            "name": "InvalidSeller",
-            "msg": "Invalid seller"
+            "name": "InvalidPrice",
+            "msg": "Invalid price"
         },
         {
             "code": 6014,
-            "name": "InvalidPrice",
-            "msg": "Invalid price"
+            "name": "InvalidCollectionConfig",
+            "msg": "Invalid collection config"
         }
     ]
 };

@@ -46,6 +46,7 @@ export type BuyNftArgs = {
     maxPrice?: number;
 };
 export type ListVirtualArgs = {
+    seller?: PublicKey;
     marketplaceAuthority?: PublicKey;
     itemId: number[];
     collectionMint: PublicKey;
@@ -54,7 +55,7 @@ export type ListVirtualArgs = {
     currencyMint?: PublicKey;
 };
 export type DelistVirtualArgs = {
-    marketplaceAuthority?: PublicKey;
+    seller?: PublicKey;
     itemId: number[];
 };
 export type BuyVirtualArgs = {

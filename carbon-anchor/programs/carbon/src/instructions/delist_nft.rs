@@ -39,7 +39,7 @@ pub struct DelistNft<'info> {
             mint.key().as_ref()
         ],
         bump = listing.bump[0],
-        has_one = seller @ Error::InvalidListingAuthority,
+        has_one = seller @ Error::InvalidSeller,
         constraint = !listing.is_virtual @ Error::IsVirtual,
         constraint = listing.item_id == mint.key().to_bytes() @ Error::InvalidMint,
     )]

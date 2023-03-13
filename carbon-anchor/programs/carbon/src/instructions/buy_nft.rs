@@ -54,7 +54,7 @@ pub struct BuyNft<'info> {
 			mint.key().as_ref()
 		],
 		bump = listing.bump[0],
-		has_one = seller @ Error::InvalidListingAuthority,
+		has_one = seller @ Error::InvalidSeller,
 		constraint = !listing.is_virtual @ Error::IsVirtual,
 		constraint = listing.item_id == mint.key().to_bytes() @ Error::InvalidMint,
 		constraint = listing.fee_config.fee_account == fee_account.key() @ Error::InvalidFeeAccount,
@@ -78,6 +78,8 @@ pub struct BuyNft<'info> {
 }
 
 /// When buying with SOL, the remaining accounts should only contain the marketplace auth.
+/// 1. marketplace auth wallet
+///
 /// When buying with an SPL token, the remaining accounts should be in the following order:
 /// 1. currency mint account
 /// 2. buyer currency ata

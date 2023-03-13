@@ -1,16 +1,39 @@
-import {ComputeBudgetProgram, Transaction} from "@solana/web3.js";
+import {ComputeBudgetProgram, Keypair, Transaction} from "@solana/web3.js";
 import Carbon from "./carbon";
 import {AnchorProvider} from "@coral-xyz/anchor";
-import {BuyVirtualArgs} from "./instructions";
+import {BuyVirtualArgs, ListVirtualArgs} from "./instructions";
 
 export class Transactions {
 	constructor(
 		public carbon: Carbon,
 	) {}
 
+	async listVirtual(
+		args: ListVirtualArgs,
+	): Promise<Transaction> {
+		const { seller, itemId, collectionMint, price, expiry, currencyMint } = args
+
+		const tx = new Transaction()
+
+		const listIx = await this.carbon.instructions.listVirtual({
+			seller,
+			itemId,
+			collectionMint,
+			price,
+			expiry,
+			currencyMint
+		})
+
+		tx.add(listIx)
+
+		await this.populateBlockhashAndFeePayer(tx)
+
+		return await this.carbon.provider.wallet.signTransaction(tx)
+	}
+
 	async buyVirtual(
 		args: BuyVirtualArgs,
-	): Promise<Transaction> {
+	): Promise<{mint: Keypair, transaction: Transaction}> {
 		const { buyer, collectionConfig, listing, metadata, maxPrice } = args
 
 		const tx = new Transaction()
@@ -28,19 +51,20 @@ export class Transactions {
 
 		tx.add(buyVirtualIxInfo.instruction)
 
-		const provider: AnchorProvider = this.carbon.provider
-		tx.recentBlockhash = (await provider.connection.getLatestBlockhash()).blockhash
-		tx.feePayer = provider.wallet.publicKey
+		await this.populateBlockhashAndFeePayer(tx)
 
-		let signedTx = await provider.wallet.signTransaction(tx)
+		let signedTx = await this.carbon.provider.wallet.signTransaction(tx)
 		signedTx.partialSign(buyVirtualIxInfo.mint)
 
-		return signedTx
+		return {
+			mint: buyVirtualIxInfo.mint,
+			transaction: signedTx
+		}
 	}
 
 	async buyVirtualAndCustody(
 		args: BuyVirtualArgs,
-	): Promise<Transaction> {
+	): Promise<{mint: Keypair, transaction: Transaction}> {
 		const { buyer, collectionConfig, listing, metadata, maxPrice } = args
 
 		const tx = new Transaction()
@@ -66,14 +90,21 @@ export class Transactions {
 
 		tx.add(custodyIx)
 
+		await this.populateBlockhashAndFeePayer(tx)
+
+		let signedTx = await this.carbon.provider.wallet.signTransaction(tx)
+		signedTx.partialSign(buyVirtualIxInfo.mint)
+
+		return {
+			mint: buyVirtualIxInfo.mint,
+			transaction: signedTx
+		}
+	}
+
+	async populateBlockhashAndFeePayer(tx: Transaction) {
 		const provider: AnchorProvider = this.carbon.provider
 		tx.recentBlockhash = (await provider.connection.getLatestBlockhash()).blockhash
 		tx.feePayer = provider.wallet.publicKey
-
-		let signedTx = await provider.wallet.signTransaction(tx)
-		signedTx.partialSign(buyVirtualIxInfo.mint)
-
-		return signedTx
 	}
 
 }

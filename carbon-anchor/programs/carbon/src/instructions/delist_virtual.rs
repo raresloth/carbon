@@ -7,19 +7,19 @@ use crate::{
 #[derive(Accounts)]
 #[instruction(item_id: [u8;32])]
 pub struct DelistVirtual<'info> {
-    /// Marketplace authority wallet.
+    /// Seller wallet.
     #[account(mut)]
-    pub marketplace_authority: Signer<'info>,
+    pub seller: Signer<'info>,
 
     #[account(
         mut,
-        close = marketplace_authority,
+        close = seller,
         seeds = [
             Listing::PREFIX.as_bytes(),
             item_id.as_ref()
         ],
         bump = listing.bump[0],
-        has_one = marketplace_authority,
+        has_one = seller,
     )]
     pub listing: Box<Account<'info, Listing>>,
 

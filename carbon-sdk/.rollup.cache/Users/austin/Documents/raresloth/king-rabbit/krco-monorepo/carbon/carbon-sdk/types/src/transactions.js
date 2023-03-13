@@ -3,6 +3,21 @@ export class Transactions {
     constructor(carbon) {
         this.carbon = carbon;
     }
+    async listVirtual(args) {
+        const { seller, itemId, collectionMint, price, expiry, currencyMint } = args;
+        const tx = new Transaction();
+        const listIx = await this.carbon.instructions.listVirtual({
+            seller,
+            itemId,
+            collectionMint,
+            price,
+            expiry,
+            currencyMint
+        });
+        tx.add(listIx);
+        await this.populateBlockhashAndFeePayer(tx);
+        return await this.carbon.provider.wallet.signTransaction(tx);
+    }
     async buyVirtual(args) {
         const { buyer, collectionConfig, listing, metadata, maxPrice } = args;
         const tx = new Transaction()
@@ -17,12 +32,13 @@ export class Transactions {
             maxPrice
         });
         tx.add(buyVirtualIxInfo.instruction);
-        const provider = this.carbon.provider;
-        tx.recentBlockhash = (await provider.connection.getLatestBlockhash()).blockhash;
-        tx.feePayer = provider.wallet.publicKey;
-        let signedTx = await provider.wallet.signTransaction(tx);
+        await this.populateBlockhashAndFeePayer(tx);
+        let signedTx = await this.carbon.provider.wallet.signTransaction(tx);
         signedTx.partialSign(buyVirtualIxInfo.mint);
-        return signedTx;
+        return {
+            mint: buyVirtualIxInfo.mint,
+            transaction: signedTx
+        };
     }
     async buyVirtualAndCustody(args) {
         const { buyer, collectionConfig, listing, metadata, maxPrice } = args;
@@ -44,12 +60,18 @@ export class Transactions {
             itemId: listing.itemId
         });
         tx.add(custodyIx);
+        await this.populateBlockhashAndFeePayer(tx);
+        let signedTx = await this.carbon.provider.wallet.signTransaction(tx);
+        signedTx.partialSign(buyVirtualIxInfo.mint);
+        return {
+            mint: buyVirtualIxInfo.mint,
+            transaction: signedTx
+        };
+    }
+    async populateBlockhashAndFeePayer(tx) {
         const provider = this.carbon.provider;
         tx.recentBlockhash = (await provider.connection.getLatestBlockhash()).blockhash;
         tx.feePayer = provider.wallet.publicKey;
-        let signedTx = await provider.wallet.signTransaction(tx);
-        signedTx.partialSign(buyVirtualIxInfo.mint);
-        return signedTx;
     }
 }
 export default Transactions;

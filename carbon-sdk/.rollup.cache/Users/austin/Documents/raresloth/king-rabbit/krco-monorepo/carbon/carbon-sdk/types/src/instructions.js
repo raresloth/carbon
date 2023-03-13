@@ -33,12 +33,12 @@ export class Instructions {
         // Account info does not exist, therefore has not been minted
         if (mintAccountInfo == null) {
             return await this.listVirtual({
+                seller: seller !== null && seller !== void 0 ? seller : this.carbon.marketplaceAuthority,
                 itemId,
                 collectionMint,
                 price,
                 expiry,
                 currencyMint,
-                marketplaceAuthority: seller !== null && seller !== void 0 ? seller : this.carbon.marketplaceAuthority,
             });
         }
         else {
@@ -58,7 +58,7 @@ export class Instructions {
             const listing = await this.carbon.program.account.listing.fetch(this.carbon.pdas.listing(itemId));
             if (listing.isVirtual) {
                 return await this.delistVirtual({
-                    marketplaceAuthority: seller,
+                    seller,
                     itemId
                 });
             }
@@ -82,7 +82,7 @@ export class Instructions {
         const { listing, maxPrice } = args;
         if (listing.isVirtual) {
             return await this.delistVirtual({
-                marketplaceAuthority: this.carbon.marketplaceAuthority,
+                seller: this.carbon.marketplaceAuthority,
                 itemId: listing.itemId
             });
         }
@@ -192,12 +192,14 @@ export class Instructions {
         return await builder.instruction();
     }
     async listVirtual(args) {
-        var _a;
+        var _a, _b;
         const { itemId, price, expiry, collectionMint, currencyMint } = args;
-        const marketplaceAuthority = (_a = args.marketplaceAuthority) !== null && _a !== void 0 ? _a : this.carbon.marketplaceAuthority;
+        const seller = (_a = args.seller) !== null && _a !== void 0 ? _a : this.carbon.marketplaceAuthority;
+        const marketplaceAuthority = (_b = args.marketplaceAuthority) !== null && _b !== void 0 ? _b : this.carbon.marketplaceAuthority;
         return await this.carbon.program.methods
             .listVirtual(itemId, new BN(price), new BN(expiry))
             .accounts({
+            seller,
             marketplaceAuthority,
             currencyMint: currencyMint !== null && currencyMint !== void 0 ? currencyMint : NATIVE_MINT,
             listing: this.carbon.pdas.listing(itemId),
@@ -209,11 +211,11 @@ export class Instructions {
     async delistVirtual(args) {
         var _a;
         const { itemId } = args;
-        const marketplaceAuthority = (_a = args.marketplaceAuthority) !== null && _a !== void 0 ? _a : this.carbon.marketplaceAuthority;
+        const seller = (_a = args.seller) !== null && _a !== void 0 ? _a : this.carbon.marketplaceAuthority;
         return await this.carbon.program.methods
             .delistVirtual(itemId)
             .accounts({
-            marketplaceAuthority,
+            seller,
             listing: this.carbon.pdas.listing(itemId),
         })
             .instruction();
@@ -227,7 +229,7 @@ export class Instructions {
             .buyVirtual(listing.itemId, maxPrice ? new BN(maxPrice) : listing.price, metadata)
             .accounts({
             buyer,
-            marketplaceAuthority,
+            seller: listing.seller,
             mint: mint.publicKey,
             collectionConfig: this.carbon.pdas.collectionConfig(collectionConfig.collectionMint),
             buyerTokenAccount: getAssociatedTokenAddressSync(mint.publicKey, buyer),
@@ -245,7 +247,7 @@ export class Instructions {
             builder.remainingAccounts([{
                     pubkey: marketplaceAuthority,
                     isWritable: true,
-                    isSigner: false,
+                    isSigner: true,
                 }]);
         }
         else {
@@ -260,13 +262,17 @@ export class Instructions {
                 }, {
                     pubkey: marketplaceAuthority,
                     isWritable: false,
-                    isSigner: false,
+                    isSigner: true,
                 }, {
                     pubkey: getAssociatedTokenAddressSync(listing.currencyMint, marketplaceAuthority),
                     isWritable: true,
                     isSigner: false,
                 }, {
                     pubkey: getAssociatedTokenAddressSync(listing.currencyMint, listing.feeConfig.feeAccount),
+                    isWritable: true,
+                    isSigner: false,
+                }, {
+                    pubkey: getAssociatedTokenAddressSync(listing.currencyMint, listing.seller),
                     isWritable: true,
                     isSigner: false,
                 }]);

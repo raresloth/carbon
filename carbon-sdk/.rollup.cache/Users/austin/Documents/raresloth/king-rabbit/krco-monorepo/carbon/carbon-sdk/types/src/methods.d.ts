@@ -32,8 +32,8 @@ export declare class Methods {
     listVirtual(args: Omit<ListVirtualArgs, 'marketplaceAuthority'> & {
         marketplaceAuthority?: Wallet;
     }): Promise<string>;
-    delistVirtual(args: Omit<DelistVirtualArgs, 'marketplaceAuthority'> & {
-        marketplaceAuthority?: Wallet;
+    delistVirtual(args: Omit<DelistVirtualArgs, 'seller'> & {
+        seller?: Wallet;
     }): Promise<string>;
     custody(args: Omit<CustodyArgs, 'owner'> & {
         owner?: Wallet;

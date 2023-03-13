@@ -16,7 +16,7 @@ pub enum Error {
 
 	/// 5
 	#[msg("Invalid listing authority")]
-	InvalidListingAuthority,
+	InvalidSeller,
 	#[msg("Overflow error")]
 	OverflowError,
 	#[msg("Invalid fee account")]
@@ -33,8 +33,8 @@ pub enum Error {
 	InvalidCustodyAccount,
 	#[msg("Invalid listing account")]
 	InvalidListingAccount,
-	#[msg("Invalid seller")]
-	InvalidSeller,
 	#[msg("Invalid price")]
-	InvalidPrice
+	InvalidPrice,
+	#[msg("Invalid collection config")]
+	InvalidCollectionConfig
 }

@@ -57,6 +57,7 @@ export type BuyNftArgs = {
 }
 
 export type ListVirtualArgs = {
+	seller?: PublicKey;
 	marketplaceAuthority?: PublicKey;
 	itemId: number[];
 	collectionMint: PublicKey;
@@ -66,7 +67,7 @@ export type ListVirtualArgs = {
 }
 
 export type DelistVirtualArgs = {
-	marketplaceAuthority?: PublicKey;
+	seller?: PublicKey;
 	itemId: number[];
 }
 
@@ -140,12 +141,12 @@ export class Instructions {
 		if (mintAccountInfo == null) {
 			return await this.listVirtual(
 				{
+					seller: seller ?? this.carbon.marketplaceAuthority,
 					itemId,
 					collectionMint,
 					price,
 					expiry,
 					currencyMint,
-					marketplaceAuthority: seller ?? this.carbon.marketplaceAuthority,
 				},
 			)
 		} else {
@@ -170,7 +171,7 @@ export class Instructions {
 			const listing = await this.carbon.program.account.listing.fetch(this.carbon.pdas.listing(itemId));
 			if (listing.isVirtual) {
 				return await this.delistVirtual({
-					marketplaceAuthority: seller,
+					seller,
 					itemId
 				})
 			} else {
@@ -195,7 +196,7 @@ export class Instructions {
 
 		if (listing.isVirtual) {
 			return await this.delistVirtual({
-				marketplaceAuthority: this.carbon.marketplaceAuthority,
+				seller: this.carbon.marketplaceAuthority,
 				itemId: listing.itemId
 			})
 		} else {
@@ -326,6 +327,7 @@ export class Instructions {
 		args: ListVirtualArgs,
 	): Promise<TransactionInstruction> {
 		const {itemId, price, expiry, collectionMint, currencyMint} = args
+		const seller = args.seller ?? this.carbon.marketplaceAuthority
 		const marketplaceAuthority = args.marketplaceAuthority ?? this.carbon.marketplaceAuthority
 
 		return await this.carbon.program.methods
@@ -335,6 +337,7 @@ export class Instructions {
 				new BN(expiry),
 			)
 			.accounts({
+				seller,
 				marketplaceAuthority,
 				currencyMint: currencyMint ?? NATIVE_MINT,
 				listing: this.carbon.pdas.listing(itemId),
@@ -348,14 +351,14 @@ export class Instructions {
 		args: DelistVirtualArgs,
 	): Promise<TransactionInstruction> {
 		const { itemId } = args
-		const marketplaceAuthority = args.marketplaceAuthority ?? this.carbon.marketplaceAuthority
+		const seller = args.seller ?? this.carbon.marketplaceAuthority
 
 		return await this.carbon.program.methods
 			.delistVirtual(
 				itemId
 			)
 			.accounts({
-				marketplaceAuthority,
+				seller,
 				listing: this.carbon.pdas.listing(itemId),
 			})
 			.instruction()
@@ -377,7 +380,7 @@ export class Instructions {
 			)
 			.accounts({
 				buyer,
-				marketplaceAuthority,
+				seller: listing.seller,
 				mint: mint.publicKey,
 				collectionConfig: this.carbon.pdas.collectionConfig(collectionConfig.collectionMint),
 				buyerTokenAccount: getAssociatedTokenAddressSync(mint.publicKey, buyer),
@@ -396,7 +399,7 @@ export class Instructions {
 			builder.remainingAccounts([{
 				pubkey: marketplaceAuthority!,
 				isWritable: true,
-				isSigner: false,
+				isSigner: true,
 			}])
 		} else {
 			builder.remainingAccounts([{
@@ -410,13 +413,17 @@ export class Instructions {
 			}, {
 				pubkey: marketplaceAuthority,
 				isWritable: false,
-				isSigner: false,
+				isSigner: true,
 			}, {
 				pubkey: getAssociatedTokenAddressSync(listing.currencyMint, marketplaceAuthority),
 				isWritable: true,
 				isSigner: false,
 			}, {
 				pubkey: getAssociatedTokenAddressSync(listing.currencyMint, listing.feeConfig.feeAccount),
+				isWritable: true,
+				isSigner: false,
+			}, {
+				pubkey: getAssociatedTokenAddressSync(listing.currencyMint, listing.seller),
 				isWritable: true,
 				isSigner: false,
 			}])
