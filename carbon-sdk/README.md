@@ -14,7 +14,7 @@ Carbon SDK can be installed using your preferred package manager.
 ### yarn
 `yarn add @raresloth/carbon-sdk`
 
-## [Examples](https://www.carbonsdk.com/examples)
+## [Examples](https://www.carbonsdk.com/integration-guide)
 
 ## License
 Carbon is licensed under the [MIT License](https://github.com/raresloth/carbon/blob/master/LICENSE)

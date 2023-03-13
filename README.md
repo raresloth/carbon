@@ -21,7 +21,7 @@ Carbon SDK can be installed using your preferred package manager.
 ### yarn
 `yarn add @raresloth/carbon-sdk`
 
-## [Examples](https://www.carbonsdk.com/examples)
+## [Examples](https://www.carbonsdk.com/integration-guide)
 
 ## Local Development
 ### Install Dependencies
