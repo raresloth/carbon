@@ -3,8 +3,6 @@
     <h1>Carbon</h1>
 </div>
 
----
-
 Carbon helps developers bridge existing web2 game economies to web3 by tokenizing in-game assets onto Solana and exposing them to on-chain liquidity.
 
 ## Deployments
