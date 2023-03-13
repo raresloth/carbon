@@ -5,6 +5,7 @@ import * as CarbonIDL from "./idl/carbon";
 import Pdas from "./pdas";
 import Methods from "./methods";
 import Instructions from "./instructions";
+import Transactions from "./transactions";
 export declare class Carbon {
     provider: AnchorProvider;
     marketplaceAuthority: PublicKey;
@@ -12,6 +13,7 @@ export declare class Carbon {
     program: Program<CarbonIDL.Carbon>;
     pdas: Pdas;
     instructions: Instructions;
+    transactions: Transactions;
     methods: Methods;
     constructor(provider: AnchorProvider, marketplaceAuthority: PublicKey, programId?: PublicKey);
     getProviderWithWallet(wallet: Wallet): AnchorProvider;
