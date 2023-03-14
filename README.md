@@ -3,14 +3,14 @@
     <h1>Carbon</h1>
 </div>
 
-Carbon helps developers bridge existing web2 game economies to web3 by tokenizing in-game assets onto Solana and exposing them to on-chain liquidity.
+Helping game developers bridge existing web2 game economies onto web3, generating more revenue for game developers and more utility for players.
 
 ## Deployments
 
 | Network | Address | Version |
 | :--- | :--- | :--- |
 | `devnet` | `CRBNZ9mWZXkgX7Um6FsdFMGFHfeNgfwbyPYtuzHxbPWB` | `latest` |
-| `mainnet-beta` | - | - |
+| `mainnet-beta` | `CRBNZ9mWZXkgX7Um6FsdFMGFHfeNgfwbyPYtuzHxbPWB` | `0.2.0` |
 
 ## Installation
 Carbon SDK can be installed using your preferred package manager.
@@ -21,7 +21,7 @@ Carbon SDK can be installed using your preferred package manager.
 ### yarn
 `yarn add @raresloth/carbon-sdk`
 
-## [Examples](https://www.carbonsdk.com/integration-guide)
+## [Integration Guide](https://www.carbonsdk.com/integration-guide)
 
 ## Local Development
 ### Install Dependencies

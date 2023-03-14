@@ -1,7 +1,7 @@
 [package]
 name = "carbon"
-version = "0.1.0"
-description = "Marketplace for listing virtual items to be lazy minted on purchase."
+version = "0.3.0"
+description = "Helping game developers bridge existing web2 game economies onto web3, generating more revenue for game developers and more utility for players."
 edition = "2021"
 
 [lib]
