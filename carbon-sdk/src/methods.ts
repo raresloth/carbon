@@ -207,6 +207,27 @@ export class Methods {
 		return await provider.sendAndConfirm(new Transaction().add(ix))
 	}
 
+	async getListingsForMarketplaceAuthority(marketplaceAuthority: PublicKey): Promise<ListingWithKey[]> {
+		return await this.carbon.program.account.listing.all([
+			{
+				memcmp: {
+					offset: 10,
+					bytes: marketplaceAuthority.toBase58(),
+				},
+			},
+		]);
+	}
+
+	async getCustodyAccountsForOwner(owner: PublicKey): Promise<CustodyAccountWithKey[]> {
+		return await this.carbon.program.account.custodyAccount.all([
+			{
+				memcmp: {
+					offset: 42,
+					bytes: owner.toBase58(),
+				},
+			},
+		]);
+	}
 }
 
 export default Methods;
