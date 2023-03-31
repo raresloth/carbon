@@ -29,9 +29,7 @@ export default {
 			},
 		}),
 	],
-	external: [
-		"buffer",
-	],
+	external: ["buffer"],
 	output: {
 		file: "dist/browser/index.js",
 		format: "es",
