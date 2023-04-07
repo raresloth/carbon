@@ -48,7 +48,7 @@ importers:
       '@solana/spl-token': ^0.3.6
       '@solana/web3.js': ^1.47.2
       '@types/lodash': ^4.14.191
-      '@types/node': ^16.18.11
+      '@types/node': ^18.15.11
       '@typescript-eslint/eslint-plugin': ^4.6.0
       '@typescript-eslint/parser': ^4.6.0
       bn.js: ^5.2.1
@@ -80,7 +80,7 @@ importers:
       '@rollup/plugin-replace': 3.1.0_rollup@2.79.1
       '@rollup/plugin-typescript': 8.5.0_zptcx3kz3uwp66hzhyyt545weq
       '@types/lodash': 4.14.191
-      '@types/node': 16.18.12
+      '@types/node': 18.15.11
       '@typescript-eslint/eslint-plugin': 4.33.0_s2qqtxhzmb7vugvfoyripfgp7i
       '@typescript-eslint/parser': 4.33.0_jofidmxrjzhj7l6vknpw5ecvfe
       concurrently: 7.6.0
@@ -915,7 +915,7 @@ packages:
   /@types/connect/3.4.35:
     resolution: {integrity: sha512-cdeYyv4KWoEgpBISTxWvqYsVy444DOqehiF3fM3ne10AmJ62RSyNkUnxMJXHQWRQQX2eR94m5y1IZyDwBjV9FQ==}
     dependencies:
-      '@types/node': 18.13.0
+      '@types/node': 18.15.11
 
   /@types/estree/0.0.39:
     resolution: {integrity: sha512-EYNwp3bU+98cpU4lAWYYL7Zz+2gryWH1qbdDTidVd6hkiR6weksdbMadyXKXNPEkQFhXM+hVO9ZygomHXp+AIw==}
@@ -949,12 +949,12 @@ packages:
   /@types/node/12.20.55:
     resolution: {integrity: sha512-J8xLz7q2OFulZ2cyGTLE1TbbZcjpno7FaN6zdJNrgAdrJ+DZzh/uFR6YrTb4C+nXakvud8Q4+rbhoIWlYQbUFQ==}
 
-  /@types/node/16.18.12:
-    resolution: {integrity: sha512-vzLe5NaNMjIE3mcddFVGlAXN1LEWueUsMsOJWaT6wWMJGyljHAWHznqfnKUQWGzu7TLPrGvWdNAsvQYW+C0xtw==}
-    dev: true
-
   /@types/node/18.13.0:
     resolution: {integrity: sha512-gC3TazRzGoOnoKAhUx+Q0t8S9Tzs74z7m0ipwGpSqQrleP14hKxP4/JUeEQcD3W1/aIpnWl8pHowI7WokuZpXg==}
+    dev: true
+
+  /@types/node/18.15.11:
+    resolution: {integrity: sha512-E5Kwq2n4SbMzQOn6wnmBjuK9ouqlURrcZDVfbo9ftDDTFt3nk7ZKK4GMOzoYgnpQJKcxwQw+lGaBvvlMo0qN/Q==}
 
   /@types/parse-json/4.0.0:
     resolution: {integrity: sha512-//oorEZjL6sbPcKUaCdIGlIUeH26mgzimjBB77G6XRgnDl/L5wOnpyBGRe/Mmf5CVW3PwEBE1NjiMZ/ssFh4wA==}
@@ -969,7 +969,7 @@ packages:
   /@types/resolve/1.17.1:
     resolution: {integrity: sha512-yy7HuzQhj0dhGpD8RLXSZWEkLsV9ibvxvi6EiJ3bkqLAO1RGo0WbkWQiwpRlSFymTJRz0d3k5LM3kkx8ArDbLw==}
     dependencies:
-      '@types/node': 16.18.12
+      '@types/node': 18.15.11
     dev: true
 
   /@types/secp256k1/4.0.3:
@@ -981,7 +981,7 @@ packages:
   /@types/ws/7.4.7:
     resolution: {integrity: sha512-JQbbmxZTZehdc2iszGKs5oC3NFnjeay7mtAWrdt7qNtAVK0g19muApzAy4bm9byz79xa2ZnO/BOBC2R8RC5Lww==}
     dependencies:
-      '@types/node': 18.13.0
+      '@types/node': 18.15.11
 
   /@typescript-eslint/eslint-plugin/4.33.0_s2qqtxhzmb7vugvfoyripfgp7i:
     resolution: {integrity: sha512-aINiAxGVdOl1eJyVjaWn/YcVAq4Gi/Yo35qHGCnqbWVz61g39D0h23veY/MA0rFFGfxK7TySg2uwDeNv+JgVpg==}
