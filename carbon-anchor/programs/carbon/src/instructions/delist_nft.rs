@@ -95,6 +95,7 @@ pub fn delist_nft_handler<'info>(
         item_id: listing.item_id,
         seller: listing.seller,
         marketplace_authority: listing.marketplace_authority,
+        collection_config: listing.collection_config,
     });
 
     Ok(())

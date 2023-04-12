@@ -201,6 +201,7 @@ pub fn buy_virtual_handler<'info>(
         is_virtual: true,
         currency_mint: ctx.accounts.listing.currency_mint,
         marketplace_authority: ctx.accounts.listing.marketplace_authority,
+		collection_config: ctx.accounts.listing.collection_config,
         fee_config: ctx.accounts.listing.fee_config,
     });
 

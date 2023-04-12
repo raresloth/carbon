@@ -1211,6 +1211,11 @@ export type Carbon = {
           "index": false
         },
         {
+          "name": "collectionConfig",
+          "type": "publicKey",
+          "index": false
+        },
+        {
           "name": "feeConfig",
           "type": {
             "defined": "FeeConfig"
@@ -1269,6 +1274,11 @@ export type Carbon = {
         },
         {
           "name": "marketplaceAuthority",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "collectionConfig",
           "type": "publicKey",
           "index": false
         }
@@ -2654,6 +2664,11 @@ export const IDL: Carbon = {
           "index": false
         },
         {
+          "name": "collectionConfig",
+          "type": "publicKey",
+          "index": false
+        },
+        {
           "name": "feeConfig",
           "type": {
             "defined": "FeeConfig"
@@ -2712,6 +2727,11 @@ export const IDL: Carbon = {
         },
         {
           "name": "marketplaceAuthority",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "collectionConfig",
           "type": "publicKey",
           "index": false
         }

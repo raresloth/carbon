@@ -35,6 +35,7 @@ pub fn delist_virtual_handler<'info>(
         item_id,
         seller: ctx.accounts.listing.seller,
         marketplace_authority: ctx.accounts.listing.marketplace_authority,
+        collection_config: ctx.accounts.listing.collection_config,
     });
 
     Ok(())
