@@ -59,6 +59,14 @@ pub mod carbon {
         instructions::buy_virtual_handler(ctx, item_id, max_price, metadata)
     }
 
+    pub fn mint_virtual<'info>(
+        ctx: Context<'_, '_, '_, 'info, MintVirtual<'info>>,
+        item_id: [u8;32],
+        metadata: Metadata
+    ) -> Result<()> {
+        instructions::mint_virtual_handler(ctx, item_id, metadata)
+    }
+
     pub fn custody<'info>(ctx: Context<Custody>, item_id: [u8; 32]) -> Result<()> {
         instructions::custody_handler(ctx, item_id)
     }

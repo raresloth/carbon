@@ -84,6 +84,14 @@ export type BuyVirtualArgs = {
 	maxPrice?: number;
 };
 
+export type MintVirtualArgs = {
+	marketplaceAuthority?: PublicKey;
+	buyer: PublicKey;
+	itemId: number[];
+	collectionConfig: CollectionConfig;
+	metadata: IdlTypes<CarbonIDL.Carbon>["Metadata"];
+};
+
 export type CustodyArgs = {
 	marketplaceAuthority?: PublicKey;
 	owner: PublicKey;
@@ -420,6 +428,35 @@ export class Instructions {
 				},
 			]);
 		}
+
+		return {
+			mint,
+			instruction: await builder.instruction(),
+		};
+	}
+
+	async mintVirtual(
+		args: MintVirtualArgs
+	): Promise<{ mint: Keypair; instruction: TransactionInstruction }> {
+		const { buyer, metadata, itemId, collectionConfig } = args;
+		const marketplaceAuthority = args.marketplaceAuthority ?? this.carbon.marketplaceAuthority;
+
+		const mint = Keypair.generate();
+
+		const builder = this.carbon.program.methods.mintVirtual(itemId, metadata).accounts({
+			buyer,
+			marketplaceAuthority,
+			mint: mint.publicKey,
+			collectionConfig: this.carbon.pdas.collectionConfig(collectionConfig.collectionMint),
+			buyerTokenAccount: getAssociatedTokenAddressSync(mint.publicKey, buyer),
+			metadataAccount: getMetadataPDA(mint.publicKey),
+			edition: getEditionPDA(mint.publicKey),
+			collectionMint: collectionConfig.collectionMint,
+			collectionMetadataAccount: getMetadataPDA(collectionConfig.collectionMint),
+			collectionEdition: getEditionPDA(collectionConfig.collectionMint),
+			tokenMetadataProgram: TOKEN_METADATA_PROGRAM_ID,
+			associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
+		});
 
 		return {
 			mint,

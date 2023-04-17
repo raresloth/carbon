@@ -45,11 +45,7 @@ describe("carbon", () => {
 	let sellerTokenAccount: PublicKey;
 	let buyer: Keypair;
 	let itemId: number[];
-	let metadataAccount: PublicKey;
-	let edition: PublicKey;
 	let collectionMint: PublicKey;
-	let collectionMetadataAccount: PublicKey;
-	let collectionEdition: PublicKey;
 	let currencyMint: PublicKey;
 	let price: number;
 	let expiry: number;
@@ -88,8 +84,6 @@ describe("carbon", () => {
 			marketplaceAuthority
 		);
 		collectionMint = collectionNft.mint;
-		collectionMetadataAccount = collectionNft.metadataAccount;
-		collectionEdition = collectionNft.edition;
 		collectionConfigPDA = carbon.pdas.collectionConfig(collectionMint);
 		currencyMint = NATIVE_MINT;
 		price = LAMPORTS_PER_SOL;
@@ -164,8 +158,6 @@ describe("carbon", () => {
 			const nft = results[2];
 			mint = nft.mint;
 			itemId = Array.from(mint.toBuffer());
-			metadataAccount = nft.metadataAccount;
-			edition = nft.edition;
 			sellerTokenAccount = getAssociatedTokenAddressSync(mint, seller.publicKey);
 			listingPDA = carbon.pdas.listing(itemId);
 			custodyAccountPDA = carbon.pdas.custodyAccount(mint);
@@ -1062,6 +1054,80 @@ describe("carbon", () => {
 				}, 6014);
 			});
 		});
+
+		describe("mint_virtual", function () {
+			it("should mint the virtual item correctly", async function () {
+				const marketplaceAuthPreBalance = await provider.connection.getBalance(
+					marketplaceAuthority.publicKey
+				);
+
+				const collectionConfig = await program.account.collectionConfig.fetch(collectionConfigPDA);
+				const buyerPreBalance = await provider.connection.getBalance(buyer.publicKey);
+
+				const { mint: mintKeypair, transaction } = await carbon.transactions.mintVirtual({
+					buyer: buyer.publicKey,
+					itemId: toItemId("ABC123"),
+					collectionConfig,
+					metadata: {
+						name: "Ghost #1",
+						uri: "https://example.com",
+					},
+				});
+				await provider.sendAndConfirm(transaction, [marketplaceAuthority, mintKeypair, buyer]);
+
+				const marketplaceAuthPostBalance = await provider.connection.getBalance(
+					marketplaceAuthority.publicKey
+				);
+				const buyerPostBalance = await provider.connection.getBalance(buyer.publicKey);
+
+				// An NFT should now exist with the correct metadata
+				const mint = mintKeypair.publicKey;
+				const nft = await fetchNFT(provider, marketplaceAuthority, mint);
+				assert.equal(
+					nft.updateAuthorityAddress.toString(),
+					marketplaceAuthority.publicKey.toString()
+				);
+				assert.equal(nft.name, "Ghost #1");
+				assert.equal(nft.uri, "https://example.com");
+				assert.equal(nft.symbol, defaultSymbol);
+				assert.equal(nft.sellerFeeBasisPoints, defaultSellerFeeBps);
+				assert.isTrue(nft.collection.verified);
+				assert.equal(nft.collection.address.toString(), collectionMint.toString());
+				assert.isTrue(nft.primarySaleHappened);
+				assert.deepEqual(nft.creators, [
+					{
+						address: marketplaceAuthority.publicKey,
+						verified: true,
+						share: 100,
+					},
+				]);
+
+				// Make sure buyer is the owner and can transfer the NFT
+				const sellerTokenAccount = await createAssociatedTokenAccount(
+					provider.connection,
+					buyer,
+					mint,
+					seller.publicKey
+				);
+				const buyerTokenAccount = getAssociatedTokenAddressSync(mint, buyer.publicKey);
+				await transferChecked(
+					provider.connection,
+					buyer,
+					buyerTokenAccount,
+					mint,
+					sellerTokenAccount,
+					buyer,
+					1,
+					0
+				);
+
+				// Make sure correct amounts were sent to seller and fee account
+				const mintingFee = 0.01 * LAMPORTS_PER_SOL;
+				assert.isAtLeast(buyerPreBalance - buyerPostBalance, mintingFee);
+
+				assert.equal(marketplaceAuthPreBalance - marketplaceAuthPostBalance, 15000);
+			});
+		});
 	});
 
 	describe("combined flows", function () {
@@ -1118,8 +1184,6 @@ describe("carbon", () => {
 				const nft = results[2];
 				itemId = Array.from(nft.mint.toBuffer());
 				mint = nft.mint;
-				metadataAccount = nft.metadataAccount;
-				edition = nft.edition;
 				sellerTokenAccount = getAssociatedTokenAddressSync(mint, seller.publicKey);
 				listingPDA = carbon.pdas.listing(itemId);
 				custodyAccountPDA = carbon.pdas.custodyAccount(mint);

@@ -1,7 +1,7 @@
 import { ComputeBudgetProgram, Keypair, Transaction } from "@solana/web3.js";
 import Carbon from "./carbon";
 import { AnchorProvider } from "@coral-xyz/anchor";
-import { BuyVirtualArgs, ListVirtualArgs } from "./instructions";
+import { BuyVirtualArgs, ListVirtualArgs, MintVirtualArgs } from "./instructions";
 
 export class Transactions {
 	constructor(public carbon: Carbon) {}
@@ -93,6 +93,27 @@ export class Transactions {
 
 		return {
 			mint: buyVirtualIxInfo.mint,
+			transaction: signedTx,
+		};
+	}
+
+	async mintVirtual(args: MintVirtualArgs): Promise<{ mint: Keypair; transaction: Transaction }> {
+		const tx = new Transaction().add(
+			ComputeBudgetProgram.setComputeUnitLimit({
+				units: 300_000,
+			})
+		);
+
+		const mintVirtualIxInfo = await this.carbon.instructions.mintVirtual(args);
+		tx.add(mintVirtualIxInfo.instruction);
+
+		await this.populateBlockhashAndFeePayer(tx);
+
+		let signedTx = await this.carbon.provider.wallet.signTransaction(tx);
+		signedTx.partialSign(mintVirtualIxInfo.mint);
+
+		return {
+			mint: mintVirtualIxInfo.mint,
 			transaction: signedTx,
 		};
 	}

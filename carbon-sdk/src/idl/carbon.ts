@@ -1,5 +1,5 @@
 export type Carbon = {
-  "version": "0.3.0",
+  "version": "0.5.0",
   "name": "carbon",
   "instructions": [
     {
@@ -597,6 +597,133 @@ export type Carbon = {
         {
           "name": "maxPrice",
           "type": "u64"
+        },
+        {
+          "name": "metadata",
+          "type": {
+            "defined": "Metadata"
+          }
+        }
+      ]
+    },
+    {
+      "name": "mintVirtual",
+      "accounts": [
+        {
+          "name": "buyer",
+          "isMut": true,
+          "isSigner": true,
+          "docs": [
+            "Buyer wallet."
+          ]
+        },
+        {
+          "name": "marketplaceAuthority",
+          "isMut": true,
+          "isSigner": true,
+          "docs": [
+            "Marketplace authority wallet."
+          ]
+        },
+        {
+          "name": "mint",
+          "isMut": true,
+          "isSigner": true,
+          "docs": [
+            "The new mint to be used for the NFT."
+          ]
+        },
+        {
+          "name": "buyerTokenAccount",
+          "isMut": true,
+          "isSigner": false,
+          "docs": [
+            "Buyer NFT token account."
+          ]
+        },
+        {
+          "name": "metadataAccount",
+          "isMut": true,
+          "isSigner": false,
+          "docs": [
+            "Metadata account for the NFT."
+          ]
+        },
+        {
+          "name": "edition",
+          "isMut": true,
+          "isSigner": false,
+          "docs": [
+            "Edition of the NFT to mint."
+          ]
+        },
+        {
+          "name": "collectionMint",
+          "isMut": true,
+          "isSigner": false,
+          "docs": [
+            "Mint of the collection NFT."
+          ]
+        },
+        {
+          "name": "collectionMetadataAccount",
+          "isMut": true,
+          "isSigner": false,
+          "docs": [
+            "Metadata for the collection NFT."
+          ]
+        },
+        {
+          "name": "collectionEdition",
+          "isMut": true,
+          "isSigner": false,
+          "docs": [
+            "Edition of the collection NFT."
+          ]
+        },
+        {
+          "name": "collectionConfig",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "Collection config for the new NFT."
+          ]
+        },
+        {
+          "name": "tokenMetadataProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "tokenProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "associatedTokenProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "rent",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "itemId",
+          "type": {
+            "array": [
+              "u8",
+              32
+            ]
+          }
         },
         {
           "name": "metadata",
@@ -1337,6 +1464,41 @@ export type Carbon = {
           "type": {
             "defined": "FeeConfig"
           },
+          "index": false
+        }
+      ]
+    },
+    {
+      "name": "Mint",
+      "fields": [
+        {
+          "name": "itemId",
+          "type": {
+            "array": [
+              "u8",
+              32
+            ]
+          },
+          "index": false
+        },
+        {
+          "name": "mint",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "buyer",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "marketplaceAuthority",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "collectionConfig",
+          "type": "publicKey",
           "index": false
         }
       ]
@@ -1452,7 +1614,7 @@ export type Carbon = {
 };
 
 export const IDL: Carbon = {
-  "version": "0.3.0",
+  "version": "0.5.0",
   "name": "carbon",
   "instructions": [
     {
@@ -2050,6 +2212,133 @@ export const IDL: Carbon = {
         {
           "name": "maxPrice",
           "type": "u64"
+        },
+        {
+          "name": "metadata",
+          "type": {
+            "defined": "Metadata"
+          }
+        }
+      ]
+    },
+    {
+      "name": "mintVirtual",
+      "accounts": [
+        {
+          "name": "buyer",
+          "isMut": true,
+          "isSigner": true,
+          "docs": [
+            "Buyer wallet."
+          ]
+        },
+        {
+          "name": "marketplaceAuthority",
+          "isMut": true,
+          "isSigner": true,
+          "docs": [
+            "Marketplace authority wallet."
+          ]
+        },
+        {
+          "name": "mint",
+          "isMut": true,
+          "isSigner": true,
+          "docs": [
+            "The new mint to be used for the NFT."
+          ]
+        },
+        {
+          "name": "buyerTokenAccount",
+          "isMut": true,
+          "isSigner": false,
+          "docs": [
+            "Buyer NFT token account."
+          ]
+        },
+        {
+          "name": "metadataAccount",
+          "isMut": true,
+          "isSigner": false,
+          "docs": [
+            "Metadata account for the NFT."
+          ]
+        },
+        {
+          "name": "edition",
+          "isMut": true,
+          "isSigner": false,
+          "docs": [
+            "Edition of the NFT to mint."
+          ]
+        },
+        {
+          "name": "collectionMint",
+          "isMut": true,
+          "isSigner": false,
+          "docs": [
+            "Mint of the collection NFT."
+          ]
+        },
+        {
+          "name": "collectionMetadataAccount",
+          "isMut": true,
+          "isSigner": false,
+          "docs": [
+            "Metadata for the collection NFT."
+          ]
+        },
+        {
+          "name": "collectionEdition",
+          "isMut": true,
+          "isSigner": false,
+          "docs": [
+            "Edition of the collection NFT."
+          ]
+        },
+        {
+          "name": "collectionConfig",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "Collection config for the new NFT."
+          ]
+        },
+        {
+          "name": "tokenMetadataProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "tokenProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "associatedTokenProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "rent",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "itemId",
+          "type": {
+            "array": [
+              "u8",
+              32
+            ]
+          }
         },
         {
           "name": "metadata",
@@ -2790,6 +3079,41 @@ export const IDL: Carbon = {
           "type": {
             "defined": "FeeConfig"
           },
+          "index": false
+        }
+      ]
+    },
+    {
+      "name": "Mint",
+      "fields": [
+        {
+          "name": "itemId",
+          "type": {
+            "array": [
+              "u8",
+              32
+            ]
+          },
+          "index": false
+        },
+        {
+          "name": "mint",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "buyer",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "marketplaceAuthority",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "collectionConfig",
+          "type": "publicKey",
           "index": false
         }
       ]
