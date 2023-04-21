@@ -10,7 +10,7 @@ Helping game developers bridge existing web2 game economies onto web3, generatin
 | Network        | Address                                        | Version  |
 | :------------- | :--------------------------------------------- | :------- |
 | `devnet`       | `CRBNZ9mWZXkgX7Um6FsdFMGFHfeNgfwbyPYtuzHxbPWB` | `latest` |
-| `mainnet-beta` | `CRBNZ9mWZXkgX7Um6FsdFMGFHfeNgfwbyPYtuzHxbPWB` | `0.4.0`  |
+| `mainnet-beta` | `CRBNZ9mWZXkgX7Um6FsdFMGFHfeNgfwbyPYtuzHxbPWB` | `0.5.0`  |
 
 ## Installation
 
