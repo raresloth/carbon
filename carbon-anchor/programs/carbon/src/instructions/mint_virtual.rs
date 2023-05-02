@@ -1,6 +1,6 @@
 use anchor_lang::prelude::*;
 use anchor_spl::{
-	token::{Token},
+	token::Token,
 	associated_token::AssociatedToken,
 	metadata::{
 		verify_sized_collection_item,
@@ -11,9 +11,9 @@ use anchor_spl::{
 	metadata
 };
 use crate::{
-	state::{CollectionConfig, Metadata},
+	state::{CollectionConfig, Metadata, MintRecord},
 	event::Mint,
-	util::{mint_nft}
+	util::mint_nft
 };
 
 #[derive(Accounts)]
@@ -74,6 +74,19 @@ pub struct MintVirtual<'info> {
 	)]
 	pub collection_config: Box<Account<'info, CollectionConfig>>,
 
+	#[account(
+		init,
+		seeds = [
+			MintRecord::PREFIX.as_bytes(),
+			collection_config.key().as_ref(),
+			item_id.as_ref()
+		],
+		bump,
+		space = MintRecord::SPACE,
+        payer = buyer,
+	)]
+	pub mint_record: Box<Account<'info, MintRecord>>,
+
 	pub token_metadata_program: Program<'info, metadata::Metadata>,
 	pub token_program: Program<'info, Token>,
 	pub associated_token_program: Program<'info, AssociatedToken>,
@@ -86,6 +99,9 @@ pub fn mint_virtual_handler<'info>(
 	item_id: [u8;32],
 	metadata: Metadata
 ) -> Result<()> {
+	let mint_record = &mut ctx.accounts.mint_record;
+	mint_record.init(ctx.accounts.collection_config.key(), item_id)?;
+	
 	let marketplace_authority = &ctx.accounts.marketplace_authority.to_account_info();
 	let data = &ctx.accounts.collection_config.get_mpl_metadata(metadata)?;
 	// Mint the NFT to the buyer.

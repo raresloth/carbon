@@ -11,7 +11,7 @@ use anchor_spl::{
 	metadata
 };
 use crate::{
-	state::{Listing, CollectionConfig, Metadata},
+	state::{Listing, CollectionConfig, Metadata, MintRecord},
 	event::Buy,
 	util::{mint_nft, transfer_payment, is_native_mint},
 	error::Error
@@ -80,7 +80,6 @@ pub struct BuyVirtual<'info> {
 	)]
 	pub listing: Box<Account<'info, Listing>>,
 
-	/// CHECK: Marketplace authority is validated in handler
 	#[account(
 		seeds = [
 			CollectionConfig::PREFIX.as_bytes(),
@@ -90,6 +89,19 @@ pub struct BuyVirtual<'info> {
 		has_one = collection_mint,
 	)]
 	pub collection_config: Box<Account<'info, CollectionConfig>>,
+
+	#[account(
+		init,
+		seeds = [
+			MintRecord::PREFIX.as_bytes(),
+			collection_config.key().as_ref(),
+			item_id.as_ref()
+		],
+		bump,
+		space = MintRecord::SPACE,
+        payer = buyer,
+	)]
+	pub mint_record: Box<Account<'info, MintRecord>>,
 
 	/// Account to send fees to.
 	/// CHECK: Safe because of listing constraint
@@ -129,6 +141,9 @@ pub fn buy_virtual_handler<'info>(
 	};
 	require!(ctx.accounts.collection_config.marketplace_authority == marketplace_authority.key(),
 		Error::InvalidCollectionConfig);
+
+	let mint_record = &mut ctx.accounts.mint_record;
+	mint_record.init(ctx.accounts.collection_config.key(), item_id)?;
 
 	let data = &ctx.accounts.collection_config.get_mpl_metadata(metadata)?;
 	// Mint the NFT to the buyer.

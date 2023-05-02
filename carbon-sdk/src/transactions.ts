@@ -1,7 +1,9 @@
 import { ComputeBudgetProgram, Keypair, Transaction } from "@solana/web3.js";
 import Carbon from "./carbon";
 import { AnchorProvider } from "@coral-xyz/anchor";
-import { BuyVirtualArgs, ListVirtualArgs, MintVirtualArgs } from "./instructions";
+import { BuyVirtualArgs } from "./instructions/buyVirtual";
+import { ListVirtualArgs } from "./instructions/listVirtual";
+import { MintVirtualArgs } from "./instructions/mintVirtual";
 
 export class Transactions {
 	constructor(public carbon: Carbon) {}

@@ -776,7 +776,7 @@ describe("carbon", () => {
 
 				const buyerPreBalance = await provider.connection.getBalance(buyer.publicKey);
 				const feeAccountPreBalance = await provider.connection.getBalance(FEE_ACCOUNT_KEY);
-				const { mint: mintKeypair, instruction } = await carbon.instructions.buyVirtual({
+				const { mint: mintKeypair, transaction } = await carbon.transactions.buyVirtual({
 					buyer: buyer.publicKey,
 					collectionConfig,
 					listing,
@@ -785,11 +785,7 @@ describe("carbon", () => {
 						uri: "https://example.com",
 					},
 				});
-				await provider.sendAndConfirm(new Transaction().add(instruction), [
-					marketplaceAuthority,
-					mintKeypair,
-					buyer,
-				]);
+				await provider.sendAndConfirm(transaction, [marketplaceAuthority, mintKeypair, buyer]);
 
 				const marketplaceAuthPostBalance = await provider.connection.getBalance(
 					marketplaceAuthority.publicKey
@@ -819,6 +815,12 @@ describe("carbon", () => {
 					},
 				]);
 
+				// The mint record should exist
+				const mintRecordPDA = carbon.pdas.mintRecord(collectionConfigPDA, itemId);
+				const mintRecord = await program.account.mintRecord.fetch(mintRecordPDA);
+				assert.equal(mintRecord.collectionConfig.toString(), collectionConfigPDA.toString());
+				assert.deepEqual(mintRecord.itemId, itemId);
+
 				// Make sure buyer is the owner and can transfer the NFT
 				const sellerTokenAccount = await createAssociatedTokenAccount(
 					provider.connection,
@@ -839,7 +841,8 @@ describe("carbon", () => {
 				);
 
 				// Make sure correct amounts were sent to seller and fee account
-				assert.equal(buyerPreBalance - buyerPostBalance, price);
+				const mintRecordStorageFee = 1392000;
+				assert.equal(buyerPreBalance - buyerPostBalance, price + mintRecordStorageFee);
 
 				const mintingFee = 0.02 * LAMPORTS_PER_SOL;
 				const marketplaceFee = (price * defaultFeeConfig.bps) / 10000;
@@ -1064,9 +1067,10 @@ describe("carbon", () => {
 				const collectionConfig = await program.account.collectionConfig.fetch(collectionConfigPDA);
 				const buyerPreBalance = await provider.connection.getBalance(buyer.publicKey);
 
+				itemId = toItemId("ABC123");
 				const { mint: mintKeypair, transaction } = await carbon.transactions.mintVirtual({
 					buyer: buyer.publicKey,
-					itemId: toItemId("ABC123"),
+					itemId,
 					collectionConfig,
 					metadata: {
 						name: "Ghost #1",
@@ -1102,6 +1106,12 @@ describe("carbon", () => {
 					},
 				]);
 
+				// The mint record should exist
+				const mintRecordPDA = carbon.pdas.mintRecord(collectionConfigPDA, itemId);
+				const mintRecord = await program.account.mintRecord.fetch(mintRecordPDA);
+				assert.equal(mintRecord.collectionConfig.toString(), collectionConfigPDA.toString());
+				assert.deepEqual(mintRecord.itemId, itemId);
+
 				// Make sure buyer is the owner and can transfer the NFT
 				const sellerTokenAccount = await createAssociatedTokenAccount(
 					provider.connection,
@@ -1126,6 +1136,40 @@ describe("carbon", () => {
 				assert.isAtLeast(buyerPreBalance - buyerPostBalance, mintingFee);
 
 				assert.equal(marketplaceAuthPreBalance - marketplaceAuthPostBalance, 15000);
+			});
+
+			it("should throw when trying to mint the same item id twice", async function () {
+				const marketplaceAuthPreBalance = await provider.connection.getBalance(
+					marketplaceAuthority.publicKey
+				);
+
+				const collectionConfig = await program.account.collectionConfig.fetch(collectionConfigPDA);
+				const buyerPreBalance = await provider.connection.getBalance(buyer.publicKey);
+
+				itemId = toItemId("ABC123");
+				const { mint: mintKeypair, transaction } = await carbon.transactions.mintVirtual({
+					buyer: buyer.publicKey,
+					itemId,
+					collectionConfig,
+					metadata: {
+						name: "Ghost #1",
+						uri: "https://example.com",
+					},
+				});
+				await provider.sendAndConfirm(transaction, [marketplaceAuthority, mintKeypair, buyer]);
+
+				await assertThrows(async () => {
+					const { mint: mintKeypair, transaction } = await carbon.transactions.mintVirtual({
+						buyer: buyer.publicKey,
+						itemId,
+						collectionConfig,
+						metadata: {
+							name: "Ghost #1",
+							uri: "https://example.com",
+						},
+					});
+					await provider.sendAndConfirm(transaction, [marketplaceAuthority, mintKeypair, buyer]);
+				});
 			});
 		});
 	});

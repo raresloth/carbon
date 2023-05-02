@@ -1,5 +1,5 @@
 export type Carbon = {
-  "version": "0.5.0",
+  "version": "0.6.0",
   "name": "carbon",
   "instructions": [
     {
@@ -551,6 +551,11 @@ export type Carbon = {
           "isSigner": false
         },
         {
+          "name": "mintRecord",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
           "name": "feeAccount",
           "isMut": true,
           "isSigner": false,
@@ -688,6 +693,11 @@ export type Carbon = {
           "docs": [
             "Collection config for the new NFT."
           ]
+        },
+        {
+          "name": "mintRecord",
+          "isMut": true,
+          "isSigner": false
         },
         {
           "name": "tokenMetadataProgram",
@@ -1214,6 +1224,33 @@ export type Carbon = {
             ],
             "type": {
               "defined": "FeeConfig"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "mintRecord",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "collectionConfig",
+            "docs": [
+              "Collection config for the item"
+            ],
+            "type": "publicKey"
+          },
+          {
+            "name": "itemId",
+            "docs": [
+              "A unique ID for the virtual item within the collection"
+            ],
+            "type": {
+              "array": [
+                "u8",
+                32
+              ]
             }
           }
         ]
@@ -1614,7 +1651,7 @@ export type Carbon = {
 };
 
 export const IDL: Carbon = {
-  "version": "0.5.0",
+  "version": "0.6.0",
   "name": "carbon",
   "instructions": [
     {
@@ -2166,6 +2203,11 @@ export const IDL: Carbon = {
           "isSigner": false
         },
         {
+          "name": "mintRecord",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
           "name": "feeAccount",
           "isMut": true,
           "isSigner": false,
@@ -2303,6 +2345,11 @@ export const IDL: Carbon = {
           "docs": [
             "Collection config for the new NFT."
           ]
+        },
+        {
+          "name": "mintRecord",
+          "isMut": true,
+          "isSigner": false
         },
         {
           "name": "tokenMetadataProgram",
@@ -2829,6 +2876,33 @@ export const IDL: Carbon = {
             ],
             "type": {
               "defined": "FeeConfig"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "mintRecord",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "collectionConfig",
+            "docs": [
+              "Collection config for the item"
+            ],
+            "type": "publicKey"
+          },
+          {
+            "name": "itemId",
+            "docs": [
+              "A unique ID for the virtual item within the collection"
+            ],
+            "type": {
+              "array": [
+                "u8",
+                32
+              ]
             }
           }
         ]

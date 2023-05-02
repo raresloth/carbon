@@ -1,22 +1,20 @@
 import { ComputeBudgetProgram, PublicKey, Transaction } from "@solana/web3.js";
 import Carbon from "./carbon";
 import { Wallet } from "@coral-xyz/anchor/dist/esm/provider";
-import {
-	BuyNftArgs,
-	CustodyArgs,
-	DelistItemArgs,
-	DelistNftArgs,
-	DelistOrBuyItemArgs,
-	DelistVirtualArgs,
-	InitCollectionConfigArgs,
-	InitMarketplaceConfigArgs,
-	ListItemArgs,
-	ListNftArgs,
-	ListVirtualArgs,
-	TakeOwnershipArgs,
-	UncustodyArgs,
-} from "./instructions";
 import { CustodyAccountWithKey, ListingWithKey } from "./types";
+import { BuyNftArgs } from "./instructions/buyNft";
+import { CustodyArgs } from "./instructions/custody";
+import { DelistItemArgs } from "./instructions/delistItem";
+import { DelistNftArgs } from "./instructions/delistNft";
+import { DelistOrBuyItemArgs } from "./instructions/delistOrBuyItem";
+import { DelistVirtualArgs } from "./instructions/delistVirtual";
+import { InitCollectionConfigArgs } from "./instructions/initCollectionConfig";
+import { InitMarketplaceConfigArgs } from "./instructions/initMarketplaceConfig";
+import { ListItemArgs } from "./instructions/listItem";
+import { ListNftArgs } from "./instructions/listNft";
+import { ListVirtualArgs } from "./instructions/listVirtual";
+import { TakeOwnershipArgs } from "./instructions/takeOwnership";
+import { UncustodyArgs } from "./instructions/uncustody";
 
 export class Methods {
 	constructor(public carbon: Carbon) {}

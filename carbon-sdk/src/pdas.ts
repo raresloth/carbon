@@ -31,6 +31,13 @@ export class Pdas {
 			this.carbon.programId
 		)[0];
 	}
+
+	mintRecord(collectionConfig: PublicKey, itemId: number[]): PublicKey {
+		return PublicKey.findProgramAddressSync(
+			[Buffer.from("mint_record"), collectionConfig.toBuffer(), Buffer.from(itemId)],
+			this.carbon.programId
+		)[0];
+	}
 }
 
 export default Pdas;
