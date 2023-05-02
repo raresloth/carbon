@@ -820,6 +820,7 @@ describe("carbon", () => {
 				const mintRecord = await program.account.mintRecord.fetch(mintRecordPDA);
 				assert.equal(mintRecord.collectionConfig.toString(), collectionConfigPDA.toString());
 				assert.deepEqual(mintRecord.itemId, itemId);
+				assert.equal(mintRecord.mint.toString(), mint.toString());
 
 				// Make sure buyer is the owner and can transfer the NFT
 				const sellerTokenAccount = await createAssociatedTokenAccount(
@@ -841,7 +842,7 @@ describe("carbon", () => {
 				);
 
 				// Make sure correct amounts were sent to seller and fee account
-				const mintRecordStorageFee = 1392000;
+				const mintRecordStorageFee = 1614720;
 				assert.equal(buyerPreBalance - buyerPostBalance, price + mintRecordStorageFee);
 
 				const mintingFee = 0.02 * LAMPORTS_PER_SOL;
@@ -1111,6 +1112,7 @@ describe("carbon", () => {
 				const mintRecord = await program.account.mintRecord.fetch(mintRecordPDA);
 				assert.equal(mintRecord.collectionConfig.toString(), collectionConfigPDA.toString());
 				assert.deepEqual(mintRecord.itemId, itemId);
+				assert.equal(mintRecord.mint.toString(), mint.toString());
 
 				// Make sure buyer is the owner and can transfer the NFT
 				const sellerTokenAccount = await createAssociatedTokenAccount(

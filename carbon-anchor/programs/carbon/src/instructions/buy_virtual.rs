@@ -95,7 +95,7 @@ pub struct BuyVirtual<'info> {
 		seeds = [
 			MintRecord::PREFIX.as_bytes(),
 			collection_config.key().as_ref(),
-			item_id.as_ref()
+			item_id.as_ref(),
 		],
 		bump,
 		space = MintRecord::SPACE,
@@ -143,7 +143,7 @@ pub fn buy_virtual_handler<'info>(
 		Error::InvalidCollectionConfig);
 
 	let mint_record = &mut ctx.accounts.mint_record;
-	mint_record.init(ctx.accounts.collection_config.key(), item_id)?;
+	mint_record.init(ctx.accounts.collection_config.key(), item_id, ctx.accounts.mint.key())?;
 
 	let data = &ctx.accounts.collection_config.get_mpl_metadata(metadata)?;
 	// Mint the NFT to the buyer.

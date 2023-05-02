@@ -1252,6 +1252,13 @@ export type Carbon = {
                 32
               ]
             }
+          },
+          {
+            "name": "mint",
+            "docs": [
+              "Track NFT mint for the item"
+            ],
+            "type": "publicKey"
           }
         ]
       }
@@ -2904,6 +2911,13 @@ export const IDL: Carbon = {
                 32
               ]
             }
+          },
+          {
+            "name": "mint",
+            "docs": [
+              "Track NFT mint for the item"
+            ],
+            "type": "publicKey"
           }
         ]
       }

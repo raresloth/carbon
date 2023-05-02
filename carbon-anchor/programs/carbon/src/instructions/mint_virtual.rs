@@ -79,7 +79,7 @@ pub struct MintVirtual<'info> {
 		seeds = [
 			MintRecord::PREFIX.as_bytes(),
 			collection_config.key().as_ref(),
-			item_id.as_ref()
+			item_id.as_ref(),
 		],
 		bump,
 		space = MintRecord::SPACE,
@@ -100,7 +100,7 @@ pub fn mint_virtual_handler<'info>(
 	metadata: Metadata
 ) -> Result<()> {
 	let mint_record = &mut ctx.accounts.mint_record;
-	mint_record.init(ctx.accounts.collection_config.key(), item_id)?;
+	mint_record.init(ctx.accounts.collection_config.key(), item_id, ctx.accounts.mint.key())?;
 	
 	let marketplace_authority = &ctx.accounts.marketplace_authority.to_account_info();
 	let data = &ctx.accounts.collection_config.get_mpl_metadata(metadata)?;
