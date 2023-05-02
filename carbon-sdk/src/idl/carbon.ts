@@ -988,6 +988,48 @@ export type Carbon = {
         }
       ],
       "args": []
+    },
+    {
+      "name": "closeMintRecord",
+      "accounts": [
+        {
+          "name": "marketplaceAuthority",
+          "isMut": true,
+          "isSigner": true,
+          "docs": [
+            "Marketplace authority wallet."
+          ]
+        },
+        {
+          "name": "mint",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "edition",
+          "isMut": true,
+          "isSigner": false,
+          "docs": [
+            "Edition account of the NFT."
+          ]
+        },
+        {
+          "name": "collectionConfig",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "mintRecord",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": []
     }
   ],
   "accounts": [
@@ -1653,6 +1695,11 @@ export type Carbon = {
       "code": 6014,
       "name": "InvalidCollectionConfig",
       "msg": "Invalid collection config"
+    },
+    {
+      "code": 6015,
+      "name": "InvalidEdition",
+      "msg": "Invalid edition"
     }
   ]
 };
@@ -2647,6 +2694,48 @@ export const IDL: Carbon = {
         }
       ],
       "args": []
+    },
+    {
+      "name": "closeMintRecord",
+      "accounts": [
+        {
+          "name": "marketplaceAuthority",
+          "isMut": true,
+          "isSigner": true,
+          "docs": [
+            "Marketplace authority wallet."
+          ]
+        },
+        {
+          "name": "mint",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "edition",
+          "isMut": true,
+          "isSigner": false,
+          "docs": [
+            "Edition account of the NFT."
+          ]
+        },
+        {
+          "name": "collectionConfig",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "mintRecord",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": []
     }
   ],
   "accounts": [
@@ -3312,6 +3401,11 @@ export const IDL: Carbon = {
       "code": 6014,
       "name": "InvalidCollectionConfig",
       "msg": "Invalid collection config"
+    },
+    {
+      "code": 6015,
+      "name": "InvalidEdition",
+      "msg": "Invalid edition"
     }
   ]
 };

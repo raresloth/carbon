@@ -15,6 +15,7 @@ import { mintVirtual } from "./instructions/mintVirtual";
 import { custody } from "./instructions/custody";
 import { uncustody } from "./instructions/uncustody";
 import { takeOwnership } from "./instructions/takeOwnership";
+import { closeMintRecord } from "./instructions/closeMintRecord";
 
 export class Instructions {
 	constructor(public carbon: Carbon) {}
@@ -34,6 +35,7 @@ export class Instructions {
 	public custody = custody;
 	public uncustody = uncustody;
 	public takeOwnership = takeOwnership;
+	public closeMintRecord = closeMintRecord;
 }
 
 export default Instructions;

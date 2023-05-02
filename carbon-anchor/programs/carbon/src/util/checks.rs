@@ -89,3 +89,24 @@ pub fn assert_is_metadata_account(
 
 	Ok(())
 }
+
+pub fn assert_is_edition_account(
+	edition: Pubkey,
+	mint: Pubkey,
+) -> Result<()> {
+	let metadata_program_id = &mpl_token_metadata::id();
+	let edition_seeds = &[
+		mpl_token_metadata::state::PREFIX.as_bytes(),
+		metadata_program_id.as_ref(),
+		mint.as_ref(),
+		mpl_token_metadata::state::EDITION.as_bytes(),
+	];
+	let (expected_edition_account, _) = Pubkey::find_program_address(
+		edition_seeds,
+		metadata_program_id
+	);
+
+	assert_keys_equal(edition, expected_edition_account, "Invalid edition account")?;
+
+	Ok(())
+}

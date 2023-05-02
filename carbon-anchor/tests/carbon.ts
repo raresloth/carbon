@@ -26,6 +26,7 @@ import {
 	transferChecked,
 } from "@solana/spl-token";
 import { assert } from "chai";
+import { Metaplex, keypairIdentity } from "@metaplex-foundation/js";
 
 describe("carbon", () => {
 	const localProvider = AnchorProvider.env();
@@ -1171,6 +1172,100 @@ describe("carbon", () => {
 						},
 					});
 					await provider.sendAndConfirm(transaction, [marketplaceAuthority, mintKeypair, buyer]);
+				});
+			});
+		});
+
+		describe("close_mint_record", function () {
+			it("should close the mint record correctly", async function () {
+				const collectionConfig = await program.account.collectionConfig.fetch(collectionConfigPDA);
+
+				itemId = toItemId("ABC123");
+				const { mint: mintKeypair, transaction } = await carbon.transactions.mintVirtual({
+					buyer: buyer.publicKey,
+					itemId,
+					collectionConfig,
+					metadata: {
+						name: "Ghost #1",
+						uri: "https://example.com",
+					},
+				});
+				await provider.sendAndConfirm(transaction, [marketplaceAuthority, mintKeypair, buyer]);
+
+				const metaplex = new Metaplex(provider.connection).use(keypairIdentity(buyer));
+				await metaplex.nfts().delete({
+					mintAddress: mintKeypair.publicKey,
+					collection: collectionMint,
+				});
+
+				const mintRecordPDA = carbon.pdas.mintRecord(collectionConfigPDA, itemId);
+				let mintRecord = await program.account.mintRecord.fetch(mintRecordPDA);
+
+				await carbon.methods.closeMintRecord({
+					mintRecord,
+				});
+
+				// The mint record should no longer exist
+				let account = await provider.connection.getAccountInfo(mintRecordPDA);
+				assert.isNull(account);
+			});
+
+			it("should throw when closing a mint record with an existing mint", async function () {
+				const collectionConfig = await program.account.collectionConfig.fetch(collectionConfigPDA);
+
+				itemId = toItemId("ABC123");
+				const { mint: mintKeypair, transaction } = await carbon.transactions.mintVirtual({
+					buyer: buyer.publicKey,
+					itemId,
+					collectionConfig,
+					metadata: {
+						name: "Ghost #1",
+						uri: "https://example.com",
+					},
+				});
+				await provider.sendAndConfirm(transaction, [marketplaceAuthority, mintKeypair, buyer]);
+
+				const mintRecordPDA = carbon.pdas.mintRecord(collectionConfigPDA, itemId);
+				let mintRecord = await program.account.mintRecord.fetch(mintRecordPDA);
+
+				await assertThrows(async () => {
+					await carbon.methods.closeMintRecord({
+						mintRecord,
+					});
+				});
+			});
+
+			it("should throw when closing a mint record as non-authority", async function () {
+				const collectionConfig = await program.account.collectionConfig.fetch(collectionConfigPDA);
+
+				itemId = toItemId("ABC123");
+				const { mint: mintKeypair, transaction } = await carbon.transactions.mintVirtual({
+					buyer: buyer.publicKey,
+					itemId,
+					collectionConfig,
+					metadata: {
+						name: "Ghost #1",
+						uri: "https://example.com",
+					},
+				});
+				await provider.sendAndConfirm(transaction, [marketplaceAuthority, mintKeypair, buyer]);
+
+				const metaplex = new Metaplex(provider.connection).use(keypairIdentity(buyer));
+				await metaplex.nfts().delete({
+					mintAddress: mintKeypair.publicKey,
+					collection: collectionMint,
+				});
+
+				const mintRecordPDA = carbon.pdas.mintRecord(collectionConfigPDA, itemId);
+				let mintRecord = await program.account.mintRecord.fetch(mintRecordPDA);
+
+				await assertThrows(async () => {
+					const ix = await carbon.instructions.closeMintRecord({
+						marketplaceAuthority: buyer.publicKey,
+						mintRecord,
+					});
+
+					await provider.sendAndConfirm(new Transaction().add(ix), [buyer]);
 				});
 			});
 		});

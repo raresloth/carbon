@@ -36,5 +36,9 @@ pub enum Error {
 	#[msg("Invalid price")]
 	InvalidPrice,
 	#[msg("Invalid collection config")]
-	InvalidCollectionConfig
+	InvalidCollectionConfig,
+
+	/// 11
+	#[msg("Invalid edition")]
+	InvalidEdition,
 }

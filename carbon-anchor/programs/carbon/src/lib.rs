@@ -78,4 +78,8 @@ pub mod carbon {
     pub fn take_ownership<'info>(ctx: Context<TakeOwnership>) -> Result<()> {
         instructions::take_ownership_handler(ctx)
     }
+
+    pub fn close_mint_record<'info>(ctx: Context<CloseMintRecord>) -> Result<()> {
+        instructions::close_mint_record_handler(ctx)
+    }
 }

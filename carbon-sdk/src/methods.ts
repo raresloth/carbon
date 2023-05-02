@@ -15,6 +15,7 @@ import { ListNftArgs } from "./instructions/listNft";
 import { ListVirtualArgs } from "./instructions/listVirtual";
 import { TakeOwnershipArgs } from "./instructions/takeOwnership";
 import { UncustodyArgs } from "./instructions/uncustody";
+import { CloseMintRecordArgs } from "./instructions/closeMintRecord";
 
 export class Methods {
 	constructor(public carbon: Carbon) {}
@@ -197,6 +198,18 @@ export class Methods {
 	): Promise<string> {
 		const marketplaceAuthority = args.marketplaceAuthority ?? this.carbon.provider.wallet;
 		const ix = await this.carbon.instructions.takeOwnership({
+			...args,
+			marketplaceAuthority: marketplaceAuthority!.publicKey,
+		});
+		const provider = this.carbon.getProviderWithWallet(marketplaceAuthority!);
+		return await provider.sendAndConfirm(new Transaction().add(ix));
+	}
+
+	async closeMintRecord(
+		args: Omit<CloseMintRecordArgs, "marketplaceAuthority"> & { marketplaceAuthority?: Wallet }
+	): Promise<string> {
+		const marketplaceAuthority = args.marketplaceAuthority ?? this.carbon.provider.wallet;
+		const ix = await this.carbon.instructions.closeMintRecord({
 			...args,
 			marketplaceAuthority: marketplaceAuthority!.publicKey,
 		});
