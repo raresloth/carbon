@@ -35,6 +35,10 @@ pub mod carbon {
         instructions::list_virtual_handler(ctx, item_id, price, expiry)
     }
 
+    pub fn update_listing(ctx: Context<UpdateListing>, price: u64, expiry: i64) -> Result<()> {
+        instructions::update_listing_handler(ctx, price, expiry)
+    }
+
     pub fn delist_nft<'info>(ctx: Context<'_, '_, '_, 'info, DelistNft<'info>>) -> Result<()> {
         instructions::delist_nft_handler(ctx)
     }

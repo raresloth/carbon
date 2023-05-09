@@ -18,6 +18,7 @@ export type CustodyAccountWithKey = {
 };
 
 export type ListEvent = IdlEvents<Carbon>["List"];
+export type ListingUpdateEvent = IdlEvents<Carbon>["ListingUpdate"];
 export type BuyEvent = IdlEvents<Carbon>["Buy"];
 export type MintEvent = IdlEvents<Carbon>["Mint"];
 export type DelistEvent = IdlEvents<Carbon>["Delist"];

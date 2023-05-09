@@ -247,6 +247,53 @@ describe("carbon", () => {
 			});
 		});
 
+		describe("update_listing", function () {
+			it("should update the listing correctly", async function () {
+				await carbon.methods.listNft({
+					seller: new Wallet(seller),
+					mint,
+					collectionMint,
+					price,
+					expiry,
+				});
+
+				const newPrice = price / 2;
+				const newExpiry = 0;
+				await carbon.methods.updateListing({
+					seller: new Wallet(seller),
+					listing: listingPDA,
+					price: newPrice,
+					expiry: newExpiry,
+				});
+
+				const listing = await program.account.listing.fetch(listingPDA);
+				assert.equal(listing.price.toNumber(), newPrice);
+				assert.equal(listing.expiry.toNumber(), newExpiry);
+			});
+
+			it("should throw when listing is expired", async function () {
+				await carbon.methods.listNft({
+					seller: new Wallet(seller),
+					mint,
+					collectionMint,
+					price,
+					expiry: (expiry = moment().add(2, "seconds").unix()),
+				});
+
+				await new Promise((resolve) => setTimeout(resolve, 3000));
+
+				await assertThrows(
+					async () =>
+						await carbon.methods.updateListing({
+							seller: new Wallet(seller),
+							listing: listingPDA,
+							price: price / 2,
+							expiry: 0,
+						})
+				);
+			});
+		});
+
 		describe("delist_nft", function () {
 			it("should delist the nft correctly", async function () {
 				await carbon.methods.listNft({
@@ -716,6 +763,44 @@ describe("carbon", () => {
 				});
 
 				await assertThrows(async () => await provider.sendAndConfirm(listTx, []));
+			});
+		});
+
+		describe("update_listing", function () {
+			it("should update the listing correctly", async function () {
+				await carbon.methods.listVirtual({ itemId, collectionMint, price, expiry });
+
+				const newPrice = price / 2;
+				const newExpiry = 0;
+				await carbon.methods.updateListing({
+					listing: listingPDA,
+					price: newPrice,
+					expiry: newExpiry,
+				});
+
+				const listing = await program.account.listing.fetch(listingPDA);
+				assert.equal(listing.price.toNumber(), newPrice);
+				assert.equal(listing.expiry.toNumber(), newExpiry);
+			});
+
+			it("should throw when listing is expired", async function () {
+				await carbon.methods.listVirtual({
+					itemId,
+					collectionMint,
+					price,
+					expiry: (expiry = moment().add(2, "seconds").unix()),
+				});
+
+				await new Promise((resolve) => setTimeout(resolve, 3000));
+
+				await assertThrows(
+					async () =>
+						await carbon.methods.updateListing({
+							listing: listingPDA,
+							price: price / 2,
+							expiry: 0,
+						})
+				);
 			});
 		});
 

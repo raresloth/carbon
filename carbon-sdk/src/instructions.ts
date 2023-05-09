@@ -6,6 +6,7 @@ import { listItem } from "./instructions/listItem";
 import { delistItem } from "./instructions/delistItem";
 import { delistOrBuyItem } from "./instructions/delistOrBuyItem";
 import { listNft } from "./instructions/listNft";
+import { updateListing } from "./instructions/updateListing";
 import { delistNft } from "./instructions/delistNft";
 import { buyNft } from "./instructions/buyNft";
 import { listVirtual } from "./instructions/listVirtual";
@@ -23,6 +24,7 @@ export class Instructions {
 	public initMarketplaceConfig = initMarketplaceConfig;
 	public initCollectionConfig = initCollectionConfig;
 	public listItem = listItem;
+	public updateListing = updateListing;
 	public delistItem = delistItem;
 	public delistOrBuyItem = delistOrBuyItem;
 	public listNft = listNft;

@@ -259,6 +259,34 @@ export type Carbon = {
       ]
     },
     {
+      "name": "updateListing",
+      "accounts": [
+        {
+          "name": "seller",
+          "isMut": true,
+          "isSigner": true,
+          "docs": [
+            "Seller wallet."
+          ]
+        },
+        {
+          "name": "listing",
+          "isMut": true,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "price",
+          "type": "u64"
+        },
+        {
+          "name": "expiry",
+          "type": "i64"
+        }
+      ]
+    },
+    {
       "name": "delistNft",
       "accounts": [
         {
@@ -1498,6 +1526,63 @@ export type Carbon = {
       ]
     },
     {
+      "name": "ListingUpdate",
+      "fields": [
+        {
+          "name": "itemId",
+          "type": {
+            "array": [
+              "u8",
+              32
+            ]
+          },
+          "index": false
+        },
+        {
+          "name": "price",
+          "type": "u64",
+          "index": false
+        },
+        {
+          "name": "expiry",
+          "type": "i64",
+          "index": false
+        },
+        {
+          "name": "seller",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "isVirtual",
+          "type": "bool",
+          "index": false
+        },
+        {
+          "name": "currencyMint",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "collectionMint",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "marketplaceAuthority",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "feeConfig",
+          "type": {
+            "defined": "FeeConfig"
+          },
+          "index": false
+        }
+      ]
+    },
+    {
       "name": "List",
       "fields": [
         {
@@ -1649,7 +1734,7 @@ export type Carbon = {
     {
       "code": 6005,
       "name": "InvalidSeller",
-      "msg": "Invalid listing authority"
+      "msg": "Invalid seller"
     },
     {
       "code": 6006,
@@ -1965,6 +2050,34 @@ export const IDL: Carbon = {
       ]
     },
     {
+      "name": "updateListing",
+      "accounts": [
+        {
+          "name": "seller",
+          "isMut": true,
+          "isSigner": true,
+          "docs": [
+            "Seller wallet."
+          ]
+        },
+        {
+          "name": "listing",
+          "isMut": true,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "price",
+          "type": "u64"
+        },
+        {
+          "name": "expiry",
+          "type": "i64"
+        }
+      ]
+    },
+    {
       "name": "delistNft",
       "accounts": [
         {
@@ -3204,6 +3317,63 @@ export const IDL: Carbon = {
       ]
     },
     {
+      "name": "ListingUpdate",
+      "fields": [
+        {
+          "name": "itemId",
+          "type": {
+            "array": [
+              "u8",
+              32
+            ]
+          },
+          "index": false
+        },
+        {
+          "name": "price",
+          "type": "u64",
+          "index": false
+        },
+        {
+          "name": "expiry",
+          "type": "i64",
+          "index": false
+        },
+        {
+          "name": "seller",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "isVirtual",
+          "type": "bool",
+          "index": false
+        },
+        {
+          "name": "currencyMint",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "collectionMint",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "marketplaceAuthority",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "feeConfig",
+          "type": {
+            "defined": "FeeConfig"
+          },
+          "index": false
+        }
+      ]
+    },
+    {
       "name": "List",
       "fields": [
         {
@@ -3355,7 +3525,7 @@ export const IDL: Carbon = {
     {
       "code": 6005,
       "name": "InvalidSeller",
-      "msg": "Invalid listing authority"
+      "msg": "Invalid seller"
     },
     {
       "code": 6006,

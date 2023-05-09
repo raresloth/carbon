@@ -15,7 +15,7 @@ pub enum Error {
 	MaxPriceExceeded,
 
 	/// 5
-	#[msg("Invalid listing authority")]
+	#[msg("Invalid seller")]
 	InvalidSeller,
 	#[msg("Overflow error")]
 	OverflowError,

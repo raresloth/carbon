@@ -111,6 +111,23 @@ impl Listing {
 		return Ok(());
 	}
 
+	pub fn update(
+		&mut self,
+		price: u64,
+		expiry: i64
+	) -> Result<()> {
+		let timestamp = Clock::get()?.unix_timestamp;
+		if self.expiry != 0 &&
+			self.expiry <= timestamp {
+			return err!(Error::ListingExpired);
+		}
+		
+		self.price = price;
+		self.expiry = expiry;
+
+		return Ok(());
+	}
+
 	pub fn get_fee_amount(&self) -> Result<u64> {
 		return Ok((self.price as u128)
 			.checked_mul(self.fee_config.bps as u128)

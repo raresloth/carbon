@@ -16,6 +16,7 @@ import { ListVirtualArgs } from "./instructions/listVirtual";
 import { TakeOwnershipArgs } from "./instructions/takeOwnership";
 import { UncustodyArgs } from "./instructions/uncustody";
 import { CloseMintRecordArgs } from "./instructions/closeMintRecord";
+import { UpdateListingArgs } from "./instructions/updateListing";
 
 export class Methods {
 	constructor(public carbon: Carbon) {}
@@ -84,6 +85,18 @@ export class Methods {
 	async listNft(args: Omit<ListNftArgs, "seller"> & { seller?: Wallet }): Promise<string> {
 		const seller = args.seller ?? this.carbon.provider.wallet;
 		const ix = await this.carbon.instructions.listNft({
+			...args,
+			seller: seller!.publicKey,
+		});
+		const provider = this.carbon.getProviderWithWallet(seller!);
+		return await provider.sendAndConfirm(new Transaction().add(ix));
+	}
+
+	async updateListing(
+		args: Omit<UpdateListingArgs, "seller"> & { seller?: Wallet }
+	): Promise<string> {
+		const seller = args.seller ?? this.carbon.provider.wallet;
+		const ix = await this.carbon.instructions.updateListing({
 			...args,
 			seller: seller!.publicKey,
 		});
