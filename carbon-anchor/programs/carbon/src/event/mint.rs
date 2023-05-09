@@ -7,5 +7,5 @@ pub struct Mint {
 	pub mint: Pubkey,
 	pub buyer: Pubkey,
 	pub marketplace_authority: Pubkey,
-	pub collection_config: Pubkey,
+	pub collection_mint: Pubkey,
 }

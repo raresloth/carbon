@@ -12,6 +12,6 @@ pub struct Buy {
 	pub is_virtual: bool,
 	pub currency_mint: Pubkey,
 	pub marketplace_authority: Pubkey,
-	pub collection_config: Pubkey,
+	pub collection_mint: Pubkey,
 	pub fee_config: FeeConfig,
 }

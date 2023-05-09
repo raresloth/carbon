@@ -21,7 +21,7 @@ pub struct Listing {
 	/// Currency to accept for payment
 	pub currency_mint: Pubkey,
 	/// Collection config for the item
-	pub collection_config: Pubkey,
+	pub collection_mint: Pubkey,
 	/// Price of the item
 	pub price: u64,
 	/// Unix timestamp of when the listing expires
@@ -86,7 +86,7 @@ impl Listing {
 		item_id: [u8;32],
 		is_virtual: bool,
 		currency_mint: Pubkey,
-		collection_config: Pubkey,
+		collection_mint: Pubkey,
 		fee_config: FeeConfig,
 		price: u64,
 		expiry: i64
@@ -103,7 +103,7 @@ impl Listing {
 		self.item_id = item_id;
 		self.is_virtual = is_virtual;
 		self.currency_mint = currency_mint;
-		self.collection_config = collection_config;
+		self.collection_mint = collection_mint;
 		self.price = price;
 		self.expiry = expiry;
 		self.fee_config = fee_config;

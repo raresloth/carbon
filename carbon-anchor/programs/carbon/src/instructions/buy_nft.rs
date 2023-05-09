@@ -141,7 +141,7 @@ pub fn buy_nft_handler<'info>(
         is_virtual: false,
         currency_mint: ctx.accounts.listing.currency_mint,
         marketplace_authority: ctx.accounts.listing.marketplace_authority,
-		collection_config: ctx.accounts.listing.collection_config,
+		collection_mint: ctx.accounts.listing.collection_mint,
         fee_config: ctx.accounts.listing.fee_config,
     });
 

@@ -154,7 +154,7 @@ pub fn mint_virtual_handler<'info>(
         mint: ctx.accounts.mint.key(),
 		buyer: ctx.accounts.buyer.key(),
         marketplace_authority: ctx.accounts.collection_config.marketplace_authority,
-		collection_config: ctx.accounts.collection_config.key(),
+		collection_mint: ctx.accounts.collection_mint.key(),
     });
 
 	Ok(())

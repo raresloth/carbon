@@ -72,8 +72,8 @@ pub struct BuyVirtual<'info> {
 			item_id.as_ref()
 		],
 		bump = listing.bump[0],
-		has_one = collection_config @ Error::InvalidCollectionConfig,
 		has_one = seller @ Error::InvalidSeller,
+		constraint = listing.collection_mint == collection_config.collection_mint @ Error::InvalidCollectionConfig,
 		constraint = listing.item_id == item_id,
 		constraint = listing.is_virtual @ Error::NotVirtual,
 		constraint = listing.fee_config.fee_account == fee_account.key() @ Error::InvalidFeeAccount,
@@ -216,7 +216,7 @@ pub fn buy_virtual_handler<'info>(
         is_virtual: true,
         currency_mint: ctx.accounts.listing.currency_mint,
         marketplace_authority: ctx.accounts.listing.marketplace_authority,
-		collection_config: ctx.accounts.listing.collection_config,
+		collection_mint: ctx.accounts.listing.collection_mint,
         fee_config: ctx.accounts.listing.fee_config,
     });
 

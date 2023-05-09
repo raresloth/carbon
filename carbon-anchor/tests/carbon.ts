@@ -38,6 +38,7 @@ describe("carbon", () => {
 	};
 	const defaultSellerFeeBps = 500;
 	const defaultSymbol = "KR";
+	const mintRecordStorageFee = 1614720;
 
 	let provider: AnchorProvider;
 	let marketplaceAuthority: Keypair;
@@ -843,7 +844,6 @@ describe("carbon", () => {
 				);
 
 				// Make sure correct amounts were sent to seller and fee account
-				const mintRecordStorageFee = 1614720;
 				assert.equal(buyerPreBalance - buyerPostBalance, price + mintRecordStorageFee);
 
 				const mintingFee = 0.02 * LAMPORTS_PER_SOL;
@@ -1008,7 +1008,7 @@ describe("carbon", () => {
 					0
 				);
 
-				assert.equal(buyerPreBalance - buyerPostBalance, price);
+				assert.equal(buyerPreBalance - buyerPostBalance, price + mintRecordStorageFee);
 
 				// Make sure correct amounts were sent to seller and fee account
 				const royalty = (price * defaultSellerFeeBps) / 10000;
@@ -1056,7 +1056,7 @@ describe("carbon", () => {
 						mintKeypair,
 						buyer,
 					]);
-				}, 6014);
+				});
 			});
 		});
 

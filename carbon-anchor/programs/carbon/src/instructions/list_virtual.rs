@@ -74,7 +74,7 @@ pub fn list_virtual_handler<'info>(
         item_id,
         true,
         ctx.accounts.currency_mint.key(),
-        ctx.accounts.collection_config.key(),
+        ctx.accounts.collection_config.collection_mint,
         ctx.accounts.marketplace_config.fee_config.clone(),
         price,
         expiry,

@@ -115,7 +115,7 @@ pub fn list_nft_handler<'info>(
         ctx.accounts.mint.key().to_bytes(),
         false,
         ctx.accounts.currency_mint.key(),
-        ctx.accounts.collection_config.key(),
+        ctx.accounts.collection_mint.key(),
         ctx.accounts.marketplace_config.fee_config.clone(),
         price,
         expiry,

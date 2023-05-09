@@ -1202,7 +1202,7 @@ export type Carbon = {
             "type": "publicKey"
           },
           {
-            "name": "collectionConfig",
+            "name": "collectionMint",
             "docs": [
               "Collection config for the item"
             ],
@@ -1424,7 +1424,7 @@ export type Carbon = {
           "index": false
         },
         {
-          "name": "collectionConfig",
+          "name": "collectionMint",
           "type": "publicKey",
           "index": false
         },
@@ -1491,7 +1491,7 @@ export type Carbon = {
           "index": false
         },
         {
-          "name": "collectionConfig",
+          "name": "collectionMint",
           "type": "publicKey",
           "index": false
         }
@@ -1583,7 +1583,7 @@ export type Carbon = {
           "index": false
         },
         {
-          "name": "collectionConfig",
+          "name": "collectionMint",
           "type": "publicKey",
           "index": false
         }
@@ -2908,7 +2908,7 @@ export const IDL: Carbon = {
             "type": "publicKey"
           },
           {
-            "name": "collectionConfig",
+            "name": "collectionMint",
             "docs": [
               "Collection config for the item"
             ],
@@ -3130,7 +3130,7 @@ export const IDL: Carbon = {
           "index": false
         },
         {
-          "name": "collectionConfig",
+          "name": "collectionMint",
           "type": "publicKey",
           "index": false
         },
@@ -3197,7 +3197,7 @@ export const IDL: Carbon = {
           "index": false
         },
         {
-          "name": "collectionConfig",
+          "name": "collectionMint",
           "type": "publicKey",
           "index": false
         }
@@ -3289,7 +3289,7 @@ export const IDL: Carbon = {
           "index": false
         },
         {
-          "name": "collectionConfig",
+          "name": "collectionMint",
           "type": "publicKey",
           "index": false
         }
