@@ -9,26 +9,18 @@ export async function delistItem(
 	args: DelistItemArgs
 ): Promise<TransactionInstruction | undefined> {
 	const { seller, itemId } = args;
-	try {
-		const listing = await this.carbon.program.account.listing.fetch(
-			this.carbon.pdas.listing(itemId)
-		);
-		if (listing.isVirtual) {
-			return await this.delistVirtual({
-				seller,
-				itemId,
-			});
-		} else {
-			return await this.delistNft({
-				seller: seller ?? this.carbon.marketplaceAuthority,
-				mint: new PublicKey(itemId),
-			});
-		}
-	} catch (e) {
-		if (e?.message.includes("Account does not exist")) {
-			return;
-		} else {
-			throw e;
-		}
+	const listing = await this.carbon.accounts.listing(itemId);
+	if (listing?.isVirtual) {
+		return await this.delistVirtual({
+			seller,
+			itemId,
+		});
+	} else {
+		const custodyAccount = await this.carbon.accounts.custodyAccount(new PublicKey(itemId));
+		return await this.delistNft({
+			seller: seller ?? this.carbon.marketplaceAuthority,
+			mint: new PublicKey(itemId),
+			tokenOwner: custodyAccount?.owner,
+		});
 	}
 }

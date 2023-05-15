@@ -1,5 +1,5 @@
 import { PublicKey } from "@solana/web3.js";
-import { CustodyAccount } from "./types";
+import { CustodyAccount, Listing } from "./types";
 import Carbon from "./carbon";
 
 const DOES_NOT_EXIST_ERROR = "Account does not exist";
@@ -22,6 +22,16 @@ export class Accounts {
 			return await this.carbon.program.account.custodyAccount.fetch(
 				this.carbon.pdas.custodyAccount(mint)
 			);
+		} catch (e) {
+			if (!e?.message.includes(DOES_NOT_EXIST_ERROR)) {
+				throw e;
+			}
+		}
+	}
+
+	async listing(itemId: number[]): Promise<Listing | undefined> {
+		try {
+			return await this.carbon.program.account.listing.fetch(this.carbon.pdas.listing(itemId));
 		} catch (e) {
 			if (!e?.message.includes(DOES_NOT_EXIST_ERROR)) {
 				throw e;
