@@ -10,12 +10,14 @@ import { Listing } from "../types";
 
 export type BuyNftArgs = {
 	buyer: PublicKey;
+	tokenOwner?: PublicKey;
 	listing: Listing;
 	maxPrice?: number;
 };
 
 export async function buyNft(args: BuyNftArgs): Promise<TransactionInstruction> {
 	const { buyer, listing, maxPrice } = args;
+	const tokenOwner = args.tokenOwner ?? listing.seller;
 
 	const mint: PublicKey = new PublicKey(listing.itemId);
 
@@ -25,7 +27,7 @@ export async function buyNft(args: BuyNftArgs): Promise<TransactionInstruction> 
 			buyer,
 			seller: listing.seller,
 			mint,
-			sellerTokenAccount: getAssociatedTokenAddressSync(mint, listing.seller),
+			sellerTokenAccount: getAssociatedTokenAddressSync(mint, tokenOwner),
 			buyerTokenAccount: getAssociatedTokenAddressSync(mint, buyer),
 			metadataAccount: getMetadataPDA(mint),
 			edition: getEditionPDA(mint),

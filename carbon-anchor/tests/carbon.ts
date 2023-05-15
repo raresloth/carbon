@@ -344,6 +344,35 @@ describe("carbon", () => {
 				const custodyAccount = await program.account.custodyAccount.fetch(custodyAccountPDA);
 				assert.isFalse(custodyAccount.isListed);
 			});
+
+			it("should delist the marketplace listed custodial nft correctly", async function () {
+				await carbon.methods.custody({
+					owner: new Wallet(seller),
+					mint,
+					itemId,
+				});
+				await carbon.methods.listNft({
+					tokenOwner: seller.publicKey,
+					mint,
+					collectionMint,
+					price,
+					expiry,
+				});
+				await carbon.methods.delistNft({
+					tokenOwner: seller.publicKey,
+					mint,
+				});
+
+				// Listing should no longer exist
+				await assertThrows(async () => await program.account.listing.fetch(listingPDA));
+
+				const sellerTokenAccountObj = await getAccount(provider.connection, sellerTokenAccount);
+				assert.equal(sellerTokenAccountObj.delegate.toString(), custodyAccountPDA.toString());
+				assert.isTrue(sellerTokenAccountObj.isFrozen);
+
+				const custodyAccount = await program.account.custodyAccount.fetch(custodyAccountPDA);
+				assert.isFalse(custodyAccount.isListed);
+			});
 		});
 
 		describe("buy_nft", function () {
@@ -527,6 +556,41 @@ describe("carbon", () => {
 				// Custody account should no longer exist
 				await assertThrows(
 					async () => await program.account.custodyAccount.fetch(custodyAccountPDA)
+				);
+			});
+
+			it("should buy the marketplace listed custodial nft correctly", async function () {
+				await carbon.methods.custody({
+					owner: new Wallet(seller),
+					mint,
+					itemId,
+				});
+				await carbon.methods.listNft({
+					tokenOwner: seller.publicKey,
+					mint,
+					collectionMint,
+					price,
+					expiry,
+				});
+				const listing = await program.account.listing.fetch(listingPDA);
+
+				await carbon.methods.buyNft({
+					buyer: new Wallet(buyer),
+					tokenOwner: seller.publicKey,
+					listing,
+				});
+
+				// Make sure buyer is the owner and can transfer the NFT
+				const buyerTokenAccount = getAssociatedTokenAddressSync(mint, buyer.publicKey);
+				await transferChecked(
+					provider.connection,
+					buyer,
+					buyerTokenAccount,
+					mint,
+					sellerTokenAccount,
+					buyer,
+					1,
+					0
 				);
 			});
 		});
@@ -1416,6 +1480,50 @@ describe("carbon", () => {
 
 				await carbon.methods.listItem({
 					seller: new Wallet(seller),
+					itemId,
+					collectionMint,
+					price,
+					expiry,
+				});
+
+				const listing = await program.account.listing.fetch(listingPDA);
+				assert.isFalse(listing.isVirtual);
+			});
+
+			it("should allow marketplace to list nft if custodial", async function () {
+				const results = await Promise.all([
+					carbon.methods.initMarketplaceConfig({
+						args: {
+							feeConfig: defaultFeeConfig,
+						},
+					}),
+					carbon.methods.initCollectionConfig({
+						args: {
+							collectionMint,
+							sellerFeeBasisPoints: defaultSellerFeeBps,
+							symbol: defaultSymbol,
+						},
+					}),
+					createNFT(provider, marketplaceAuthority, collectionMint, {
+						tokenOwner: seller.publicKey,
+					}),
+				]);
+
+				const nft = results[2];
+				itemId = Array.from(nft.mint.toBuffer());
+				mint = nft.mint;
+				sellerTokenAccount = getAssociatedTokenAddressSync(mint, seller.publicKey);
+				listingPDA = carbon.pdas.listing(itemId);
+				custodyAccountPDA = carbon.pdas.custodyAccount(mint);
+
+				await carbon.methods.custody({
+					owner: new Wallet(seller),
+					mint,
+					itemId,
+				});
+
+				await carbon.methods.listItem({
+					tokenOwner: seller.publicKey,
 					itemId,
 					collectionMint,
 					price,

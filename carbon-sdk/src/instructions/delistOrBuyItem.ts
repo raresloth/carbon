@@ -16,9 +16,14 @@ export async function delistOrBuyItem(args: DelistOrBuyItemArgs): Promise<Transa
 		});
 	} else {
 		if (listing.seller.equals(this.carbon.marketplaceAuthority)) {
+			const custodyAccount = await this.carbon.accounts.custodyAccount(
+				new PublicKey(listing.itemId)
+			);
+
 			return await this.delistNft({
 				seller: this.carbon.marketplaceAuthority,
 				mint: new PublicKey(listing.itemId),
+				tokenOwner: custodyAccount?.owner ?? listing.seller,
 			});
 		} else {
 			return await this.buyNft({

@@ -2,6 +2,7 @@ import { PublicKey, TransactionInstruction } from "@solana/web3.js";
 
 export type ListItemArgs = {
 	seller?: PublicKey;
+	tokenOwner?: PublicKey;
 	itemId: number[];
 	collectionMint: PublicKey;
 	price: number;
@@ -10,13 +11,9 @@ export type ListItemArgs = {
 };
 
 export async function listItem(args: ListItemArgs): Promise<TransactionInstruction> {
-	const { seller, itemId, collectionMint, price, expiry, currencyMint } = args;
+	const { seller, tokenOwner, itemId, collectionMint, price, expiry, currencyMint } = args;
 
-	let mintAccountInfo;
-	try {
-		const mint = new PublicKey(itemId);
-		mintAccountInfo = await this.carbon.program.provider.connection.getAccountInfo(mint);
-	} catch (e) {}
+	const mintAccountInfo = await this.carbon.accounts.getAccountInfo(new PublicKey(itemId));
 
 	// Account info does not exist, therefore has not been minted
 	if (mintAccountInfo == null) {
@@ -31,6 +28,7 @@ export async function listItem(args: ListItemArgs): Promise<TransactionInstructi
 	} else {
 		return await this.listNft({
 			seller: seller ?? this.carbon.marketplaceAuthority,
+			tokenOwner,
 			mint: new PublicKey(itemId),
 			collectionMint,
 			price,

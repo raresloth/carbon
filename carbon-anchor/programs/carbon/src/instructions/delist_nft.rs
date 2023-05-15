@@ -19,7 +19,6 @@ pub struct DelistNft<'info> {
     /// Seller's token account of the mint to delist.
     #[account(
         mut,
-        constraint = token_account.owner == seller.key(),
         token::mint = mint,
     )]
     pub token_account: Box<Account<'info, TokenAccount>>,

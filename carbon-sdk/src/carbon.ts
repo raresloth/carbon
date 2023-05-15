@@ -7,6 +7,7 @@ import Methods from "./methods";
 import { PROGRAM_ID } from "./index";
 import Instructions from "./instructions";
 import Transactions from "./transactions";
+import Accounts from "./accounts";
 
 export class Carbon {
 	public program: Program<CarbonIDL.Carbon>;
@@ -14,6 +15,7 @@ export class Carbon {
 	public instructions: Instructions;
 	public transactions: Transactions;
 	public methods: Methods;
+	public accounts: Accounts;
 
 	constructor(
 		public provider: AnchorProvider,
@@ -25,6 +27,7 @@ export class Carbon {
 		this.instructions = new Instructions(this);
 		this.transactions = new Transactions(this);
 		this.methods = new Methods(this);
+		this.accounts = new Accounts(this);
 	}
 
 	getProviderWithWallet(wallet: Wallet) {

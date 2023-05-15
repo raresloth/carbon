@@ -6,6 +6,7 @@ import { getMetadataPDA, getEditionPDA, TOKEN_METADATA_PROGRAM_ID } from "../sol
 export type ListNftArgs = {
 	seller: PublicKey;
 	mint: PublicKey;
+	tokenOwner?: PublicKey;
 	collectionMint: PublicKey;
 	price: number;
 	expiry: number;
@@ -15,12 +16,13 @@ export type ListNftArgs = {
 
 export async function listNft(args: ListNftArgs): Promise<TransactionInstruction> {
 	const { seller, mint, collectionMint, price, expiry, currencyMint, accounts } = args;
+	const tokenOwner = args.tokenOwner ?? seller;
 
 	return await this.carbon.program.methods
 		.listNft(new BN(price), new BN(expiry))
 		.accounts({
 			seller,
-			tokenAccount: getAssociatedTokenAddressSync(mint, seller),
+			tokenAccount: getAssociatedTokenAddressSync(mint, tokenOwner),
 			mint,
 			collectionMint,
 			metadataAccount: getMetadataPDA(mint),
