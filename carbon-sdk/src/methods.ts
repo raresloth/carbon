@@ -78,8 +78,8 @@ export class Methods {
 	}
 
 	async delistOrBuyItem(args: DelistOrBuyItemArgs): Promise<string> {
-		const ix = await this.carbon.instructions.delistOrBuyItem(args);
-		return await this.carbon.provider.sendAndConfirm(new Transaction().add(ix));
+		const ixs = await this.carbon.instructions.delistOrBuyItem(args);
+		return await this.carbon.provider.sendAndConfirm(new Transaction().add(...ixs));
 	}
 
 	async listNft(args: Omit<ListNftArgs, "seller"> & { seller?: Wallet }): Promise<string> {

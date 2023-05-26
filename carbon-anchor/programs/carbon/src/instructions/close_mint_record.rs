@@ -1,5 +1,9 @@
+use crate::{
+    error::Error,
+    state::{CollectionConfig, MintRecord},
+    util::assert_is_edition_account,
+};
 use anchor_lang::prelude::*;
-use crate::{error::Error, state::{CollectionConfig, MintRecord}, util::assert_is_edition_account};
 
 #[derive(Accounts)]
 pub struct CloseMintRecord<'info> {
@@ -11,9 +15,9 @@ pub struct CloseMintRecord<'info> {
     pub mint: UncheckedAccount<'info>,
 
     /// Edition account of the NFT.
-	/// CHECK: Verified in handler
-	#[account(mut)]
-	pub edition: UncheckedAccount<'info>,
+    /// CHECK: Verified in handler
+    #[account(mut)]
+    pub edition: UncheckedAccount<'info>,
 
     #[account(
         seeds = [
@@ -42,15 +46,13 @@ pub struct CloseMintRecord<'info> {
     pub system_program: Program<'info, System>,
 }
 
-pub fn close_mint_record_handler<'info>(
-    ctx: Context<CloseMintRecord>,
-) -> Result<()> {
+pub fn close_mint_record_handler<'info>(ctx: Context<CloseMintRecord>) -> Result<()> {
     assert_is_edition_account(ctx.accounts.edition.key(), ctx.accounts.mint.key())?;
 
-    if !ctx.accounts.edition.data_is_empty() {
-		msg!("Edition account must be empty");
-	}
-	require!(ctx.accounts.edition.data_is_empty(), Error::InvalidEdition);
+    if ctx.accounts.edition.lamports() != 0 {
+        msg!("Edition account has not been closed");
+    }
+    require!(ctx.accounts.edition.lamports() == 0, Error::InvalidEdition);
 
     Ok(())
 }

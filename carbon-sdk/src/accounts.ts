@@ -1,5 +1,5 @@
 import { PublicKey } from "@solana/web3.js";
-import { CustodyAccount, Listing } from "./types";
+import { CustodyAccount, Listing, MintRecord } from "./types";
 import Carbon from "./carbon";
 
 const DOES_NOT_EXIST_ERROR = "Account does not exist";
@@ -32,6 +32,20 @@ export class Accounts {
 	async listing(itemId: number[]): Promise<Listing | undefined> {
 		try {
 			return await this.carbon.program.account.listing.fetch(this.carbon.pdas.listing(itemId));
+		} catch (e) {
+			if (!e?.message.includes(DOES_NOT_EXIST_ERROR)) {
+				throw e;
+			}
+		}
+	}
+
+	async mintRecord(collectionConfig: PublicKey, itemId: number[]): Promise<MintRecord | undefined> {
+		return await this.mintRecordFromAddress(this.carbon.pdas.mintRecord(collectionConfig, itemId));
+	}
+
+	async mintRecordFromAddress(mintRecordAddress: PublicKey): Promise<MintRecord | undefined> {
+		try {
+			return await this.carbon.program.account.mintRecord.fetch(mintRecordAddress);
 		} catch (e) {
 			if (!e?.message.includes(DOES_NOT_EXIST_ERROR)) {
 				throw e;
