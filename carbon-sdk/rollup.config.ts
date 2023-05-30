@@ -12,7 +12,7 @@ export default {
 		nodeResolve({
 			browser: true,
 			extensions: [".js", ".ts"],
-			dedupe: ["bn.js", "buffer"],
+			dedupe: ["bn.js", "buffer", "assert"],
 			preferBuiltins: false,
 		}),
 		typescript({
@@ -29,7 +29,7 @@ export default {
 			},
 		}),
 	],
-	external: ["buffer"],
+	external: ["buffer", "assert"],
 	output: {
 		file: "dist/browser/index.js",
 		format: "es",
