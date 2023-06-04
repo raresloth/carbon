@@ -1,5 +1,5 @@
 export type Carbon = {
-  "version": "0.6.0",
+  "version": "0.7.0",
   "name": "carbon",
   "instructions": [
     {
@@ -1790,7 +1790,7 @@ export type Carbon = {
 };
 
 export const IDL: Carbon = {
-  "version": "0.6.0",
+  "version": "0.7.0",
   "name": "carbon",
   "instructions": [
     {
