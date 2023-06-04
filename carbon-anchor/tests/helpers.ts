@@ -3,6 +3,8 @@ import { keypairIdentity, Metaplex } from "@metaplex-foundation/js";
 import { Keypair, Transaction, SystemProgram, PublicKey } from "@solana/web3.js";
 import { createMint, getOrCreateAssociatedTokenAccount, mintTo } from "@solana/spl-token";
 import { assert } from "chai";
+import { toItemId } from "@raresloth/carbon-sdk";
+import * as uuid from "uuid";
 
 export async function setBalance(provider: Provider, keypair: Keypair, amount: number) {
 	const balance = await provider.connection.getBalance(keypair.publicKey);
@@ -122,4 +124,8 @@ export async function assertThrows(fn: () => Promise<any | void>, code?: number,
 		}
 	}
 	assert.isTrue(throws, "Expected error to be thrown");
+}
+
+export function createVirtualItemId(): number[] {
+	return toItemId(uuid.v4().slice(0, 32));
 }

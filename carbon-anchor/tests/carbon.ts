@@ -13,11 +13,12 @@ import {
 	createCollectionNFT,
 	createNFT,
 	createSplToken,
+	createVirtualItemId,
 	fetchNFT,
 	setBalance,
 } from "./helpers";
 import moment from "moment";
-import { Carbon, FEE_ACCOUNT_KEY, toItemId } from "@raresloth/carbon-sdk";
+import { Carbon, FEE_ACCOUNT_KEY } from "@raresloth/carbon-sdk";
 import {
 	createAssociatedTokenAccount,
 	getAccount,
@@ -757,7 +758,6 @@ describe("carbon", () => {
 	describe("virtual flows", function () {
 		beforeEach(setUpData);
 
-		let i = 0;
 		async function setUpData() {
 			await Promise.all([
 				carbon.methods.initMarketplaceConfig({
@@ -774,8 +774,7 @@ describe("carbon", () => {
 				}),
 			]);
 
-			i++;
-			itemId = toItemId("my_item" + i.toString());
+			itemId = createVirtualItemId();
 			listingPDA = carbon.pdas.listing(itemId);
 		}
 
@@ -1218,7 +1217,7 @@ describe("carbon", () => {
 				const collectionConfig = await program.account.collectionConfig.fetch(collectionConfigPDA);
 				const buyerPreBalance = await provider.connection.getBalance(buyer.publicKey);
 
-				itemId = toItemId("ABC123");
+				itemId = createVirtualItemId();
 				const { mint: mintKeypair, transaction } = await carbon.transactions.mintVirtual({
 					buyer: buyer.publicKey,
 					itemId,
@@ -1298,7 +1297,7 @@ describe("carbon", () => {
 				const collectionConfig = await program.account.collectionConfig.fetch(collectionConfigPDA);
 				const buyerPreBalance = await provider.connection.getBalance(buyer.publicKey);
 
-				itemId = toItemId("ABC123");
+				itemId = createVirtualItemId();
 				const { mint: mintKeypair, transaction } = await carbon.transactions.mintVirtual({
 					buyer: buyer.publicKey,
 					itemId,
@@ -1329,7 +1328,7 @@ describe("carbon", () => {
 			it("should close the mint record correctly", async function () {
 				const collectionConfig = await program.account.collectionConfig.fetch(collectionConfigPDA);
 
-				itemId = toItemId("ABC123");
+				itemId = createVirtualItemId();
 				const { mint: mintKeypair, transaction } = await carbon.transactions.mintVirtual({
 					buyer: buyer.publicKey,
 					itemId,
@@ -1362,7 +1361,7 @@ describe("carbon", () => {
 			it("should throw when closing a mint record with an existing mint", async function () {
 				const collectionConfig = await program.account.collectionConfig.fetch(collectionConfigPDA);
 
-				itemId = toItemId("ABC123");
+				itemId = createVirtualItemId();
 				const { mint: mintKeypair, transaction } = await carbon.transactions.mintVirtual({
 					buyer: buyer.publicKey,
 					itemId,
@@ -1387,7 +1386,7 @@ describe("carbon", () => {
 			it("should throw when closing a mint record as non-authority", async function () {
 				const collectionConfig = await program.account.collectionConfig.fetch(collectionConfigPDA);
 
-				itemId = toItemId("ABC123");
+				itemId = createVirtualItemId();
 				const { mint: mintKeypair, transaction } = await carbon.transactions.mintVirtual({
 					buyer: buyer.publicKey,
 					itemId,
@@ -1438,7 +1437,7 @@ describe("carbon", () => {
 					}),
 				]);
 
-				itemId = toItemId("listItemTest");
+				itemId = createVirtualItemId();
 				listingPDA = carbon.pdas.listing(itemId);
 
 				await carbon.methods.listItem({
@@ -1538,7 +1537,6 @@ describe("carbon", () => {
 		describe("delistOrBuyItem", function () {
 			beforeEach(setUpData);
 
-			let i = 0;
 			async function setUpData() {
 				await Promise.all([
 					carbon.methods.initMarketplaceConfig({
@@ -1555,14 +1553,13 @@ describe("carbon", () => {
 					}),
 				]);
 
-				i++;
-				itemId = toItemId("my_item" + i.toString());
+				itemId = createVirtualItemId();
 				listingPDA = carbon.pdas.listing(itemId);
 			}
 
 			it("should burn the nft and mint record when given", async function () {
 				const collectionConfig = await program.account.collectionConfig.fetch(collectionConfigPDA);
-				itemId = toItemId("ABC123");
+				itemId = createVirtualItemId();
 
 				const { mint: mintKeypair, transaction } = await carbon.transactions.mintVirtual({
 					buyer: seller.publicKey,
@@ -1595,6 +1592,69 @@ describe("carbon", () => {
 					},
 				});
 			});
+		});
+	});
+
+	describe("integration", function () {
+		beforeEach(setUpData);
+
+		async function setUpData() {
+			await Promise.all([
+				carbon.methods.initMarketplaceConfig({
+					args: {
+						feeConfig: defaultFeeConfig,
+					},
+				}),
+				carbon.methods.initCollectionConfig({
+					args: {
+						collectionMint,
+						sellerFeeBasisPoints: defaultSellerFeeBps,
+						symbol: defaultSymbol,
+					},
+				}),
+			]);
+
+			itemId = createVirtualItemId();
+		}
+
+		it("should buy virtual, then buy minted nft correctly", async function () {
+			await carbon.methods.listVirtual({ itemId, collectionMint, price, expiry });
+			let listing = await carbon.accounts.listing(itemId);
+			const collectionConfig = await program.account.collectionConfig.fetch(collectionConfigPDA);
+			const { mint: mintKeypair, transaction } = await carbon.transactions.buyVirtual({
+				buyer: buyer.publicKey,
+				collectionConfig,
+				listing,
+				metadata: {
+					name: "Ghost #1",
+					uri: "https://example.com",
+				},
+			});
+			mint = mintKeypair.publicKey;
+			await provider.sendAndConfirm(transaction, [marketplaceAuthority, mintKeypair, buyer]);
+
+			await carbon.methods.listNft({
+				seller: new Wallet(buyer),
+				mint,
+				collectionMint,
+				price,
+				expiry,
+			});
+			listing = await carbon.accounts.listing(mint.toBuffer());
+			await carbon.methods.buyNft({ buyer: new Wallet(seller), listing });
+
+			// Seller is now the owner and can transfer the nft
+			const buyerTokenAccount = getAssociatedTokenAddressSync(mint, buyer.publicKey);
+			await transferChecked(
+				provider.connection,
+				seller,
+				getAssociatedTokenAddressSync(mint, seller.publicKey),
+				mint,
+				buyerTokenAccount,
+				seller,
+				1,
+				0
+			);
 		});
 	});
 });
