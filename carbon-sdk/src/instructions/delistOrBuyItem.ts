@@ -1,17 +1,11 @@
 import { TransactionInstruction, PublicKey } from "@solana/web3.js";
-import { Listing, MintRecord } from "../types";
-import { createBurnNftInstruction } from "@metaplex-foundation/mpl-token-metadata";
-import { TOKEN_PROGRAM_ID, getAssociatedTokenAddressSync } from "@solana/spl-token";
-import { TOKEN_METADATA_PROGRAM_ID, getEditionPDA, getMetadataPDA } from "../solana";
+import { Listing } from "../types";
+import { BurnArgs } from "./burnAndCloseMintRecord";
 
 export type DelistOrBuyItemArgs = {
 	listing: Listing;
 	maxPrice?: number;
-	burnOnBuy?: BurnOnBuyArgs;
-};
-
-export type BurnOnBuyArgs = {
-	mintRecord: MintRecord;
+	burnArgs?: BurnArgs;
 };
 
 export async function delistOrBuyItem(
@@ -32,13 +26,27 @@ export async function delistOrBuyItem(
 				new PublicKey(listing.itemId)
 			);
 
-			return [
+			const ixs = [
 				await this.delistNft({
 					seller: this.carbon.marketplaceAuthority,
 					mint: new PublicKey(listing.itemId),
 					tokenOwner: custodyAccount?.owner ?? listing.seller,
 				}),
 			];
+
+			if (custodyAccount != null) {
+				ixs.push(
+					await this.takeOwnership({
+						custodyAccount,
+					})
+				);
+			}
+
+			if (args.burnArgs != null) {
+				ixs.push(...(await this.burnAndCloseMintRecord(args.burnArgs, listing)));
+			}
+
+			return ixs;
 		} else {
 			const ixs = [
 				await this.buyNft({
@@ -48,29 +56,8 @@ export async function delistOrBuyItem(
 				}),
 			];
 
-			if (args.burnOnBuy != null) {
-				const { mintRecord } = args.burnOnBuy;
-				const mint = mintRecord.mint;
-				ixs.push(
-					createBurnNftInstruction(
-						{
-							metadata: getMetadataPDA(mint),
-							owner: this.carbon.marketplaceAuthority,
-							mint,
-							tokenAccount: getAssociatedTokenAddressSync(mint, this.carbon.marketplaceAuthority),
-							masterEditionAccount: getEditionPDA(mint),
-							splTokenProgram: TOKEN_PROGRAM_ID,
-							collectionMetadata: getMetadataPDA(listing.collectionMint),
-						},
-						TOKEN_METADATA_PROGRAM_ID
-					)
-				);
-
-				ixs.push(
-					await this.closeMintRecord({
-						mintRecord,
-					})
-				);
+			if (args.burnArgs != null) {
+				ixs.push(...(await this.burnAndCloseMintRecord(args.burnArgs, listing)));
 			}
 
 			return ixs;

@@ -17,6 +17,7 @@ import { custody } from "./instructions/custody";
 import { uncustody } from "./instructions/uncustody";
 import { takeOwnership } from "./instructions/takeOwnership";
 import { closeMintRecord } from "./instructions/closeMintRecord";
+import { burnAndCloseMintRecord } from "./instructions/burnAndCloseMintRecord";
 
 export class Instructions {
 	constructor(public carbon: Carbon) {}
@@ -38,6 +39,7 @@ export class Instructions {
 	public uncustody = uncustody;
 	public takeOwnership = takeOwnership;
 	public closeMintRecord = closeMintRecord;
+	public burnAndCloseMintRecord = burnAndCloseMintRecord;
 }
 
 export default Instructions;

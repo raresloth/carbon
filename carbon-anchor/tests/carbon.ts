@@ -1557,7 +1557,55 @@ describe("carbon", () => {
 				listingPDA = carbon.pdas.listing(itemId);
 			}
 
-			it("should burn the nft and mint record when given", async function () {
+			it("should burn the nft and mint record when given and delisting", async function () {
+				const collectionConfig = await program.account.collectionConfig.fetch(collectionConfigPDA);
+				itemId = createVirtualItemId();
+
+				const { mint: mintKeypair, transaction } = await carbon.transactions.mintVirtual({
+					buyer: seller.publicKey,
+					itemId,
+					collectionConfig,
+					metadata: {
+						name: "Ghost #1",
+						uri: "https://example.com",
+					},
+				});
+
+				transaction.add(
+					await carbon.instructions.custody({
+						owner: seller.publicKey,
+						mint: mintKeypair.publicKey,
+						itemId,
+					})
+				);
+
+				await provider.sendAndConfirm(transaction, [marketplaceAuthority, mintKeypair, seller]);
+
+				mint = mintKeypair.publicKey;
+
+				await carbon.methods.listNft({
+					tokenOwner: seller.publicKey,
+					mint,
+					collectionMint,
+					price,
+					expiry,
+				});
+
+				const listing = await carbon.accounts.listing(mint.toBuffer());
+				let mintRecord = await carbon.accounts.mintRecord(collectionConfigPDA, itemId);
+
+				await carbon.methods.delistOrBuyItem({
+					listing,
+					burnArgs: {
+						mintRecord,
+					},
+				});
+
+				mintRecord = await carbon.accounts.mintRecord(collectionConfigPDA, itemId);
+				assert.isUndefined(mintRecord);
+			});
+
+			it("should burn the nft and mint record when given and buying", async function () {
 				const collectionConfig = await program.account.collectionConfig.fetch(collectionConfigPDA);
 				itemId = createVirtualItemId();
 
@@ -1583,14 +1631,17 @@ describe("carbon", () => {
 				});
 
 				const listing = await carbon.accounts.listing(mint.toBuffer());
-				const mintRecord = await carbon.accounts.mintRecord(collectionConfigPDA, itemId);
+				let mintRecord = await carbon.accounts.mintRecord(collectionConfigPDA, itemId);
 
 				await carbon.methods.delistOrBuyItem({
 					listing,
-					burnOnBuy: {
+					burnArgs: {
 						mintRecord,
 					},
 				});
+
+				mintRecord = await carbon.accounts.mintRecord(collectionConfigPDA, itemId);
+				assert.isUndefined(mintRecord);
 			});
 		});
 	});
