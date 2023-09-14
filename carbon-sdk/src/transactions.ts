@@ -117,7 +117,11 @@ export class Transactions {
 			}
 		}
 
-		const tx = new Transaction().add(...ixs);
+		const tx = new Transaction().add(
+			ComputeBudgetProgram.setComputeUnitLimit({
+				units: 500_000,
+			})
+		).add(...ixs);
 		await this.populateBlockhashAndFeePayer(tx, recentBlockhash);
 
 		const signedTx = await this.carbon.provider.wallet.signTransaction(tx);
