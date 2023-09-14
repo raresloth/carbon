@@ -1,20 +1,19 @@
-import { IdlTypes, BN } from "@coral-xyz/anchor";
+import { BN } from "@coral-xyz/anchor";
 import {
 	getAssociatedTokenAddressSync,
 	ASSOCIATED_TOKEN_PROGRAM_ID,
 	NATIVE_MINT,
 } from "@solana/spl-token";
 import { PublicKey, Keypair, TransactionInstruction } from "@solana/web3.js";
-import { CarbonIDL } from "..";
 import { getMetadataPDA, getEditionPDA, TOKEN_METADATA_PROGRAM_ID } from "../solana";
-import { CollectionConfig, Listing } from "../types";
+import { CollectionConfig, Listing, Metadata } from "../types";
 
 export type BuyVirtualArgs = {
 	marketplaceAuthority?: PublicKey;
 	buyer: PublicKey;
 	collectionConfig: CollectionConfig;
 	listing: Listing;
-	metadata: IdlTypes<CarbonIDL.Carbon>["Metadata"];
+	metadata: Metadata;
 	maxPrice?: number;
 };
 

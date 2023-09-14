@@ -1557,6 +1557,58 @@ describe("carbon", () => {
 				listingPDA = carbon.pdas.listing(itemId);
 			}
 
+			it("should delist the virtual listing if listed by marketplace", async function () {
+				await carbon.methods.listItem({
+					itemId,
+					collectionMint,
+					price,
+					expiry,
+				});
+
+				let listing = await carbon.accounts.listing(itemId);
+				const tx = await carbon.transactions.delistOrBuyItem({
+					listing,
+					burnMint: true,
+				});
+				await provider.sendAndConfirm(tx);
+
+				const mintRecord = await carbon.accounts.mintRecord(collectionConfigPDA, itemId);
+				assert.isUndefined(mintRecord);
+
+				listing = await carbon.accounts.listing(itemId);
+				assert.isUndefined(listing);
+			});
+
+			it("should buy and burn the virtual listing if listed by third party seller", async function () {
+				const listTx = await carbon.transactions.listVirtual({
+					seller: seller.publicKey,
+					itemId,
+					collectionMint,
+					price,
+					expiry,
+				});
+				await provider.sendAndConfirm(listTx, [seller]);
+
+				let listing = await carbon.accounts.listing(itemId);
+
+				const tx = await carbon.transactions.delistOrBuyItem({
+					listing,
+					burnMint: true,
+					collectionConfig: collectionConfigPDA,
+					metadata: {
+						name: "Ghost #1",
+						uri: "https://example.com",
+					},
+				});
+				await provider.sendAndConfirm(tx);
+
+				const mintRecord = await carbon.accounts.mintRecord(collectionConfigPDA, itemId);
+				assert.isUndefined(mintRecord);
+
+				listing = await carbon.accounts.listing(itemId);
+				assert.isUndefined(listing);
+			});
+
 			it("should burn the nft and mint record when given and delisting", async function () {
 				const collectionConfig = await program.account.collectionConfig.fetch(collectionConfigPDA);
 				itemId = createVirtualItemId();
@@ -1594,12 +1646,15 @@ describe("carbon", () => {
 				const listing = await carbon.accounts.listing(mint.toBuffer());
 				let mintRecord = await carbon.accounts.mintRecord(collectionConfigPDA, itemId);
 
-				await carbon.methods.delistOrBuyItem({
+				const tx = await carbon.transactions.delistOrBuyItem({
 					listing,
+					burnMint: true,
 					burnArgs: {
 						mintRecord,
 					},
 				});
+
+				await provider.sendAndConfirm(tx);
 
 				mintRecord = await carbon.accounts.mintRecord(collectionConfigPDA, itemId);
 				assert.isUndefined(mintRecord);
@@ -1633,12 +1688,14 @@ describe("carbon", () => {
 				const listing = await carbon.accounts.listing(mint.toBuffer());
 				let mintRecord = await carbon.accounts.mintRecord(collectionConfigPDA, itemId);
 
-				await carbon.methods.delistOrBuyItem({
+				const tx = await carbon.transactions.delistOrBuyItem({
 					listing,
+					burnMint: true,
 					burnArgs: {
 						mintRecord,
 					},
 				});
+				await provider.sendAndConfirm(tx);
 
 				mintRecord = await carbon.accounts.mintRecord(collectionConfigPDA, itemId);
 				assert.isUndefined(mintRecord);

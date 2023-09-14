@@ -6,7 +6,6 @@ import { BuyNftArgs } from "./instructions/buyNft";
 import { CustodyArgs } from "./instructions/custody";
 import { DelistItemArgs } from "./instructions/delistItem";
 import { DelistNftArgs } from "./instructions/delistNft";
-import { DelistOrBuyItemArgs } from "./instructions/delistOrBuyItem";
 import { DelistVirtualArgs } from "./instructions/delistVirtual";
 import { InitCollectionConfigArgs } from "./instructions/initCollectionConfig";
 import { InitMarketplaceConfigArgs } from "./instructions/initMarketplaceConfig";
@@ -77,10 +76,8 @@ export class Methods {
 		return await provider.sendAndConfirm(new Transaction().add(ix));
 	}
 
-	async delistOrBuyItem(args: DelistOrBuyItemArgs): Promise<string> {
-		const ixs = await this.carbon.instructions.delistOrBuyItem(args);
-		return await this.carbon.provider.sendAndConfirm(new Transaction().add(...ixs));
-	}
+	// delistOrBuyItem may require a signature from the mint if buying a virtual item so
+	// transaction helpers should be used instead
 
 	async listNft(args: Omit<ListNftArgs, "seller"> & { seller?: Wallet }): Promise<string> {
 		const seller = args.seller ?? this.carbon.provider.wallet;

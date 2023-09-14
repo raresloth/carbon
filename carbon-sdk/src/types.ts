@@ -1,4 +1,4 @@
-import { IdlAccounts, IdlEvents } from "@coral-xyz/anchor";
+import { IdlAccounts, IdlEvents, IdlTypes } from "@coral-xyz/anchor";
 import { Carbon } from "./idl/carbon";
 import { PublicKey } from "@solana/web3.js";
 
@@ -7,6 +7,8 @@ export type CollectionConfig = IdlAccounts<Carbon>["collectionConfig"];
 export type Listing = IdlAccounts<Carbon>["listing"];
 export type CustodyAccount = IdlAccounts<Carbon>["custodyAccount"];
 export type MintRecord = IdlAccounts<Carbon>["mintRecord"];
+
+export type Metadata = IdlTypes<Carbon>["Metadata"];
 
 export type ListingWithKey = {
 	publicKey: PublicKey;
