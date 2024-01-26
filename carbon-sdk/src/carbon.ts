@@ -8,6 +8,7 @@ import { PROGRAM_ID } from "./index";
 import Instructions from "./instructions";
 import Transactions from "./transactions";
 import Accounts from "./accounts";
+import { GLOBAL_SETTINGS } from "./solana";
 
 export class Carbon {
 	public program: Program<CarbonIDL.Carbon>;
@@ -16,6 +17,7 @@ export class Carbon {
 	public transactions: Transactions;
 	public methods: Methods;
 	public accounts: Accounts;
+	public targetPriorityFeeLamports = GLOBAL_SETTINGS.targetPriorityFeeLamports;
 
 	constructor(
 		public provider: AnchorProvider,

@@ -32,7 +32,7 @@ import { Metaplex, keypairIdentity } from "@metaplex-foundation/js";
 describe("carbon", () => {
 	const localProvider = AnchorProvider.env();
 	const program = anchor.workspace.Carbon as Program<CarbonIDL.Carbon>;
-	const TX_FEE = 0.000005 * LAMPORTS_PER_SOL;
+	const TX_FEE = 0.000006 * LAMPORTS_PER_SOL;
 	const defaultFeeConfig = {
 		feeAccount: FEE_ACCOUNT_KEY,
 		bps: 200,

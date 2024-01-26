@@ -8,7 +8,7 @@
 	},
 	"devDependencies": {
 		"@metaplex-foundation/js": "^0.17.12",
-		"@raresloth/carbon-sdk": "workspace:^0.7.0",
+		"@raresloth/carbon-sdk": "workspace:*",
 		"@solana/spl-token": "^0.3.6",
 		"@solana/web3.js": "^1.47.4",
 		"@types/bn.js": "^5.1.0",

@@ -1,4 +1,9 @@
-import { ComputeBudgetProgram, PublicKey, Transaction } from "@solana/web3.js";
+import {
+	ComputeBudgetProgram,
+	PublicKey,
+	Transaction,
+	TransactionInstruction,
+} from "@solana/web3.js";
 import Carbon from "./carbon";
 import { Wallet } from "@coral-xyz/anchor/dist/esm/provider";
 import { CustodyAccountWithKey, ListingWithKey } from "./types";
@@ -16,6 +21,7 @@ import { TakeOwnershipArgs } from "./instructions/takeOwnership";
 import { UncustodyArgs } from "./instructions/uncustody";
 import { CloseMintRecordArgs } from "./instructions/closeMintRecord";
 import { UpdateListingArgs } from "./instructions/updateListing";
+import { getComputeIxs } from "./solana";
 
 export class Methods {
 	constructor(public carbon: Carbon) {}
@@ -28,10 +34,9 @@ export class Methods {
 		const marketplaceAuthority = args.marketplaceAuthority ?? this.carbon.provider.wallet;
 		const ix = await this.carbon.instructions.initMarketplaceConfig({
 			...args,
-			marketplaceAuthority: marketplaceAuthority!.publicKey,
+			marketplaceAuthority: marketplaceAuthority.publicKey,
 		});
-		const provider = this.carbon.getProviderWithWallet(marketplaceAuthority!);
-		return await provider.sendAndConfirm(new Transaction().add(ix));
+		return await this.sendIxWithWallet(ix, marketplaceAuthority);
 	}
 
 	async initCollectionConfig(
@@ -42,20 +47,18 @@ export class Methods {
 		const marketplaceAuthority = args.marketplaceAuthority ?? this.carbon.provider.wallet;
 		const ix = await this.carbon.instructions.initCollectionConfig({
 			...args,
-			marketplaceAuthority: marketplaceAuthority!.publicKey,
+			marketplaceAuthority: marketplaceAuthority.publicKey,
 		});
-		const provider = this.carbon.getProviderWithWallet(marketplaceAuthority!);
-		return await provider.sendAndConfirm(new Transaction().add(ix));
+		return await this.sendIxWithWallet(ix, marketplaceAuthority);
 	}
 
 	async listItem(args: Omit<ListItemArgs, "seller"> & { seller?: Wallet }): Promise<string> {
 		const seller = args.seller ?? this.carbon.provider.wallet;
 		const ix = await this.carbon.instructions.listItem({
 			...args,
-			seller: seller!.publicKey,
+			seller: seller.publicKey,
 		});
-		const provider = this.carbon.getProviderWithWallet(seller!);
-		return await provider.sendAndConfirm(new Transaction().add(ix));
+		return await this.sendIxWithWallet(ix, seller);
 	}
 
 	async delistItem(
@@ -64,7 +67,7 @@ export class Methods {
 		const seller = args.seller ?? this.carbon.provider.wallet;
 		const ix = await this.carbon.instructions.delistItem({
 			...args,
-			seller: seller!.publicKey,
+			seller: seller.publicKey,
 		});
 
 		// No delist necessary as the listing doesn't exist
@@ -72,8 +75,7 @@ export class Methods {
 			return;
 		}
 
-		const provider = this.carbon.getProviderWithWallet(seller!);
-		return await provider.sendAndConfirm(new Transaction().add(ix));
+		return await this.sendIxWithWallet(ix, seller);
 	}
 
 	// delistOrBuyItem may require a signature from the mint if buying a virtual item so
@@ -83,10 +85,9 @@ export class Methods {
 		const seller = args.seller ?? this.carbon.provider.wallet;
 		const ix = await this.carbon.instructions.listNft({
 			...args,
-			seller: seller!.publicKey,
+			seller: seller.publicKey,
 		});
-		const provider = this.carbon.getProviderWithWallet(seller!);
-		return await provider.sendAndConfirm(new Transaction().add(ix));
+		return await this.sendIxWithWallet(ix, seller);
 	}
 
 	async updateListing(
@@ -95,64 +96,43 @@ export class Methods {
 		const seller = args.seller ?? this.carbon.provider.wallet;
 		const ix = await this.carbon.instructions.updateListing({
 			...args,
-			seller: seller!.publicKey,
+			seller: seller.publicKey,
 		});
-		const provider = this.carbon.getProviderWithWallet(seller!);
-		return await provider.sendAndConfirm(new Transaction().add(ix));
+		return await this.sendIxWithWallet(ix, seller);
 	}
 
 	async delistNft(args: Omit<DelistNftArgs, "seller"> & { seller?: Wallet }): Promise<string> {
 		const seller = args.seller ?? this.carbon.provider.wallet;
 		const ix = await this.carbon.instructions.delistNft({
 			...args,
-			seller: seller!.publicKey,
+			seller: seller.publicKey,
 		});
-		const provider = this.carbon.getProviderWithWallet(seller!);
-		return await provider.sendAndConfirm(new Transaction().add(ix));
+		return await this.sendIxWithWallet(ix, seller);
 	}
 
 	async buyNft(args: Omit<BuyNftArgs, "buyer"> & { buyer?: Wallet }): Promise<string> {
 		const buyer = args.buyer ?? this.carbon.provider.wallet;
 		const ix = await this.carbon.instructions.buyNft({
 			...args,
-			buyer: buyer!.publicKey,
+			buyer: buyer.publicKey,
 		});
-		const provider = this.carbon.getProviderWithWallet(buyer!);
-		return await provider.sendAndConfirm(
-			new Transaction()
-				.add(
-					ComputeBudgetProgram.setComputeUnitLimit({
-						units: 300_000,
-					})
-				)
-				.add(ix)
-		);
+		return await this.sendIxWithWallet(ix, buyer, 300_000);
 	}
 
 	async buyNftAndCustody(args: Omit<BuyNftArgs, "buyer"> & { buyer?: Wallet }): Promise<string> {
 		const buyer = args.buyer ?? this.carbon.provider.wallet;
 		const buyIx = await this.carbon.instructions.buyNft({
 			...args,
-			buyer: buyer!.publicKey,
+			buyer: buyer.publicKey,
 		});
 
 		const custodyIx = await this.carbon.instructions.custody({
-			owner: buyer!.publicKey,
+			owner: buyer.publicKey,
 			mint: new PublicKey(args.listing.itemId),
 			itemId: args.listing.itemId,
 		});
 
-		const provider = this.carbon.getProviderWithWallet(buyer!);
-		return await provider.sendAndConfirm(
-			new Transaction()
-				.add(
-					ComputeBudgetProgram.setComputeUnitLimit({
-						units: 400_000,
-					})
-				)
-				.add(buyIx)
-				.add(custodyIx)
-		);
+		return await this.sendIxsWithWallet([buyIx, custodyIx], buyer, 400_000);
 	}
 
 	async listVirtual(
@@ -161,11 +141,10 @@ export class Methods {
 		const marketplaceAuthority = args.marketplaceAuthority ?? this.carbon.provider.wallet;
 		const ix = await this.carbon.instructions.listVirtual({
 			...args,
-			seller: marketplaceAuthority!.publicKey,
-			marketplaceAuthority: marketplaceAuthority!.publicKey,
+			seller: marketplaceAuthority.publicKey,
+			marketplaceAuthority: marketplaceAuthority.publicKey,
 		});
-		const provider = this.carbon.getProviderWithWallet(marketplaceAuthority!);
-		return await provider.sendAndConfirm(new Transaction().add(ix));
+		return await this.sendIxWithWallet(ix, marketplaceAuthority);
 	}
 
 	async delistVirtual(
@@ -174,10 +153,9 @@ export class Methods {
 		const seller = args.seller ?? this.carbon.provider.wallet;
 		const ix = await this.carbon.instructions.delistVirtual({
 			...args,
-			seller: seller!.publicKey,
+			seller: seller.publicKey,
 		});
-		const provider = this.carbon.getProviderWithWallet(seller!);
-		return await provider.sendAndConfirm(new Transaction().add(ix));
+		return await this.sendIxWithWallet(ix, seller);
 	}
 
 	// buyVirtual requires a signature from the buyer and marketplace authority so the
@@ -187,20 +165,18 @@ export class Methods {
 		const owner = args.owner ?? this.carbon.provider.wallet;
 		const ix = await this.carbon.instructions.custody({
 			...args,
-			owner: owner!.publicKey,
+			owner: owner.publicKey,
 		});
-		const provider = this.carbon.getProviderWithWallet(owner!);
-		return await provider.sendAndConfirm(new Transaction().add(ix));
+		return await this.sendIxWithWallet(ix, owner);
 	}
 
 	async uncustody(args: Omit<UncustodyArgs, "owner"> & { owner?: Wallet }): Promise<string> {
 		const owner = args.owner ?? this.carbon.provider.wallet;
 		const ix = await this.carbon.instructions.uncustody({
 			...args,
-			owner: owner!.publicKey,
+			owner: owner.publicKey,
 		});
-		const provider = this.carbon.getProviderWithWallet(owner!);
-		return await provider.sendAndConfirm(new Transaction().add(ix));
+		return await this.sendIxWithWallet(ix, owner);
 	}
 
 	async takeOwnership(
@@ -209,10 +185,9 @@ export class Methods {
 		const marketplaceAuthority = args.marketplaceAuthority ?? this.carbon.provider.wallet;
 		const ix = await this.carbon.instructions.takeOwnership({
 			...args,
-			marketplaceAuthority: marketplaceAuthority!.publicKey,
+			marketplaceAuthority: marketplaceAuthority.publicKey,
 		});
-		const provider = this.carbon.getProviderWithWallet(marketplaceAuthority!);
-		return await provider.sendAndConfirm(new Transaction().add(ix));
+		return await this.sendIxWithWallet(ix, marketplaceAuthority);
 	}
 
 	async closeMintRecord(
@@ -221,10 +196,9 @@ export class Methods {
 		const marketplaceAuthority = args.marketplaceAuthority ?? this.carbon.provider.wallet;
 		const ix = await this.carbon.instructions.closeMintRecord({
 			...args,
-			marketplaceAuthority: marketplaceAuthority!.publicKey,
+			marketplaceAuthority: marketplaceAuthority.publicKey,
 		});
-		const provider = this.carbon.getProviderWithWallet(marketplaceAuthority!);
-		return await provider.sendAndConfirm(new Transaction().add(ix));
+		return await this.sendIxWithWallet(ix, marketplaceAuthority);
 	}
 
 	async getListingsForMarketplaceAuthority(
@@ -249,6 +223,32 @@ export class Methods {
 				},
 			},
 		]);
+	}
+
+	async sendIxWithWallet(
+		ix: TransactionInstruction,
+		wallet: Wallet,
+		computeBudget?: number
+	): Promise<string> {
+		return await this.sendIxsWithWallet([ix], wallet, computeBudget);
+	}
+
+	async sendIxsWithWallet(
+		ixs: TransactionInstruction[],
+		wallet: Wallet,
+		computeBudget?: number
+	): Promise<string> {
+		const provider = this.carbon.getProviderWithWallet(wallet);
+		return provider.sendAndConfirm(this.getDefaultTransaction(computeBudget).add(...ixs));
+	}
+
+	getDefaultTransaction(computeBudget?: number): Transaction {
+		return new Transaction().add(
+			...getComputeIxs({
+				computeBudget,
+				targetPriorityFeeLamports: this.carbon.targetPriorityFeeLamports,
+			})
+		);
 	}
 }
 

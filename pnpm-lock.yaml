@@ -14,7 +14,7 @@ importers:
         specifier: ^0.17.12
         version: 0.17.12
       '@raresloth/carbon-sdk':
-        specifier: workspace:^0.7.0
+        specifier: workspace:*
         version: link:../carbon-sdk
       '@solana/spl-token':
         specifier: ^0.3.6
@@ -5246,7 +5246,7 @@ packages:
     dev: true
 
   github.com/Bundlr-Network/avsc/a730cc8018b79e114b6a3381bbb57760a24c6cef:
-    resolution: {tarball: https://codeload.github.com/Bundlr-Network/avsc/tar.gz/a730cc8018b79e114b6a3381bbb57760a24c6cef}
+    resolution: {commit: a730cc8018b79e114b6a3381bbb57760a24c6cef, repo: git+ssh://git@github.com/Bundlr-Network/avsc.git, type: git}
     name: avsc
     version: 5.4.7
     engines: {node: '>=0.11'}
